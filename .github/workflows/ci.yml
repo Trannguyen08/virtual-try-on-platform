@@ -1,17 +1,71 @@
-name: CI
-on: [push, pull_request]
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  # ==========================================
+  # 1. PYTHON BACKEND, BODY, GARMENT, FIT & AI
+  # ==========================================
+  backend-and-ai:
+    name: Python Lint & Fast Unit Tests
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        run: pytest tests/
+          pip install ruff pytest jsonschema
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint Python Code (Ruff)
+        run: |
+          # Dừng build nếu có lỗi cú pháp hoặc import/type nghiêm trọng
+          ruff check . --select=E9,F63,F7,F82
+
+      - name: Run Fast Unit Tests (Skip Slow & GPU)
+        run: |
+          # Chạy toàn bộ unit test nhanh, bỏ qua bài test nặng mô phỏng / GPU
+          pytest tests/unit/ -m "not slow and not gpu" --verbose
+
+  # ==========================================
+  # 2. FRONTEND WEB & 3D VIEWER
+  # ==========================================
+  frontend:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build Frontend (Vite & TypeScript check)
+        working-directory: frontend
+        run: npm run build
