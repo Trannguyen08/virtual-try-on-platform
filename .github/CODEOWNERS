@@ -1,0 +1,8 @@
+# Code Owners
+* @owner
+/backend/ @backend-team
+/frontend/ @frontend-team
+/body/ @body-team
+/garment/ @garment-team
+/fit/ @fit-team
+/ai/ @ai-team

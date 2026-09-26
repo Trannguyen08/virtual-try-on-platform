@@ -1,0 +1,2 @@
+class SizeService:
+    pass
