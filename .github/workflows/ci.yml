@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,7 +15,7 @@ jobs:
   # 1. PYTHON BACKEND, BODY, GARMENT, FIT & AI
   # ==========================================
   backend-and-ai:
-    name: Python Lint & Fast Unit Tests
+    name: Python Lint & Backend Mock Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +27,14 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pip'
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pytest jsonschema
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install -r backend/requirements-dev.txt
 
       - name: Lint Python Code (Ruff)
         run: |
@@ -42,7 +44,7 @@ jobs:
       - name: Run Fast Unit Tests (Skip Slow & GPU)
         run: |
           # Chạy toàn bộ unit test nhanh, bỏ qua bài test nặng mô phỏng / GPU
-          pytest tests/unit/ -m "not slow and not gpu" --verbose
+          python -m pytest tests/unit/ tests/e2e/mock/ -m "not slow and not gpu" --verbose
 
   # ==========================================
   # 2. FRONTEND WEB & 3D VIEWER

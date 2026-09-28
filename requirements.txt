@@ -1,7 +1,5 @@
 # Core backend & API
-fastapi>=0.110.0
-uvicorn[standard]>=0.28.0
-pydantic>=2.6.0
+-r backend/requirements.txt
 python-dotenv>=1.0.1
 
 # AI & Computation

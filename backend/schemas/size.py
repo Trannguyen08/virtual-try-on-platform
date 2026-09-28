@@ -1,3 +1,6 @@
-from pydantic import BaseModel
-class SizeRecommendationSchema(BaseModel):
-    pass
+from backend.schemas.common import Confidence, Provenance, Size
+
+
+class SizeRecommendationSchema(Provenance):
+    size: Size | None
+    confidence: Confidence
