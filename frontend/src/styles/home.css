@@ -1,0 +1,669 @@
+/* ==========================================================================
+   Virtual Try-On Platform - Home & Catalog Styles
+   Faithfully implemented from Stitch AI Design System
+   ========================================================================== */
+
+/* Navbar */
+.vfit-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  z-index: 50;
+  background-color: rgba(255, 247, 252, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(230, 225, 233, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .vfit-navbar {
+    padding: 0 1rem;
+    height: 4.25rem;
+  }
+}
+
+.vfit-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vfit-brand-logo-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, var(--vfit-primary-container) 0%, var(--vfit-dark-primary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.vfit-brand-logo-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--vfit-primary-container);
+}
+
+.vfit-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .vfit-nav-links {
+    display: none;
+  }
+}
+
+.vfit-nav-item {
+  position: relative;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--vfit-secondary);
+  text-decoration: none;
+  padding: 0.5rem 0.25rem;
+  transition: color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.vfit-nav-item:hover,
+.vfit-nav-item.active {
+  color: var(--vfit-on-surface);
+}
+
+.vfit-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  border-radius: 2px;
+  background-color: var(--vfit-primary-container);
+}
+
+.vfit-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.vfit-icon-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vfit-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.vfit-icon-btn:hover {
+  background-color: var(--vfit-secondary-container);
+  color: var(--vfit-primary-container);
+}
+
+.vfit-badge-count {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  background-color: var(--vfit-destructive-crimson);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  height: 1.1rem;
+  min-width: 1.1rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.25rem;
+}
+
+/* Hero Section */
+.vfit-hero {
+  position: relative;
+  padding: 6.5rem 2rem 4rem 2rem;
+  overflow: hidden;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .vfit-hero {
+    padding: 5.5rem 1rem 3rem 1rem;
+  }
+}
+
+.vfit-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .vfit-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.vfit-tag-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  background-color: var(--vfit-secondary-container);
+  color: var(--vfit-dark-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.vfit-hero-title {
+  font-size: 3.5rem;
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--vfit-on-surface);
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  .vfit-hero-title {
+    font-size: 2.45rem;
+  }
+}
+
+.vfit-gradient-text {
+  background: linear-gradient(135deg, var(--vfit-primary-container) 0%, var(--vfit-dark-primary) 50%, #517aff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vfit-hero-desc {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--vfit-secondary);
+  max-width: 34rem;
+  margin: 0 0 1.75rem 0;
+}
+
+.vfit-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vfit-btn-secondary {
+  height: 3.25rem;
+  padding: 0 1.75rem;
+  border-radius: var(--vfit-radius-xl);
+  background-color: var(--vfit-surface-container);
+  color: var(--vfit-on-surface);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 1px solid var(--vfit-border-subtle);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.vfit-btn-secondary:hover {
+  background-color: var(--vfit-secondary-container);
+  transform: translateY(-1px);
+}
+
+/* Checklist box */
+.vfit-checklist-box {
+  background-color: var(--vfit-surface-container-low);
+  border-radius: var(--vfit-radius-xl);
+  padding: 1.25rem;
+  margin-top: 1.75rem;
+  border: 1px solid rgba(230, 225, 233, 0.7);
+}
+
+.vfit-checklist-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vfit-primary-container);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.vfit-checklist-items {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--vfit-secondary);
+}
+
+@media (max-width: 600px) {
+  .vfit-checklist-items {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vfit-check-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--vfit-dark-primary);
+  display: inline-block;
+  margin-right: 0.4rem;
+}
+
+/* Trust Metrics */
+.vfit-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--vfit-surface-container-highest);
+}
+
+.vfit-metric-num {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--vfit-on-surface);
+  line-height: 1;
+}
+
+.vfit-metric-label {
+  font-size: 0.85rem;
+  color: var(--vfit-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Hero Showcase Image & Hologram Overlay */
+.vfit-showcase-container {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.vfit-showcase-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--vfit-radius-xl);
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(8, 10, 97, 0.2);
+  background-color: var(--vfit-surface-container);
+}
+
+.vfit-showcase-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vfit-showcase-card:hover .vfit-showcase-img {
+  transform: scale(1.04);
+}
+
+/* Hologram HUD Badges */
+.vfit-hud-badge-top {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(6, 10, 19, 0.85);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.vfit-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--vfit-success-emerald);
+  box-shadow: 0 0 10px var(--vfit-success-emerald);
+}
+
+.vfit-hud-accuracy {
+  position: absolute;
+  top: 3.5rem;
+  left: 1rem;
+  background-color: rgba(6, 10, 19, 0.88);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--vfit-radius-md);
+  font-size: 0.785rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  max-width: 180px;
+}
+
+.vfit-hud-bottom {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1rem;
+  right: 1rem;
+  background-color: rgba(6, 10, 19, 0.9);
+  backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 1rem 1.15rem;
+  border-radius: var(--vfit-radius-lg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Floating 360 Badge */
+.vfit-floating-badge {
+  position: absolute;
+  bottom: -1rem;
+  left: -1rem;
+  background-color: var(--vfit-surface-card);
+  padding: 0.75rem 1rem;
+  border-radius: var(--vfit-radius-lg);
+  box-shadow: 0 15px 35px -5px rgba(8, 10, 97, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+/* How It Works Section (Bento Grid) */
+.vfit-section-bg {
+  background-color: var(--vfit-surface-container);
+  padding: 5rem 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vfit-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1280px;
+  margin: 2.5rem auto 0 auto;
+}
+
+@media (max-width: 900px) {
+  .vfit-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vfit-bento-card {
+  background-color: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(8, 10, 97, 0.04);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vfit-bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(8, 10, 97, 0.08);
+}
+
+.vfit-step-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--vfit-radius-lg);
+  background-color: var(--vfit-secondary-container);
+  color: var(--vfit-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.vfit-step-num {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: rgba(199, 197, 211, 0.5);
+  line-height: 1;
+}
+
+/* Product Cards Grid */
+.vfit-products-section {
+  padding: 5rem 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.vfit-category-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--vfit-surface-container-high);
+  padding: 0.35rem;
+  border-radius: 9999px;
+  flex-wrap: wrap;
+}
+
+.vfit-tab-btn {
+  padding: 0.45rem 1.15rem;
+  border-radius: 9999px;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vfit-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.vfit-tab-btn.active {
+  background-color: var(--vfit-primary-container);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(8, 10, 97, 0.15);
+}
+
+.vfit-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.75rem;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 1100px) {
+  .vfit-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .vfit-product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vfit-product-card {
+  background-color: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(8, 10, 97, 0.03);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.vfit-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 40px -10px rgba(8, 10, 97, 0.12);
+}
+
+.vfit-product-thumb {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background-color: var(--vfit-surface-container);
+  overflow: hidden;
+}
+
+.vfit-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.vfit-product-card:hover .vfit-product-thumb img {
+  transform: scale(1.06);
+}
+
+.vfit-product-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+/* Catalog Sidebar Layout */
+.vfit-catalog-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  max-width: 1280px;
+  margin: 2rem auto 5rem auto;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 960px) {
+  .vfit-catalog-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vfit-filter-sidebar {
+  background-color: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(8, 10, 97, 0.03);
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+}
+
+.vfit-filter-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.vfit-filter-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vfit-on-surface);
+}
+
+/* Color Swatches */
+.vfit-swatch-list {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.vfit-swatch {
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.vfit-swatch:hover,
+.vfit-swatch.active {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--vfit-focus-ring);
+}
+
+/* Footer */
+.vfit-footer {
+  background-color: #060a13;
+  color: #ffffff;
+  padding: 4rem 2rem 2rem 2rem;
+  margin-top: auto;
+}
+
+.vfit-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+}
+
+@media (max-width: 900px) {
+  .vfit-footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .vfit-footer-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vfit-footer-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.vfit-footer-link:hover {
+  color: #ffffff;
+}
