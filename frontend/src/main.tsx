@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { UploadPage } from './pages/UploadPage';
+import { App } from './App';
 
 const rootElement = document.getElementById('root');
 
@@ -10,6 +10,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <UploadPage />
+    <App />
   </StrictMode>,
 );

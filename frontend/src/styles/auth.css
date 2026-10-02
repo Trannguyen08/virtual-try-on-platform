@@ -1,0 +1,526 @@
+/* ==========================================================================
+   Virtual Try-On Platform - Authentication Styles
+   Faithfully implemented from Stitch AI Design System
+   ========================================================================== */
+
+:root {
+  --vfit-font-family: 'Bricolage Grotesque', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Color Palette */
+  --vfit-bg: #fff7fc;
+  --vfit-surface-card: #ffffff;
+  --vfit-surface-container: #f7eaf8;
+  --vfit-surface-container-low: #fdeffe;
+  --vfit-surface-container-highest: #ecdeed;
+  --vfit-primary-container: #080a61;
+  --vfit-dark-primary: #0f2ea9;
+  --vfit-on-primary: #ffffff;
+  --vfit-on-surface: #201923;
+  --vfit-secondary: #565f6e;
+  --vfit-outline: #777682;
+  --vfit-focus-ring: #3d7eff;
+  --vfit-secondary-container: #dae3f5;
+  --vfit-accent-lavender: #e5e8ff;
+  --vfit-destructive-crimson: #e11d48;
+  --vfit-success-emerald: #10b981;
+  --vfit-on-primary-fixed-variant: #393e8d;
+  --vfit-on-tertiary-fixed-variant: #003ab1;
+  
+  /* Radius */
+  --vfit-radius-md: 0.75rem;
+  --vfit-radius-lg: 1rem;
+  --vfit-radius-xl: 1.25rem;
+  --vfit-radius-full: 9999px;
+  
+  /* Shadows */
+  --vfit-shadow-card: 0 20px 40px -15px rgba(8, 10, 97, 0.08), 0 0 1px 1px rgba(8, 10, 97, 0.04);
+  --vfit-shadow-focus: 0 4px 20px -2px rgba(61, 126, 255, 0.25);
+  --vfit-shadow-btn: 0 10px 25px -5px rgba(8, 10, 97, 0.3);
+}
+
+/* Base Container & Ambient Background */
+.vfit-auth-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--vfit-bg);
+  font-family: var(--vfit-font-family);
+  color: var(--vfit-on-surface);
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+}
+
+.vfit-ambient-glow-1 {
+  position: absolute;
+  top: -8rem;
+  left: -8rem;
+  width: 26rem;
+  height: 26rem;
+  border-radius: var(--vfit-radius-full);
+  background-color: rgba(218, 227, 245, 0.55);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.vfit-ambient-glow-2 {
+  position: absolute;
+  bottom: -9rem;
+  right: -8rem;
+  width: 32rem;
+  height: 32rem;
+  border-radius: var(--vfit-radius-full);
+  background-color: rgba(229, 232, 255, 0.65);
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+/* Main Card */
+.vfit-auth-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  box-shadow: var(--vfit-shadow-card);
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+  padding: 2.25rem 2rem 0 2rem;
+  box-sizing: border-box;
+  animation: vfitCardFadeIn 0.35s ease-out;
+}
+
+@keyframes vfitCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Decorative Atmospheric Scan Line */
+.vfit-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--vfit-focus-ring) 50%, transparent 100%);
+  opacity: 0.85;
+}
+
+/* Header & AI Badge */
+.vfit-auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.vfit-security-badge-outer {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--vfit-radius-full);
+  background-color: var(--vfit-surface-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 2px 8px rgba(8, 10, 97, 0.04);
+}
+
+.vfit-security-badge-inner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--vfit-radius-full);
+  background-color: var(--vfit-primary-container);
+  color: var(--vfit-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vfit-security-badge-outer:hover .vfit-security-badge-inner {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.vfit-auth-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--vfit-primary-container);
+  margin: 0 0 0.35rem 0;
+}
+
+.vfit-auth-subtitle {
+  font-size: 0.95rem;
+  color: var(--vfit-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.vfit-brand-highlight {
+  font-weight: 700;
+  color: var(--vfit-on-primary-fixed-variant);
+  letter-spacing: 0.03em;
+}
+
+/* Alerts / Error Banner */
+.vfit-alert-banner {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--vfit-radius-md);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  animation: vfitShake 0.3s ease-in-out;
+}
+
+@keyframes vfitShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Form Styles */
+.vfit-auth-form {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.vfit-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.vfit-input-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--vfit-on-surface);
+}
+
+.vfit-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.vfit-input-field {
+  width: 100%;
+  height: 3rem;
+  padding: 0 2.75rem 0 1.15rem;
+  border-radius: var(--vfit-radius-xl);
+  background-color: var(--vfit-surface-container-low);
+  border: 1px solid transparent;
+  color: var(--vfit-on-surface);
+  font-size: 0.925rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.vfit-input-field::placeholder {
+  color: var(--vfit-outline);
+}
+
+.vfit-input-field:focus {
+  background-color: var(--vfit-surface-card);
+  border-color: rgba(61, 126, 255, 0.4);
+  box-shadow: var(--vfit-shadow-focus);
+}
+
+.vfit-input-icon {
+  position: absolute;
+  right: 1rem;
+  pointer-events: none;
+  color: var(--vfit-outline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vfit-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--vfit-radius-full);
+  color: var(--vfit-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.vfit-password-toggle:hover {
+  color: var(--vfit-on-surface);
+  background-color: rgba(8, 10, 97, 0.05);
+}
+
+/* Checkbox and Forgot Link */
+.vfit-form-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.2rem;
+  font-size: 0.85rem;
+}
+
+.vfit-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  color: var(--vfit-secondary);
+  transition: color 0.15s ease;
+}
+
+.vfit-checkbox-label:hover {
+  color: var(--vfit-on-surface);
+}
+
+.vfit-checkbox-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 4px;
+  accent-color: var(--vfit-primary-container);
+  cursor: pointer;
+}
+
+.vfit-link {
+  color: var(--vfit-on-tertiary-fixed-variant);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.15s ease, text-decoration 0.15s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.vfit-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* Primary CTA Button */
+.vfit-btn-primary {
+  width: 100%;
+  height: 3.1rem;
+  border-radius: var(--vfit-radius-lg);
+  background-color: var(--vfit-primary-container);
+  color: var(--vfit-on-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  box-shadow: 0 4px 14px rgba(8, 10, 97, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vfit-btn-primary:hover:not(:disabled) {
+  background-color: var(--vfit-dark-primary);
+  box-shadow: var(--vfit-shadow-btn);
+  transform: translateY(-1px);
+}
+
+.vfit-btn-primary:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.vfit-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Divider */
+.vfit-divider-row {
+  display: flex;
+  align-items: center;
+  margin: 1.4rem 0;
+  width: 100%;
+}
+
+.vfit-divider-line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: var(--vfit-surface-container-highest);
+}
+
+.vfit-divider-text {
+  padding: 0 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--vfit-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Social Buttons Grid */
+.vfit-social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.vfit-btn-social {
+  height: 3rem;
+  border-radius: var(--vfit-radius-xl);
+  background-color: var(--vfit-surface-container);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--vfit-on-surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.vfit-btn-social:hover {
+  background-color: var(--vfit-surface-container-highest);
+  transform: translateY(-1px);
+}
+
+.vfit-btn-social:active {
+  transform: scale(0.98);
+}
+
+/* Switcher prompt */
+.vfit-switch-prompt {
+  text-align: center;
+  margin: 1.35rem 0 1.25rem 0;
+  font-size: 0.925rem;
+  color: var(--vfit-secondary);
+}
+
+/* 256-Bit Security Badge (Card bottom) */
+.vfit-trust-badge {
+  margin: 0 -2rem 0 -2rem;
+  padding: 0.85rem 1.25rem;
+  background-color: rgba(253, 239, 254, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.785rem;
+  color: var(--vfit-secondary);
+  border-top: 1px solid rgba(236, 222, 237, 0.6);
+  border-bottom-left-radius: var(--vfit-radius-xl);
+  border-bottom-right-radius: var(--vfit-radius-xl);
+}
+
+.vfit-trust-icon {
+  color: var(--vfit-on-tertiary-fixed-variant);
+  flex-shrink: 0;
+}
+
+/* Micro Footer */
+.vfit-micro-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--vfit-outline);
+}
+
+.vfit-micro-footer a {
+  color: var(--vfit-outline);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.vfit-micro-footer a:hover {
+  color: var(--vfit-on-surface);
+}
+
+/* Spinner / Loading */
+.vfit-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: vfitSpin 0.7s linear infinite;
+}
+
+@keyframes vfitSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Modal Overlay */
+.vfit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(8, 10, 97, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  animation: vfitFadeIn 0.2s ease;
+}
+
+@keyframes vfitFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.vfit-modal-content {
+  background-color: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(8, 10, 97, 0.25);
+  position: relative;
+}
+
+.vfit-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--vfit-secondary);
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.35rem;
+  border-radius: 50%;
+}

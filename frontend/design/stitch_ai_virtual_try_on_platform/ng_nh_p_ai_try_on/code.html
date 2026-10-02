@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="vi" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-highest": "#ecdeed",
+          "destructive-crimson": "#e11d48",
+          "tertiary-fixed": "#dce1ff",
+          "surface-card": "#ffffff",
+          "on-primary": "#ffffff",
+          "inverse-primary": "#bfc2ff",
+          "secondary-fixed": "#dae3f5",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed": "#00164f",
+          "focus-ring": "#3d7eff",
+          "dark-background": "#020409",
+          "on-tertiary-fixed-variant": "#003ab1",
+          "dark-secondary": "#11172c",
+          "outline": "#777682",
+          "surface": "#fff7fc",
+          "error-container": "#ffdad6",
+          "surface-variant": "#ecdeed",
+          "on-secondary-fixed-variant": "#3e4755",
+          "on-tertiary-container": "#517aff",
+          "accent-lavender": "#e5e8ff",
+          "on-primary-fixed-variant": "#393e8d",
+          "on-error": "#ffffff",
+          "dark-card": "#060a13",
+          "error": "#ba1a1a",
+          "tertiary-container": "#00164f",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#b6c4ff",
+          "secondary-fixed-dim": "#bec7d8",
+          "on-surface-variant": "#464651",
+          "on-secondary-container": "#5c6574",
+          "surface-container": "#f7eaf8",
+          "inverse-on-surface": "#faecfb",
+          "surface-dim": "#e3d6e4",
+          "background-canvas": "#fdfcfe",
+          "surface-container-low": "#fdeffe",
+          "primary-fixed-dim": "#bfc2ff",
+          "surface-container-high": "#f2e4f2",
+          "muted-fg": "#635d69",
+          "on-secondary": "#ffffff",
+          "inverse-surface": "#362e38",
+          "on-tertiary": "#ffffff",
+          "on-primary-fixed": "#080a61",
+          "secondary": "#565f6e",
+          "outline-variant": "#c7c5d3",
+          "primary-container": "#080a61",
+          "border-subtle": "#e6e1e9",
+          "primary": "#000000",
+          "secondary-container": "#dae3f5",
+          "background": "#fff7fc",
+          "surface-tint": "#5156a6",
+          "on-background": "#201923",
+          "on-primary-container": "#777ccf",
+          "on-secondary-fixed": "#131c29",
+          "tertiary": "#000000",
+          "primary-fixed": "#e0e0ff",
+          "dark-border": "#1b1a42",
+          "on-surface": "#201923",
+          "dark-primary": "#0f2ea9",
+          "surface-bright": "#fff7fc"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin-mobile": "1rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem",
+          "space-sm": "0.5rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "margin": "2rem",
+          "gutter": "1.25rem"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-sm": [
+            "Bricolage Grotesque"
+          ],
+          "label-md": [
+            "Bricolage Grotesque"
+          ],
+          "display": [
+            "Bricolage Grotesque"
+          ],
+          "display-mobile": [
+            "Bricolage Grotesque"
+          ],
+          "body-sm": [
+            "Bricolage Grotesque"
+          ],
+          "headline-sm": [
+            "Bricolage Grotesque"
+          ],
+          "body-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg-mobile": [
+            "Bricolage Grotesque"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-lg": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "13px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "600"
+            }
+          ],
+          "display": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.035em",
+              "fontWeight": "800"
+            }
+          ],
+          "display-mobile": [
+            "38px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "800"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "15px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      }
+    }
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex items-center justify-center p-margin"><main class="w-full"><div class="flex flex-col w-full items-center justify-center relative py-space-xl px-margin-mobile md:px-margin overflow-hidden">
+<!-- Subtle Ambient Glows and Tech Grid Accents -->
+<div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-secondary-container/40 blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-36 -right-32 w-[30rem] h-[30rem] rounded-full bg-accent-lavender/50 blur-3xl pointer-events-none"></div>
+<div class="w-full max-w-lg relative z-10">
+<!-- Top Editorial Subtext Bar -->
+
+<!-- Main Authentication Card -->
+<div class="bg-surface-card rounded-[1.25rem] shadow-xl p-space-lg md:p-space-xl relative overflow-hidden">
+<!-- Decorative Atmospheric Scan Line -->
+<div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-focus-ring to-transparent opacity-80"></div>
+<!-- Card Header -->
+<div class="flex flex-col items-center text-center">
+<!-- AI Security Badge Icon -->
+<div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center mb-space-md shadow-sm group">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary transition-transform duration-300 group-hover:scale-105">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+<path d="M9 12l2 2 4-4"></path>
+</svg>
+</div>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary-container tracking-tight mb-space-xs">
+          ĐĂNG NHẬP
+        </h1>
+<p class="font-body-md text-body-md text-secondary">
+          Chào mừng bạn quay trở lại với <span class="font-label-lg text-label-lg text-on-primary-fixed-variant tracking-wide">AI TRY-ON</span>
+</p>
+</div>
+<!-- Form Container -->
+<form class="mt-space-lg space-y-space-md" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="flex flex-col space-y-1.5 text-left">
+<label class="font-label-md text-label-md text-on-surface" for="email">
+            Email
+          </label>
+<div class="relative flex items-center">
+<input class="w-full h-12 px-space-md rounded-[1.25rem] bg-surface-container-low text-on-surface placeholder:text-outline font-body-md text-body-md transition-all duration-200 outline-none focus:bg-surface-card focus:shadow-md focus:shadow-focus-ring/10" id="email" placeholder="example@gmail.com" type="email">
+<div class="absolute right-4 pointer-events-none text-outline">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col space-y-1.5 text-left">
+<label class="font-label-md text-label-md text-on-surface" for="password">
+            Mật khẩu
+          </label>
+<div class="relative flex items-center">
+<input class="w-full h-12 pl-space-md pr-12 rounded-[1.25rem] bg-surface-container-low text-on-surface placeholder:text-outline font-body-md text-body-md transition-all duration-200 outline-none focus:bg-surface-card focus:shadow-md focus:shadow-focus-ring/10" id="password" placeholder="•••••••••••" type="password">
+<button aria-label="Hiện hoặc ẩn mật khẩu" class="absolute right-3.5 p-1 rounded-full text-secondary hover:text-on-surface focus:outline-none transition-colors" id="toggle-password" type="button">
+<svg class="w-5 h-5" fill="none" id="eye-icon" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Checkbox & Forgot Password -->
+<div class="flex items-center justify-between pt-1">
+<label class="flex items-center gap-2 cursor-pointer select-none group">
+<input class="w-4 h-4 rounded text-primary-container accent-primary-container transition-transform group-hover:scale-105" type="checkbox">
+<span class="font-body-sm text-body-sm text-secondary group-hover:text-on-surface transition-colors">
+              Ghi nhớ đăng nhập
+            </span>
+</label>
+<a class="font-label-sm text-label-sm text-on-tertiary-fixed-variant hover:underline transition-colors tracking-wide" href="#">
+            Quên mật khẩu?
+          </a>
+</div>
+<!-- Primary CTA Button -->
+<div class="pt-space-xs">
+<button class="w-full h-12 rounded-[1rem] bg-primary-container text-on-primary font-label-lg text-label-lg tracking-wider uppercase transition-all duration-300 hover:shadow-lg hover:shadow-primary-container/30 hover:bg-dark-primary active:scale-[0.99] flex items-center justify-center gap-2" type="submit">
+<span class="">ĐĂNG NHẬP</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</form>
+<!-- Minimal Divider -->
+<div class="flex items-center my-space-lg">
+<div class="flex-grow h-px bg-surface-container-highest"></div>
+<span class="px-4 font-label-sm text-label-sm text-outline tracking-widest uppercase">
+          HOẶC
+        </span>
+<div class="flex-grow h-px bg-surface-container-highest"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Google Button -->
+<button class="flex items-center justify-center gap-space-sm h-12 rounded-[1.25rem] bg-surface-container hover:bg-surface-container-highest transition-all duration-200 text-on-surface active:scale-[0.98]" type="button">
+<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
+</svg>
+<span class="font-label-md text-label-md">Google</span>
+</button>
+<!-- Facebook Button -->
+<button class="flex items-center justify-center gap-space-sm h-12 rounded-[1.25rem] bg-surface-container hover:bg-surface-container-highest transition-all duration-200 text-on-surface active:scale-[0.98]" type="button">
+<svg class="w-5 h-5 flex-shrink-0" fill="#1877F2" viewBox="0 0 24 24">
+<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+</svg>
+<span class="font-label-md text-label-md">Facebook</span>
+</button>
+</div>
+<!-- Registration Prompt -->
+<div class="text-center mt-space-lg">
+<p class="font-body-md text-body-md text-secondary">
+          Chưa có tài khoản? 
+          <a class="font-label-md text-label-md text-on-tertiary-fixed-variant hover:underline ml-1" href="#">
+            Đăng ký ngay
+          </a>
+</p>
+</div>
+<!-- AI & Encryption Trust Badge -->
+<div class="mt-space-lg pt-space-md border-t-0 bg-surface-container-low/70 -mx-space-lg -mb-space-lg md:-mx-space-xl md:-mb-space-xl px-space-md py-3 flex items-center justify-center gap-2">
+<svg class="w-4 h-4 text-on-tertiary-fixed-variant flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect>
+<path d="M7 11V7a5 5 0 0110 0v4"></path>
+</svg>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center">
+          Dữ liệu khuôn mặt và vóc dáng được mã hóa bảo mật 256-bit
+        </span>
+</div>
+</div>
+<!-- Editorial Micro-Footer -->
+<div class="flex items-center justify-center gap-space-md mt-space-md text-outline font-label-sm text-label-sm">
+<a class="hover:text-on-surface transition-colors" href="#">Điều khoản dịch vụ</a>
+<span class="">•</span>
+<a class="hover:text-on-surface transition-colors" href="#">Chính sách AI Studio</a>
+<span class="">•</span>
+<a class="hover:text-on-surface transition-colors" href="#">Trợ giúp</a>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('toggle-password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (toggleBtn && passwordInput && eyeIcon) {
+      toggleBtn.addEventListener('click', function() {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        
+        if (isPassword) {
+          eyeIcon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+          `;
+        } else {
+          eyeIcon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          `;
+        }
+      });
+    }
+  })();
+</script></main>
+
+</body></html>

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-highest": "#ecdeed",
+          "destructive-crimson": "#e11d48",
+          "tertiary-fixed": "#dce1ff",
+          "surface-card": "#ffffff",
+          "on-primary": "#ffffff",
+          "inverse-primary": "#bfc2ff",
+          "secondary-fixed": "#dae3f5",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed": "#00164f",
+          "focus-ring": "#3d7eff",
+          "dark-background": "#020409",
+          "on-tertiary-fixed-variant": "#003ab1",
+          "dark-secondary": "#11172c",
+          "outline": "#777682",
+          "surface": "#fff7fc",
+          "error-container": "#ffdad6",
+          "surface-variant": "#ecdeed",
+          "on-secondary-fixed-variant": "#3e4755",
+          "on-tertiary-container": "#517aff",
+          "accent-lavender": "#e5e8ff",
+          "on-primary-fixed-variant": "#393e8d",
+          "on-error": "#ffffff",
+          "dark-card": "#060a13",
+          "error": "#ba1a1a",
+          "tertiary-container": "#00164f",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#b6c4ff",
+          "secondary-fixed-dim": "#bec7d8",
+          "on-surface-variant": "#464651",
+          "on-secondary-container": "#5c6574",
+          "surface-container": "#f7eaf8",
+          "inverse-on-surface": "#faecfb",
+          "surface-dim": "#e3d6e4",
+          "background-canvas": "#fdfcfe",
+          "surface-container-low": "#fdeffe",
+          "primary-fixed-dim": "#bfc2ff",
+          "surface-container-high": "#f2e4f2",
+          "muted-fg": "#635d69",
+          "on-secondary": "#ffffff",
+          "inverse-surface": "#362e38",
+          "on-tertiary": "#ffffff",
+          "on-primary-fixed": "#080a61",
+          "secondary": "#565f6e",
+          "outline-variant": "#c7c5d3",
+          "primary-container": "#080a61",
+          "border-subtle": "#e6e1e9",
+          "primary": "#000000",
+          "secondary-container": "#dae3f5",
+          "background": "#fff7fc",
+          "surface-tint": "#5156a6",
+          "on-background": "#201923",
+          "on-primary-container": "#777ccf",
+          "on-secondary-fixed": "#131c29",
+          "tertiary": "#000000",
+          "primary-fixed": "#e0e0ff",
+          "dark-border": "#1b1a42",
+          "on-surface": "#201923",
+          "dark-primary": "#0f2ea9",
+          "surface-bright": "#fff7fc"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin-mobile": "1rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem",
+          "space-sm": "0.5rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "margin": "2rem",
+          "gutter": "1.25rem"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-sm": [
+            "Bricolage Grotesque"
+          ],
+          "label-md": [
+            "Bricolage Grotesque"
+          ],
+          "display": [
+            "Bricolage Grotesque"
+          ],
+          "display-mobile": [
+            "Bricolage Grotesque"
+          ],
+          "body-sm": [
+            "Bricolage Grotesque"
+          ],
+          "headline-sm": [
+            "Bricolage Grotesque"
+          ],
+          "body-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg-mobile": [
+            "Bricolage Grotesque"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-lg": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "13px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "600"
+            }
+          ],
+          "display": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.035em",
+              "fontWeight": "800"
+            }
+          ],
+          "display-mobile": [
+            "38px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "800"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "15px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      }
+    }
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-fixed"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" data-path="home" href="#"><img alt="AI Try-On Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XbkASecrYBHBw-l6lmmqphlQ2G-M1jBFjboQRdIGEbCEA-8nMSywelLOB39fsSVeJAY5hwRW8TkCOm4S9t_z3aERPE90EFZL0CasjS9gVG7rXhIgjiWnrxGkfqcUdWgsMfvxAPaahAaZo_B-918f-po6biNww0iY-7vKVzXNAnkkk8ZiRhPVnZ1MzexFZ1MBzjwoRrKWgRIwcUm3tLbBBuktkuLKWqUlr2SSIPC9O4b7EbXwZIlXDIac38"/><span class="font-headline-sm text-headline-sm tracking-tight text-primary font-bold">AI TRY-ON</span></a><nav class="hidden lg:flex items-center gap-space-lg" data-active-classes="text-primary font-label-lg font-bold after:w-full"><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="home" href="#">Trang chủ</a><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="products" href="#">Sản phẩm</a><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="try-on" href="#">Thử đồ</a><a aria-current="page" class="relative py-space-xs transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-primary-container after:transition-all text-primary font-label-lg font-bold after:w-full" data-path="history" href="#">Lịch sử</a></nav></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><button aria-label="Tìm kiếm" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Danh sách yêu thích" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive-crimson text-on-error font-label-sm text-label-sm flex items-center justify-center leading-none">3</span></button><button aria-label="Thông báo" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="h-6 w-px bg-outline-variant/40 hidden sm:block"></div><a class="hidden sm:inline-flex items-center justify-center h-12 px-space-lg rounded-[1.25rem] bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_4px_10px_0px_rgba(0,0,0,0.10)] hover:shadow-[0_4px_10px_0px_rgba(0,0,0,0.20)] hover:bg-primary transition-all gap-space-xs" data-path="try-on" href="#"><span class="material-symbols-outlined text-[18px]">auto_fix_high</span><span>Bắt đầu thử đồ</span></a><button aria-label="Hồ sơ người dùng" class="relative w-10 h-10 rounded-full bg-secondary-container p-0.5 overflow-hidden ring-2 ring-transparent hover:ring-focus-ring transition-all focus:outline-none focus:ring-focus-ring flex items-center justify-center" type="button"><img alt="User avatar" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPvIYit1cV0szGMwoSCEp82X7r3EilwJysLiwS65lhzDf3TVJ98al9Y7rV2AfHrJuHoHWft07RnUrIAO6nmTSkhCdUQlJD39EkJl4ABtT6nnoL7W1u1DV_m2rsJL5QjKydrqS2EEj1l_8uGDvgC8Dx5Fscc6nak9HotjNcDIn5O-NdbhiUaB_ftiLeMe_b_DsuJep9fBR0ScPB9alSIkVkleIplf4JQBtZ5f8jczBGD5rq4Z18-QOPeg"/></button></div></div></header><main class="w-full pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Sub-bar Navigation & 3D Meta Control -->
+<section class="w-full px-margin py-space-md bg-surface-container-lowest/80 backdrop-blur-md shadow-sm">
+<div class="max-w-[1536px] mx-auto flex flex-col md:flex-row items-center justify-between gap-space-md">
+<!-- Left: Back link -->
+<a class="inline-flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:-translate-x-0.5">arrow_back_ios_new</span>
+<span>Quay lại xem 2D (Split-slider)</span>
+</a>
+<!-- Center: Title & Live Fit Status Badge -->
+<div class="flex flex-wrap items-center justify-center gap-space-sm text-center">
+<h1 class="font-headline-sm text-headline-sm font-bold tracking-tight text-primary">
+          KẾT QUẢ THỬ ĐỒ 3D <span class="text-on-surface-variant font-normal">—</span> 360° INTERACTIVE FIT
+        </h1>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/90 text-on-secondary-fixed text-label-sm font-label-sm shadow-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>Chế độ 3D Realtime • Khớp phom 99.4%</span>
+</div>
+</div>
+<!-- Right: Action Icons (Snapshot, Bookmark, Share) -->
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-surface-container-high hover:bg-secondary-container text-on-surface transition-all font-label-md text-label-md shadow-sm active:scale-95" id="btn-snapshot" title="Chụp ảnh góc 3D hiện tại" type="button">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+<span class="hidden sm:inline">Chụp dáng 3D</span>
+</button>
+<button aria-label="Lưu vào yêu thích" class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-90" id="btn-favorite" type="button">
+<span class="material-symbols-outlined text-[20px] text-destructive-crimson" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button aria-label="Chia sẻ 3D look" class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-90" id="btn-share" type="button">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Viewport Dual-Column: 3D Canvas (Left) & Biomechanical Tension Intel (Right) -->
+<main class="w-full px-margin py-space-lg">
+<div class="max-w-[1536px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- LEFT: 360° Interactive Three.js Staging Viewport (Col 7 / 12) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<div class="relative w-full rounded-3xl overflow-hidden bg-surface-container-lowest shadow-md">
+<!-- Live 3D Scene Viewport Custom Element -->
+<!-- STITCH_THREEJS_START:ANIMATION_23 class="w-full h-[620px] block relative overflow-hidden bg-gradient-to-b from-surface-container-low/40 via-surface-container-lowest to-surface-container/60" -->
+<div class="w-full h-[620px] block relative overflow-hidden bg-gradient-to-b from-surface-container-low/40 via-surface-container-lowest to-surface-container/60" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_23" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_23');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Three.js Interactive 3D Try-On Mannequin & Garment Viewer
+const width = container.clientWidth || 600;
+const height = container.clientHeight || 750;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+camera.position.set(0, 1.1, 3.2);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xfff5fa, 1.4);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+keyLight.position.set(2, 4, 3);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0xd4e2ff, 1.2);
+fillLight.position.set(-3, 2, -1);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xe8d0ff, 1.5);
+rimLight.position.set(0, 3, -3);
+scene.add(rimLight);
+
+// Group container for full avatar
+const avatarGroup = new THREE.Group();
+scene.add(avatarGroup);
+
+// Materials
+const skinMaterial = new THREE.MeshStandardMaterial({
+  color: 0xf5d0b5,
+  roughness: 0.6,
+  metalness: 0.05
+});
+
+const shirtTopWhite = new THREE.MeshStandardMaterial({
+  color: 0xfafafa,
+  roughness: 0.8,
+  metalness: 0.02
+});
+
+const shirtBottomNavy = new THREE.MeshStandardMaterial({
+  color: 0x111625,
+  roughness: 0.85,
+  metalness: 0.05
+});
+
+const pantsLinenBeige = new THREE.MeshStandardMaterial({
+  color: 0xd9c8b4,
+  roughness: 0.85,
+  metalness: 0.02
+});
+
+const beltLeather = new THREE.MeshStandardMaterial({
+  color: 0x7c4722,
+  roughness: 0.4,
+  metalness: 0.2
+});
+
+const shoeMaterial = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 0.5
+});
+
+// Head & Neck
+const headGeo = new THREE.SphereGeometry(0.18, 32, 32);
+headGeo.scale(0.85, 1.15, 0.95);
+const head = new THREE.Mesh(headGeo, skinMaterial);
+head.position.y = 1.95;
+avatarGroup.add(head);
+
+// Hair
+const hairGeo = new THREE.SphereGeometry(0.20, 24, 24);
+hairGeo.scale(0.92, 1.12, 1.05);
+const hairMat = new THREE.MeshStandardMaterial({ color: 0x1c171d, roughness: 0.7 });
+const hair = new THREE.Mesh(hairGeo, hairMat);
+hair.position.set(0, 1.98, -0.04);
+avatarGroup.add(hair);
+
+const neckGeo = new THREE.CylinderGeometry(0.065, 0.08, 0.18, 20);
+const neck = new THREE.Mesh(neckGeo, skinMaterial);
+neck.position.y = 1.76;
+avatarGroup.add(neck);
+
+// Torso Garment: Minimalist Signature T-Shirt (Colorblocked White top / Navy bottom)
+const upperChestGeo = new THREE.CylinderGeometry(0.24, 0.235, 0.26, 28);
+upperChestGeo.scale(1.08, 1, 0.65);
+const upperChest = new THREE.Mesh(upperChestGeo, shirtTopWhite);
+upperChest.position.y = 1.55;
+avatarGroup.add(upperChest);
+
+// Collar rim
+const collarGeo = new THREE.TorusGeometry(0.09, 0.018, 16, 32);
+collarGeo.rotation.x = Math.PI / 2;
+const collar = new THREE.Mesh(collarGeo, shirtTopWhite);
+collar.position.y = 1.67;
+avatarGroup.add(collar);
+
+const lowerTorsoGeo = new THREE.CylinderGeometry(0.235, 0.22, 0.32, 28);
+lowerTorsoGeo.scale(1.05, 1, 0.63);
+const lowerTorso = new THREE.Mesh(lowerTorsoGeo, shirtBottomNavy);
+lowerTorso.position.y = 1.28;
+avatarGroup.add(lowerTorso);
+
+// Shoulders and Arms
+[-1, 1].forEach(side => {
+  // Sleeve
+  const sleeveGeo = new THREE.CylinderGeometry(0.08, 0.085, 0.22, 18);
+  sleeveGeo.rotation.z = side * 0.25;
+  const sleeve = new THREE.Mesh(sleeveGeo, shirtTopWhite);
+  sleeve.position.set(side * 0.28, 1.54, 0);
+  avatarGroup.add(sleeve);
+
+  // Arm
+  const armGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.52, 18);
+  armGeo.rotation.z = side * 0.12;
+  const arm = new THREE.Mesh(armGeo, skinMaterial);
+  arm.position.set(side * 0.34, 1.22, 0);
+  avatarGroup.add(arm);
+
+  // Hand
+  const handGeo = new THREE.BoxGeometry(0.06, 0.14, 0.04);
+  const hand = new THREE.Mesh(handGeo, skinMaterial);
+  hand.position.set(side * 0.38, 0.88, 0);
+  avatarGroup.add(hand);
+});
+
+// Belt
+const beltGeo = new THREE.CylinderGeometry(0.23, 0.23, 0.045, 28);
+beltGeo.scale(1.05, 1, 0.64);
+const belt = new THREE.Mesh(beltGeo, beltLeather);
+belt.position.y = 1.11;
+avatarGroup.add(belt);
+
+// Buckle
+const buckleGeo = new THREE.BoxGeometry(0.05, 0.05, 0.02);
+const buckleMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+buckle.position.set(0, 1.11, 0.155);
+avatarGroup.add(buckle);
+
+// Pants (High-waisted Linen Pants)
+const hipGeo = new THREE.CylinderGeometry(0.235, 0.25, 0.22, 28);
+hipGeo.scale(1.06, 1, 0.66);
+const hips = new THREE.Mesh(hipGeo, pantsLinenBeige);
+hips.position.y = 0.99;
+avatarGroup.add(hips);
+
+[-1, 1].forEach(side => {
+  // Pant leg
+  const legGeo = new THREE.CylinderGeometry(0.115, 0.125, 0.94, 22);
+  const leg = new THREE.Mesh(legGeo, pantsLinenBeige);
+  leg.position.set(side * 0.13, 0.46, 0);
+  avatarGroup.add(leg);
+
+  // Shoe
+  const shoeGeo = new THREE.BoxGeometry(0.12, 0.08, 0.24);
+  const shoe = new THREE.Mesh(shoeGeo, shoeMaterial);
+  shoe.position.set(side * 0.13, -0.05, 0.03);
+  avatarGroup.add(shoe);
+});
+
+// Circular 3D Fitting Pedestal / Grid platform
+const podiumGeo = new THREE.CylinderGeometry(0.9, 0.95, 0.06, 48);
+const podiumMat = new THREE.MeshStandardMaterial({ color: 0x03035e, metalness: 0.1, roughness: 0.4 });
+const podium = new THREE.Mesh(podiumGeo, podiumMat);
+podium.position.y = -0.12;
+podium.receiveShadow = true;
+scene.add(podium);
+
+// Holographic Measurement Rings around pedestal
+const ringGeo = new THREE.RingGeometry(0.98, 1.02, 64);
+ringGeo.rotation.x = -Math.PI / 2;
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x3d7eff, side: THREE.DoubleSide });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.position.y = -0.10;
+scene.add(ring);
+
+// Interactive Rotation & Mouse controls
+let isDragging = false;
+let previousMouseX = 0;
+let previousMouseY = 0;
+let autoRotate = true;
+
+const dom = renderer.domElement;
+dom.style.cursor = 'grab';
+
+dom.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  autoRotate = false;
+  previousMouseX = e.clientX;
+  previousMouseY = e.clientY;
+  dom.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  dom.style.cursor = 'grab';
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const deltaX = e.clientX - previousMouseX;
+  const deltaY = e.clientY - previousMouseY;
+
+  avatarGroup.rotation.y += deltaX * 0.012;
+  camera.position.y = Math.max(0.4, Math.min(2.2, camera.position.y - deltaY * 0.005));
+
+  previousMouseX = e.clientX;
+  previousMouseY = e.clientY;
+});
+
+// Touch support
+dom.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    isDragging = true;
+    autoRotate = false;
+    previousMouseX = e.touches[0].clientX;
+    previousMouseY = e.touches[0].clientY;
+  }
+});
+
+window.addEventListener('touchend', () => {
+  isDragging = false;
+});
+
+window.addEventListener('touchmove', (e) => {
+  if (!isDragging || e.touches.length !== 1) return;
+  const deltaX = e.touches[0].clientX - previousMouseX;
+  const deltaY = e.touches[0].clientY - previousMouseY;
+
+  avatarGroup.rotation.y += deltaX * 0.015;
+  previousMouseX = e.touches[0].clientX;
+  previousMouseY = e.touches[0].clientY;
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+  const w = container.clientWidth || 600;
+  const h = container.clientHeight || 750;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+  if (autoRotate) {
+    avatarGroup.rotation.y += 0.006;
+  }
+  ring.rotation.z += 0.004;
+  renderer.render(scene, camera);
+}
+animate();
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_23 -->
+<!-- Top-Left HUD: Physics Engine & Render Engine Metric -->
+<div class="absolute top-4 left-4 z-20 pointer-events-none flex flex-col gap-1.5">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-background/75 backdrop-blur-md text-surface text-label-sm font-label-sm shadow-md">
+<span class="w-2 h-2 rounded-full bg-focus-ring animate-ping"></span>
+<span class="tracking-wide">AI Neural Physics Mesh V4.2</span>
+<span class="text-outline-variant">|</span>
+<span class="text-tertiary-fixed">48,200 Polys</span>
+<span class="text-outline-variant">|</span>
+<span class="text-emerald-400 font-bold">60 FPS</span>
+</div>
+<div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface-variant font-label-sm text-[11px] w-fit">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span>
+<span>Subdivision Level: High-Res Dynamic Cloth</span>
+</div>
+</div>
+<!-- Top-Right HUD: Quick Camera Angulation Switcher -->
+<div class="absolute top-4 right-4 z-20 flex flex-col items-end gap-1.5">
+<div aria-label="Góc nhìn camera" class="inline-flex p-1 bg-dark-background/80 backdrop-blur-md rounded-2xl shadow-lg gap-1" role="tablist">
+<button class="px-2.5 py-1 rounded-xl bg-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-sm transition-all" data-cam="front" type="button">0° Mặt trước</button>
+<button class="px-2.5 py-1 rounded-xl text-surface hover:bg-white/20 font-label-sm text-label-sm transition-all" data-cam="side" type="button">90° Góc nghiêng</button>
+<button class="px-2.5 py-1 rounded-xl text-surface hover:bg-white/20 font-label-sm text-label-sm transition-all" data-cam="back" type="button">180° Phía sau</button>
+</div>
+<div class="inline-flex p-1 bg-surface-container-lowest/85 backdrop-blur-md rounded-xl shadow-sm gap-1">
+<button class="px-2 py-0.5 rounded-lg hover:bg-secondary-container font-label-sm text-[11px] text-on-surface transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">accessibility_new</span> Toàn thân
+              </button>
+<button class="px-2 py-0.5 rounded-lg hover:bg-secondary-container font-label-sm text-[11px] text-on-surface transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">zoom_in</span> Cận cảnh áo
+              </button>
+</div>
+</div>
+<!-- Bottom-Center Floating Interactive Toolbar -->
+<div class="absolute bottom-6 inset-x-0 mx-auto z-20 flex flex-col items-center gap-2 pointer-events-none px-4">
+<div class="pointer-events-auto inline-flex items-center gap-1 p-1.5 rounded-full bg-dark-background/85 backdrop-blur-lg text-surface shadow-xl">
+<!-- Auto Orbit 360 toggle -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container text-surface hover:bg-primary transition-all font-label-sm text-label-sm" id="btn-auto-rotate" type="button">
+<span class="material-symbols-outlined text-[16px] animate-spin" style="animation-duration: 6s;">360</span>
+<span>Xoay 360° (Đang bật)</span>
+</button>
+<div class="h-4 w-px bg-outline-variant/30 mx-1"></div>
+<!-- Wireframe mesh toggle -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-surface transition-all font-label-sm text-label-sm" id="btn-wireframe" type="button">
+<span class="material-symbols-outlined text-[16px]">grid_4x4</span>
+<span>Lưới Wireframe</span>
+</button>
+<!-- Cloth tension heatmap toggle -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-surface transition-all font-label-sm text-label-sm" id="btn-heatmap" type="button">
+<span class="material-symbols-outlined text-[16px]">heat_pump</span>
+<span>Heatmap Fit</span>
+</button>
+<!-- Lighting cycle toggle -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-surface transition-all font-label-sm text-label-sm" id="btn-lighting" type="button">
+<span class="material-symbols-outlined text-[16px]">light_mode</span>
+<span>Studio Light</span>
+</button>
+</div>
+<!-- Gesture Instruction Hint -->
+<div class="pointer-events-auto inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest/85 backdrop-blur-sm text-on-surface-variant font-label-sm text-[11px] shadow-sm">
+<span class="material-symbols-outlined text-[14px]">touch_app</span>
+<span>Kéo chuột để xoay 360° • Cuộn chuột để phóng to/thu nhỏ vóc dáng</span>
+</div>
+</div>
+</div>
+<!-- Quick 3D Action Utility Strip -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm w-full">
+<button class="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-surface-container-lowest hover:bg-secondary-container text-on-surface transition-all shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Tải file .GLB 3D</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-surface-container-lowest hover:bg-secondary-container text-on-surface transition-all shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">wb_sunny</span>
+<span>Đổi ánh sáng ngoài trời</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-surface-container-lowest hover:bg-secondary-container text-on-surface transition-all shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">app_registration</span>
+<span>Tùy chỉnh số đo</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-semibold transition-all shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">checkroom</span>
+<span>Đổi trang phục</span>
+</button>
+</div>
+</div>
+<!-- RIGHT: Product Blueprint & Biomechanical Fitting Analysis (Col 5 / 12) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Product Header & Pricing Card -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col gap-space-md">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Mã SP: AI-TOP-MIN-2401 • VIRTUAL RUNWAY</span>
+<h2 class="font-headline-md text-headline-md font-bold text-primary leading-tight">
+                Áo Thun Minimalist Signature (Black &amp; Off-White)
+              </h2>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">
+              NEW 2024
+            </span>
+</div>
+<!-- Price Row -->
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-md text-headline-md font-extrabold text-destructive-crimson">299.000₫</span>
+<span class="font-body-md text-body-md text-on-surface-variant line-through">450.000₫</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">
+              -33% SIÊU ƯU ĐÃI
+            </span>
+</div>
+<!-- Swatch & Size Selectors -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Màu sắc mô phỏng:</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Đen Than (Black Core)</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button aria-label="Chọn màu đen than" class="w-9 h-9 rounded-full bg-stone-900 shadow-sm ring-2 ring-focus-ring ring-offset-2 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px] text-white">check</span>
+</button>
+<button aria-label="Chọn màu trắng ngọc trai" class="w-9 h-9 rounded-full bg-stone-100 shadow-sm hover:scale-105 transition-transform" type="button"></button>
+<button aria-label="Chọn màu xanh navy sâu" class="w-9 h-9 rounded-full bg-blue-950 shadow-sm hover:scale-105 transition-transform" type="button"></button>
+<button aria-label="Chọn màu xám xi măng" class="w-9 h-9 rounded-full bg-neutral-400 shadow-sm hover:scale-105 transition-transform" type="button"></button>
+</div>
+</div>
+<!-- Size selector with AI Optimal Badge -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Kích thước:</span>
+<span class="font-label-sm text-label-sm text-on-tertiary-container font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> AI Khuyên dùng Size M
+              </span>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<button class="py-2.5 rounded-xl font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-secondary-container transition-colors" type="button">S</button>
+<button class="py-2.5 rounded-xl font-label-md text-label-md bg-primary-container text-on-primary font-bold shadow-md" type="button">M (Đang thử)</button>
+<button class="py-2.5 rounded-xl font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-secondary-container transition-colors" type="button">L</button>
+<button class="py-2.5 rounded-xl font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-secondary-container transition-colors" type="button">XL</button>
+</div>
+</div>
+</div>
+<!-- Biomechanical Fitting & Real-time Cloth Tension Map Card -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-primary">Phân tích căng / rủ vải 3D</h3>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm">Độ chính xác 99.4%</span>
+</div>
+<!-- Tension Biometrics Array -->
+<div class="flex flex-col gap-space-sm">
+<!-- Metric 1: Shoulders -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Khớp vai (Shoulder Width)</span>
+<span class="font-label-sm text-label-sm text-emerald-700 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Áp lực 12 Pa (Hoàn hảo)
+                </span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-emerald-500 rounded-full" style="width: 32%;"></div>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Đường may trùng khít 99.8% xương đầu vai, không gây kích khi vươn tay.</p>
+</div>
+<!-- Metric 2: Chest Tension -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Độ ôm ngực (Chest Girth)</span>
+<span class="font-label-sm text-label-sm text-blue-700 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Áp lực 18 Pa (Tự nhiên, tôn phom)
+                </span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-blue-600 rounded-full" style="width: 48%;"></div>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Độ cử động dư 3.5cm, tôn dáng ngực phẳng và thẳng lưng khi đứng nghiêm.</p>
+</div>
+<!-- Metric 3: Waist & Drape Dynamic -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Vòng eo &amp; Độ rủ vải (Waist &amp; Drape)</span>
+<span class="font-label-sm text-label-sm text-indigo-700 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">tune</span> Độ rủ 2.4cm (Thoải mái)
+                </span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-indigo-600 rounded-full" style="width: 25%;"></div>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Sợi bông 250gsm rủ tự nhiên che khuyết điểm vòng 2 khi ngồi hoặc gập bụng.</p>
+</div>
+<!-- Metric 4: Hem Proportion -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">Tà áo &amp; Tỷ lệ cơ thể (Hem Ratio)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">Chiều dài 69cm (Tỷ lệ 1:1.618)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim rounded-full" style="width: 70%;"></div>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Tà áo che vừa đúng 1/3 xương hông, kéo dài đôi chân thị giác thêm 4.5cm.</p>
+</div>
+</div>
+</div>
+<!-- Conversion CTAs -->
+<div class="flex flex-col gap-space-sm">
+<button class="w-full h-14 rounded-[1.25rem] bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+<span>THÊM VÀO GIỎ HÀNG NGAY — 299.000₫</span>
+</button>
+<div class="grid grid-cols-2 gap-space-sm">
+<button class="h-12 rounded-[1.25rem] bg-surface-container-lowest hover:bg-secondary-container text-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Xem chi tiết sản phẩm</span>
+</button>
+<button class="h-12 rounded-[1.25rem] bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+<span>Lưu Outfit vào Bộ sưu tập</span>
+</button>
+</div>
+</div>
+<!-- Trust Badges Strip -->
+<div class="grid grid-cols-3 gap-2 p-3.5 rounded-2xl bg-surface-container-low/70">
+<div class="flex flex-col items-center text-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">sync</span>
+<span class="font-label-sm text-[11px] font-bold text-on-surface">Đổi trả 30 ngày</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant leading-tight">Nếu không khớp với 3D</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">verified</span>
+<span class="font-label-sm text-[11px] font-bold text-on-surface">100% Cotton 250gsm</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant leading-tight">Vải đanh dày dặn</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]">local_shipping</span>
+<span class="font-label-sm text-[11px] font-bold text-on-surface">Giao hỏa tốc 2h</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant leading-tight">Nội thành HN &amp; TP.HCM</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Cross-Sell Virtual Wardrobe: 'GỢI Ý PHỐI CÙNG OUTFIT 3D NÀY' -->
+<section class="w-full px-margin py-space-xl bg-surface-container-low/40">
+<div class="max-w-[1536px] mx-auto flex flex-col gap-space-lg">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-tertiary-fixed-variant font-bold">STYLIST AI RECOMMENDED COMPANIONS</span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-primary">GỢI Ý PHỐI CÙNG OUTFIT 3D NÀY</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Tất cả sản phẩm bên dưới đã được tính toán đồng bộ phom dáng chuẩn xác với Áo Minimalist Signature.</p>
+</div>
+<button class="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary hover:text-primary-container font-bold transition-colors" type="button">
+<span>Xem tất cả 16 gợi ý phối đồ</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Garment Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: Quần Tây Linen Dáng Rủ Be -->
+<div class="group rounded-3xl p-3 bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-surface-container-high mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="High quality studio shot of relaxed tailored linen trousers in warm beige stone color, clean minimal architectural backdrop, warm diffuse ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2pyDn8xdnlIIr9-vGU7xzQRhtWmIFJn4oLekdBxct7OvgNWwqpyvsEMRNnINQhD7hlscRwL5a0StHxry-_S0R4Vgb6awmZ_xnfVFvBXaAUCmIEx0P5i-P4kiHxcSqx-DHHfCj148d2VQ27T8pOMCNpVer1OnhMVVQU1RUKfyGi9YbpncmpFIQSNQvtkmePtqdoA-iubsZ8dho70iUMwtXnQbhdydU1CS7W3wfCpQ1y1m27LahQRZT-g"/>
+<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-dark-background/80 text-surface font-label-sm text-[11px] backdrop-blur-sm">Khớp phom 99.1%</span>
+<button aria-label="Thêm vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-destructive-crimson transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5 px-1 pb-1">
+<span class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">Trousers • Bottom</span>
+<h3 class="font-headline-sm text-[16px] font-bold text-on-surface line-clamp-1 group-hover:text-primary-container transition-colors">Quần Tây Linen Be Tự Nhiên</h3>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-[17px] font-bold text-primary">520.000₫</span>
+<button class="px-3 py-1.5 rounded-xl bg-secondary-container hover:bg-primary-container hover:text-on-primary text-on-secondary-fixed font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> Ướm thử 3D
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 2: Blazer Tailored AI Smart Fit -->
+<div class="group rounded-3xl p-3 bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-surface-container-high mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Sophisticated unstructured navy blue wool blend tailored blazer jacket on mannequin, clean fashion editorial studio lighting, smooth neutral gradient background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8ZUOHTm60NkQMF6GgMy-7W7I74e7us5LaadJ7zpiEkvsDR6oc3VD4xQgdSBbMMsnyYHvb4do5UsQchw14kJgrcBhdXrakAnwk3kbsppDf2SDzxWjiwmpiiL_1iVF26ulysROiarmuGPVGxaSx5ttwQYOfd7MRM68FBPntruPRv8ESBRD_5PQtpgqPLcgorSw5-9RbdejJWaHrDvFGu_8tkyZdslni4CbY77gn3SeTVZ0YHZj_Bx23RQ"/>
+<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-dark-background/80 text-surface font-label-sm text-[11px] backdrop-blur-sm">Lớp khoác ngoài</span>
+<button aria-label="Thêm vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-destructive-crimson transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5 px-1 pb-1">
+<span class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">Outerwear • Blazer</span>
+<h3 class="font-headline-sm text-[16px] font-bold text-on-surface line-clamp-1 group-hover:text-primary-container transition-colors">Blazer Tailored AI Smart Fit</h3>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-[17px] font-bold text-primary">1.190.000₫</span>
+<button class="px-3 py-1.5 rounded-xl bg-secondary-container hover:bg-primary-container hover:text-on-primary text-on-secondary-fixed font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> Ướm thử 3D
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 3: Áo Sơ Mi Silk Blend Phủ Ngoài -->
+<div class="group rounded-3xl p-3 bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-surface-container-high mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Flowy textured off-white ivory silk blend resort overshirt, editorial high fashion photography, soft sunlight shadows and organic textiles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgj1WyopBNj3rdvyY05i-DBq5l2R87wUb6Rfe9P0Daz6LeidA3C5vDEILkPL2MfG06Urk-hA2jsKMLRyNeGeBBOePnHT4e2Yewjq5PDcundbZBTa65now1Lub4Y7cMuWW9F1Ru7mWw24LWBjHuSAiYNRgMMx08hxyXLkHTKKKmb38B5jWFje2wYVuo5JHau5YiT5jhDaUcHg3D-hwVgkYor3-tzuSFjYcJHotFLAAYHhQ_r4U6dUB1dQ"/>
+<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-dark-background/80 text-surface font-label-sm text-[11px] backdrop-blur-sm">Layering đề xuất</span>
+<button aria-label="Thêm vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-destructive-crimson transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5 px-1 pb-1">
+<span class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">Overshirt • Layer</span>
+<h3 class="font-headline-sm text-[16px] font-bold text-on-surface line-clamp-1 group-hover:text-primary-container transition-colors">Áo Sơ Mi Silk Blend Khoác Nhẹ</h3>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-[17px] font-bold text-primary">480.000₫</span>
+<button class="px-3 py-1.5 rounded-xl bg-secondary-container hover:bg-primary-container hover:text-on-primary text-on-secondary-fixed font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> Ướm thử 3D
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 4: Kính Râm Cyber Minimalist Titanium -->
+<div class="group rounded-3xl p-3 bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-surface-container-high mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Sleek modern minimalist sunglasses with subtle metallic titanium frame and dark tinted lenses on minimalist pedestal, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVnk0mzgroghD0XNghKWUMqoXmKuygR7u9jBo2o82kQHRW2iychAiiqZvqNIsbpc4QHa6c1odKmHi1Ahjv0Fkk0z2vC0IWc-HyKlqfSehqBMCPa8-FkFGI_yRx_xA1ezN9HtNg4YEqHOVE996Pv1QYUqHkzROzVsXbOI-i7YmsWelJITh3_aNvXYR3t1H5zndjkeP848tju0l1iJ-JGv67XxFRQJ3AHX0kzni7SHOcga90IshE_Bd-AQ"/>
+<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-dark-background/80 text-surface font-label-sm text-[11px] backdrop-blur-sm">Phụ kiện 3D</span>
+<button aria-label="Thêm vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-destructive-crimson transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5 px-1 pb-1">
+<span class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">Accessories • Eyewear</span>
+<h3 class="font-headline-sm text-[16px] font-bold text-on-surface line-clamp-1 group-hover:text-primary-container transition-colors">Kính Râm Titanium Đen Nhám</h3>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-[17px] font-bold text-primary">350.000₫</span>
+<button class="px-3 py-1.5 rounded-xl bg-secondary-container hover:bg-primary-container hover:text-on-primary text-on-secondary-fixed font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> Ướm thử 3D
+              </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Client-side Logic Script for Quick Cam, Toggles & Snapshot Feedback -->
+<script>
+    (function init3DViewerControls() {
+      // Camera view switchers
+      const camButtons = document.querySelectorAll('[data-cam]');
+      camButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          camButtons.forEach(b => {
+            b.classList.remove('bg-surface-container-lowest', 'text-primary', 'font-bold');
+            b.classList.add('text-surface');
+          });
+          btn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold');
+          btn.classList.remove('text-surface');
+        });
+      });
+
+      // Auto Rotate Toggle State
+      const autoRotateBtn = document.getElementById('btn-auto-rotate');
+      let rotating = true;
+      if (autoRotateBtn) {
+        autoRotateBtn.addEventListener('click', () => {
+          rotating = !rotating;
+          if (rotating) {
+            autoRotateBtn.classList.remove('bg-white/20');
+            autoRotateBtn.classList.add('bg-primary-container');
+            autoRotateBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin" style="animation-duration: 6s;">360</span><span>Xoay 360° (Đang bật)</span>';
+          } else {
+            autoRotateBtn.classList.remove('bg-primary-container');
+            autoRotateBtn.classList.add('bg-white/20');
+            autoRotateBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">pause</span><span>Xoay 360° (Đã dừng)</span>';
+          }
+        });
+      }
+
+      // Wireframe Toggle
+      const wireframeBtn = document.getElementById('btn-wireframe');
+      let wireframeActive = false;
+      if (wireframeBtn) {
+        wireframeBtn.addEventListener('click', () => {
+          wireframeActive = !wireframeActive;
+          wireframeBtn.classList.toggle('bg-focus-ring', wireframeActive);
+          wireframeBtn.classList.toggle('text-white', wireframeActive);
+        });
+      }
+
+      // Heatmap Toggle
+      const heatmapBtn = document.getElementById('btn-heatmap');
+      let heatmapActive = false;
+      if (heatmapBtn) {
+        heatmapBtn.addEventListener('click', () => {
+          heatmapActive = !heatmapActive;
+          heatmapBtn.classList.toggle('bg-destructive-crimson', heatmapActive);
+          heatmapBtn.classList.toggle('text-white', heatmapActive);
+        });
+      }
+
+      // Lighting Cycle
+      const lightingBtn = document.getElementById('btn-lighting');
+      const lightModes = ['Studio Light', 'Ánh sáng tự nhiên', 'Runway Neon'];
+      let lightIndex = 0;
+      if (lightingBtn) {
+        lightingBtn.addEventListener('click', () => {
+          lightIndex = (lightIndex + 1) % lightModes.length;
+          lightingBtn.querySelector('span:last-child').textContent = lightModes[lightIndex];
+        });
+      }
+
+      // Snapshot Flash Effect
+      const snapshotBtn = document.getElementById('btn-snapshot');
+      if (snapshotBtn) {
+        snapshotBtn.addEventListener('click', () => {
+          const originalText = snapshotBtn.innerHTML;
+          snapshotBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] text-emerald-600">done</span><span class="hidden sm:inline text-emerald-600 font-bold">Đã lưu ảnh!</span>';
+          setTimeout(() => {
+            snapshotBtn.innerHTML = originalText;
+          }, 1800);
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="w-full px-margin py-space-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-xs max-w-xl"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm font-bold text-primary">AI TRY-ON</span><span class="font-label-sm text-label-sm uppercase px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant">Studio</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">Copyright © 2024 AI Virtual Try-On. All rights reserved. Nền tảng thời trang công nghệ Haute Couture &amp; Thị giác máy tính.</p></div><nav class="flex flex-wrap items-center gap-x-space-lg gap-y-space-sm"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="dieu-khoan-dich-vu" href="#">Điều khoản dịch vụ</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="chinh-sach-quyen-rieng-tu" href="#">Chính sách quyền riêng tư</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="lien-he" href="#">Liên hệ</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="ho-tro" href="#">Hỗ trợ</a></nav></div></footer></body></html>

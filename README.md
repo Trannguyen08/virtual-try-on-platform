@@ -5,6 +5,7 @@ pipeline xử lý ảnh/AI thật hay frontend hoàn chỉnh. Số đo/nhãn fit
 hình khối là dữ liệu demo, luôn có `source: "mock"`; score/confidence là `null`.
 
 Contract để M1/M2/M4/M5 tích hợp: [docs/api/api-contract.md](docs/api/api-contract.md).
+Tổng quan và kiến trúc hệ thống: [docs/project-overview.md](docs/project-overview.md) | [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md).
 
 ## Chạy backend trên Windows
 
