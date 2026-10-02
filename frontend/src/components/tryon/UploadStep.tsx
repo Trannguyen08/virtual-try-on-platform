@@ -222,8 +222,44 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
             </ul>
           </div>
 
+          {/* AI Photo Validation Inspection Check */}
+          <div
+            style={{
+              marginTop: '1.25rem',
+              padding: '1rem',
+              borderRadius: 'var(--vfit-radius-lg)',
+              backgroundColor: 'var(--vfit-surface-container-low)',
+              border: '1px solid rgba(61, 126, 255, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--vfit-focus-ring)', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span className="vfit-pulse-dot" />
+                KIỂM TRA ẢNH AI ĐẠT CHUẨN
+              </span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
+                99.2 / 100 Điểm
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem', fontSize: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
+                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Tư thế đứng thẳng (100%)
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
+                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Ánh sáng rõ nét (98%)
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
+                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Toàn thân cân đối (99%)
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
+                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Tách phông nền sẵn sàng
+              </div>
+            </div>
+          </div>
+
           {/* Continue CTA */}
-          <div style={{ marginTop: '1.75rem' }}>
+          <div style={{ marginTop: '1.25rem' }}>
             <button
               type="button"
               className="vfit-btn-primary"

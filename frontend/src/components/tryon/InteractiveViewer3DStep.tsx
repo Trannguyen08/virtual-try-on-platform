@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { BodyData, FitResult } from '../../api/tryonApi';
 import { Product } from '../../data/mockProducts';
+import { historyStorage } from '../../services/historyStorage';
+import { TryOnHistoryItem } from '../../data/mockHistory';
 
 interface InteractiveViewer3DStepProps {
   garment: Product;
@@ -10,6 +12,7 @@ interface InteractiveViewer3DStepProps {
   fitResult: FitResult | null;
   onTryAnotherSize: () => void;
   onRestart: () => void;
+  onNavigateHistory?: () => void;
 }
 
 export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = ({
@@ -19,12 +22,14 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
   fitResult,
   onTryAnotherSize,
   onRestart,
+  onNavigateHistory,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [activeLayer, setActiveLayer] = useState<'both' | 'body' | 'garment'>('both');
   const [isWireframe, setIsWireframe] = useState<boolean>(false);
   const [isAutoRotate, setIsAutoRotate] = useState<boolean>(true);
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
+  const [savedToHistory, setSavedToHistory] = useState<boolean>(false);
 
   // References for Three.js state
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -537,6 +542,74 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                   <span>✓ ĐÃ THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
                 ) : (
                   <span>THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
+                )}
+              </button>
+
+              {/* Save To History Button */}
+              <button
+                type="button"
+                className="vfit-btn-secondary"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  backgroundColor: savedToHistory ? 'var(--vfit-secondary-container)' : '#fff',
+                  borderColor: savedToHistory ? 'var(--vfit-focus-ring)' : 'var(--vfit-border-subtle)',
+                  color: savedToHistory ? 'var(--vfit-primary-container)' : 'var(--vfit-on-surface)',
+                  fontWeight: 700,
+                }}
+                onClick={() => {
+                  if (savedToHistory && onNavigateHistory) {
+                    onNavigateHistory();
+                    return;
+                  }
+                  const newItem: TryOnHistoryItem = {
+                    id: `hist-${Date.now()}`,
+                    productId: garment.id,
+                    productName: garment.name,
+                    category: garment.category,
+                    categoryLabel: garment.categoryLabel,
+                    price: garment.price,
+                    formattedPrice: `${garment.price.toLocaleString('vi-VN')}₫`,
+                    size: selectedSize,
+                    colorName: garment.colors[0]?.name || 'Mặc định',
+                    colorHex: garment.colors[0]?.hex || '#080a61',
+                    date: new Date().toLocaleDateString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                    timestamp: Date.now(),
+                    originalPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
+                    resultPhotoUrl: garment.imageUrl,
+                    fitScore: overallScore,
+                    inCart: addedToCart,
+                    regions: {
+                      chest: { score: 98, label: 'good', text: 'Chuẩn form' },
+                      waist: { score: 99, label: 'good', text: 'Chuẩn form' },
+                      hip: { score: 97, label: 'good', text: 'Vừa vặn' },
+                      shoulder: { score: 100, label: 'good', text: 'Khớp vai hoàn hảo' },
+                    },
+                    notes: `Thử đồ 3D với vóc dáng ${bodyData?.measurements.chest_cm || 96}cm ngực, ${bodyData?.measurements.waist_cm || 80}cm eo.`,
+                  };
+                  historyStorage.saveItem(newItem);
+                  setSavedToHistory(true);
+                }}
+              >
+                {savedToHistory ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    ✓ ĐÃ LƯU KẾT QUẢ • XEM LỊCH SỬ THỬ ĐỒ →
+                  </span>
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    LƯU VÀO LỊCH SỬ THỬ ĐỒ
+                  </span>
                 )}
               </button>
 

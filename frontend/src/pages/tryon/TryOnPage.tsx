@@ -11,9 +11,10 @@ type TryOnStep = 'upload' | 'select-garment' | 'processing' | 'viewer-3d';
 interface TryOnPageProps {
   initialGarment?: Product | null;
   onNavigateCatalog?: () => void;
+  onNavigateHistory?: () => void;
 }
 
-export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
+export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigateCatalog, onNavigateHistory }) => {
   const [currentStep, setCurrentStep] = useState<TryOnStep>(
     initialGarment ? 'select-garment' : 'upload'
   );
@@ -187,6 +188,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
           fitResult={fitResult}
           onTryAnotherSize={() => setCurrentStep('select-garment')}
           onRestart={handleRestart}
+          onNavigateHistory={onNavigateHistory}
         />
       )}
     </div>
