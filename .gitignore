@@ -27,6 +27,8 @@ wheels/
 frontend/node_modules/
 frontend/dist/
 frontend/.next/
+.vercel/
+frontend/.vercel/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -51,6 +53,11 @@ data/outputs/
 !data/raw/.gitkeep
 !data/synthetic/.gitkeep
 !data/outputs/.gitkeep
+*.sqlite3
+*.db
+
+# Plans & scratch
+docs/plan/
 
 # Blender / 3D temp files
 *.blend1
