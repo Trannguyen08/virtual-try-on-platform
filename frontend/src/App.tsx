@@ -24,6 +24,7 @@ const MainContent: React.FC = () => {
     setCurrentTab('try-on');
   };
 
+  
   const handleStartTryOn = () => {
     setSelectedProduct(null);
     setCurrentTab('try-on');
