@@ -1,4 +1,5 @@
 import { ApiResponse } from './types';
+import { BodyCustomParams, BODY_PRESETS } from '../data/bodyPresets';
 
 export interface BodyMeasurement {
   height_cm: number;
@@ -24,6 +25,7 @@ export interface BodyData {
   measurements: BodyMeasurement;
   confidence: number | null;
   mesh: BodyAsset | null;
+  customParams?: BodyCustomParams;
 }
 
 export interface FitResult {
@@ -71,9 +73,87 @@ const API_BASE = 'http://localhost:8000';
 
 export const tryonApi = {
   /**
+   * Gọi POST /api/generate trên Blender backend nếu chạy cục bộ,
+   * hoặc fallback về model GLB có sẵn trong public/models/
+   */
+  async generateBodyWithBlender(
+    params: BodyCustomParams,
+    onProgress?: (msg: string) => void
+  ): Promise<{ glbUrl: string; source: 'blender-engine' | 'preset-mesh' }> {
+    try {
+      onProgress?.('Kết nối Blender MPFB 3D Engine...');
+      const heightInMeters = params.height > 10 ? params.height / 100 : params.height;
+
+      const payload = {
+        height: heightInMeters,
+        weight: params.weight,
+        age: params.age || 24,
+        gender: params.gender || 'female',
+        proportions: {
+          shoulder_width: params.proportions.shoulder_width,
+          waist: params.proportions.waist,
+          hips: params.proportions.hips,
+          chest: params.proportions.chest,
+          leg_length: params.proportions.leg_length,
+          arm_length: params.proportions.arm_length,
+          muscle_tone: params.proportions.muscle_tone,
+          belly: params.proportions.belly,
+          buttocks: params.proportions.buttocks ?? 0.5,
+        },
+        skin: {
+          tone: params.skinTone,
+          color_hex: params.skinColorHex,
+        },
+      };
+
+      const res = await fetch(`${API_BASE}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const jobId = data.job_id;
+        if (jobId) {
+          onProgress?.('Blender đang sinh lưới mesh 3D...');
+          // Poll status
+          for (let i = 0; i < 30; i++) {
+            await new Promise((r) => setTimeout(r, 1000));
+            const statusRes = await fetch(`${API_BASE}/api/status/${jobId}`);
+            if (statusRes.ok) {
+              const statusData = await statusRes.json();
+              if (statusData.status === 'completed') {
+                const glbPath = statusData.glb_url?.startsWith('http')
+                  ? statusData.glb_url
+                  : `${API_BASE}${statusData.glb_url || `/output/${jobId}.glb`}`;
+                return { glbUrl: glbPath, source: 'blender-engine' };
+              }
+              if (statusData.status === 'failed') break;
+              if (statusData.progress) {
+                onProgress?.(`Blender MPFB xử lý (${statusData.progress}%)...`);
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // Backend offline: chuyển sang mesh preset
+    }
+
+    // Static preset mesh fallback
+    const fallbackUrl = params.glbModelUrl || '/models/body_default.glb';
+    return { glbUrl: fallbackUrl, source: 'preset-mesh' };
+  },
+
+  /**
    * Gọi POST /api/tryon/analyze hoặc dùng mock nếu backend chưa khởi động
    */
-  async analyze(imageFile: File | Blob, heightCm: number): Promise<BodyData> {
+  async analyze(
+    imageFile: File | Blob,
+    heightCm: number,
+    customParams?: BodyCustomParams
+  ): Promise<BodyData> {
     try {
       const formData = new FormData();
       formData.append('image', imageFile, 'photo.jpg');
@@ -86,7 +166,10 @@ export const tryonApi = {
 
       if (res.ok) {
         const json: ApiResponse<BodyData> = await res.json();
-        if (json.data) return json.data;
+        if (json.data) {
+          if (customParams) json.data.customParams = customParams;
+          return json.data;
+        }
       }
     } catch {
       // Backend offline: tự động dùng client-side mock
@@ -94,6 +177,8 @@ export const tryonApi = {
 
     // Client mock fallback
     await new Promise((r) => setTimeout(r, 600));
+    const glbUrl = customParams?.glbModelUrl || '/models/body_default.glb';
+
     return {
       body_id: `body_${Date.now()}`,
       source: 'mock',
@@ -101,19 +186,20 @@ export const tryonApi = {
       notes: ['Client fallback mock for frontend standalone testing'],
       measurements: {
         height_cm: heightCm,
-        chest_cm: Math.round(heightCm * 0.56),
-        waist_cm: Math.round(heightCm * 0.47),
-        hip_cm: Math.round(heightCm * 0.58),
-        shoulder_width_cm: Math.round(heightCm * 0.26),
+        chest_cm: Math.round(heightCm * (customParams ? 0.45 + customParams.proportions.chest * 0.2 : 0.56)),
+        waist_cm: Math.round(heightCm * (customParams ? 0.38 + customParams.proportions.waist * 0.18 : 0.47)),
+        hip_cm: Math.round(heightCm * (customParams ? 0.48 + customParams.proportions.hips * 0.2 : 0.58)),
+        shoulder_width_cm: Math.round(heightCm * (customParams ? 0.2 + customParams.proportions.shoulder_width * 0.12 : 0.26)),
       },
       confidence: null,
       mesh: {
-        source: 'mock',
-        method: 'box_geometry_fixture',
+        source: 'mpfb_preset',
+        method: 'blender_glb_export',
         format: 'glb',
-        url: `${API_BASE}/api/assets/mock-body.glb`,
-        notes: ['Synthetic boxes fixture'],
+        url: glbUrl,
+        notes: ['Realistic 3D MPFB human body mesh'],
       },
+      customParams,
     };
   },
 

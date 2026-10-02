@@ -6,6 +6,7 @@ import { ProcessingStep } from '../../components/tryon/ProcessingStep';
 import { SelectGarmentStep } from '../../components/tryon/SelectGarmentStep';
 import { UploadStep } from '../../components/tryon/UploadStep';
 import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
+import { BodyCustomParams, BODY_PRESETS } from '../../data/bodyPresets';
 
 type TryOnStep = 'upload' | 'select-garment' | 'confirm' | 'processing' | 'viewer-3d';
 
@@ -22,9 +23,21 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(
-    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80'
+    BODY_PRESETS[0].img
   );
   const [heightCm, setHeightCm] = useState<number>(170);
+
+  const [bodyCustomParams, setBodyCustomParams] = useState<BodyCustomParams>({
+    height: 170,
+    weight: 50,
+    gender: 'female',
+    age: 24,
+    skinTone: 'light',
+    skinColorHex: '#f5d0b5',
+    selectedPresetId: 'slim',
+    glbModelUrl: '/models/body_default.glb',
+    proportions: { ...BODY_PRESETS[0].proportions },
+  });
 
   const [selectedGarment, setSelectedGarment] = useState<Product>(
     initialGarment || MOCK_PRODUCTS[0]
@@ -39,11 +52,13 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
   const handleUploadComplete = async (
     file: File | null,
     previewUrl: string,
-    height: number
+    height: number,
+    customParams: BodyCustomParams
   ) => {
     setPhotoFile(file);
     setPhotoPreview(previewUrl);
     setHeightCm(height);
+    setBodyCustomParams(customParams);
     setCurrentStep('select-garment');
   };
 
@@ -60,16 +75,28 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
     setProcessingStatus('Đang gửi dữ liệu ảnh và quét vóc dáng...');
 
     try {
-      // Step A: Phân tích ảnh hoặc dùng mock
+      // Step A: Blender MPFB 3D Generation / Preset fallback
+      setProcessingStatus('Đang đồng bộ tham số MPFB và chuẩn bị lưới 3D...');
+      const blenderJob = await tryonApi.generateBodyWithBlender(bodyCustomParams, (msg) => {
+        setProcessingStatus(msg);
+      });
+
+      const updatedParams: BodyCustomParams = {
+        ...bodyCustomParams,
+        glbModelUrl: blenderJob.glbUrl,
+      };
+      setBodyCustomParams(updatedParams);
+
+      // Step B: Phân tích ảnh hoặc dùng mock
       let bodyRes = bodyData;
       if (!bodyRes) {
         setProcessingStatus('AI đang phân tích tỷ lệ cơ thể và dựng body mesh...');
         const blobOrFile = photoFile || new Blob(['mock'], { type: 'image/jpeg' });
-        bodyRes = await tryonApi.analyze(blobOrFile, heightCm);
+        bodyRes = await tryonApi.analyze(blobOrFile, heightCm, updatedParams);
         setBodyData(bodyRes);
       }
 
-      // Step B: Tạo fit job và chờ kết quả
+      // Step C: Tạo fit job và chờ kết quả
       setProcessingStatus('Đang thực hiện draping trang phục và tính toán độ căng vải...');
       const fitRes = await tryonApi.fitAndPoll(
         bodyRes.body_id,
@@ -208,7 +235,10 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
 
       {/* Step Content */}
       {currentStep === 'upload' && (
-        <UploadStep onNext={handleUploadComplete} />
+        <UploadStep
+          initialCustomParams={bodyCustomParams}
+          onNext={handleUploadComplete}
+        />
       )}
 
       {currentStep === 'select-garment' && (
@@ -225,6 +255,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
           heightCm={heightCm}
           garment={selectedGarment}
           selectedSize={selectedSize}
+          customParams={bodyCustomParams}
           onBack={() => setCurrentStep('select-garment')}
           onChangeModel={() => setCurrentStep('upload')}
           onChangeGarment={() => setCurrentStep('select-garment')}
@@ -242,6 +273,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
           selectedSize={selectedSize}
           bodyData={bodyData}
           fitResult={fitResult}
+          customParams={bodyCustomParams}
           onTryAnotherSize={() => setCurrentStep('select-garment')}
           onRestart={handleRestart}
           onNavigateHistory={onNavigateHistory}

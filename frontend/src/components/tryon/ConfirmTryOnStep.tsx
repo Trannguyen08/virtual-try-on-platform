@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Product } from '../../data/mockProducts';
+import { BodyCustomParams, BODY_PRESETS } from '../../data/bodyPresets';
 
 interface ConfirmTryOnStepProps {
   photoPreview: string;
   heightCm: number;
   garment: Product;
   selectedSize: string;
+  customParams?: BodyCustomParams;
   onBack: () => void;
   onChangeModel: () => void;
   onChangeGarment: () => void;
@@ -17,6 +19,7 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
   heightCm,
   garment,
   selectedSize,
+  customParams,
   onBack,
   onChangeModel,
   onChangeGarment,
@@ -24,6 +27,8 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
 }) => {
   const [agreedConsent, setAgreedConsent] = useState(true);
   const [modelAngle, setModelAngle] = useState<'front' | 'side' | 'back'>('front');
+
+  const selectedPreset = BODY_PRESETS.find((p) => p.id === customParams?.selectedPresetId);
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -182,14 +187,19 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
 
             {/* Model Metadata Tags */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.85rem' }}>
-              <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-on-surface)' }}>
-                Dáng đứng chuẩn
+              <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-primary-container)', fontWeight: 700 }}>
+                🧬 {selectedPreset ? selectedPreset.name : '3D Custom Biometrics'}
               </span>
               <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-on-surface)' }}>
-                Chiều cao: {heightCm} cm
+                Cao: {heightCm} cm • {customParams?.weight || 50}kg
               </span>
+              {customParams && (
+                <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-secondary)' }}>
+                  Vai {Math.round(customParams.proportions.shoulder_width * 100)}% • Eo {Math.round(customParams.proportions.waist * 100)}% • Hông {Math.round(customParams.proportions.hips * 100)}%
+                </span>
+              )}
               <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-focus-ring)', fontWeight: 600 }}>
-                ✓ Nền đã tách lớp
+                ⚡ Mesh: {customParams?.glbModelUrl?.split('/').pop() || 'body_default.glb'}
               </span>
             </div>
           </div>
@@ -417,6 +427,9 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-secondary-container)', color: 'var(--vfit-primary-container)', fontWeight: 700 }}>
+            3D Engine: <strong>Blender MPFB + WebGL</strong>
+          </span>
           <span style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-on-surface)' }}>
             Render: <strong>~3.5 giây</strong>
           </span>

@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { BodyData, FitResult } from '../../api/tryonApi';
 import { Product } from '../../data/mockProducts';
 import { historyStorage } from '../../services/historyStorage';
 import { TryOnHistoryItem } from '../../data/mockHistory';
+import { BodyCustomParams } from '../../data/bodyPresets';
 
 interface InteractiveViewer3DStepProps {
   garment: Product;
   selectedSize: string;
   bodyData: BodyData | null;
   fitResult: FitResult | null;
+  customParams?: BodyCustomParams;
   onTryAnotherSize: () => void;
   onRestart: () => void;
   onNavigateHistory?: () => void;
@@ -20,6 +23,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
   selectedSize,
   bodyData,
   fitResult,
+  customParams,
   onTryAnotherSize,
   onRestart,
   onNavigateHistory,
@@ -32,6 +36,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
   const [displayMode, setDisplayMode] = useState<'3d-canvas' | 'photorealistic'>('3d-canvas');
   const [lightingMode, setLightingMode] = useState<'studio' | 'natural' | 'warm'>('studio');
   const [photoSlider, setPhotoSlider] = useState<number>(50);
+  const [modelMeshType, setModelMeshType] = useState<'glb' | 'procedural'>('procedural');
 
   // References for Three.js state
   const mountRef = useRef<HTMLDivElement>(null);
@@ -118,19 +123,23 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       wireframe: isWireframe,
     });
 
-    // 6. Build Stylized 3D Avatar (Head, Neck, Arms, Legs)
+    // 6. Build Stylized 3D Avatar (Head, Neck, Arms, Legs) as immediate procedural baseline
+    const proceduralParts: THREE.Object3D[] = [];
+
     // Head
     const headGeo = new THREE.SphereGeometry(0.17, 32, 32);
     headGeo.scale(0.85, 1.15, 0.95);
     const head = new THREE.Mesh(headGeo, skinMaterial);
     head.position.y = 1.95;
     bodyMeshGroup.add(head);
+    proceduralParts.push(head);
 
     // Neck
     const neckGeo = new THREE.CylinderGeometry(0.065, 0.08, 0.16, 20);
     const neck = new THREE.Mesh(neckGeo, skinMaterial);
     neck.position.y = 1.76;
     bodyMeshGroup.add(neck);
+    proceduralParts.push(neck);
 
     // Body Core Underlay
     const torsoGeo = new THREE.CylinderGeometry(0.22, 0.2, 0.5, 24);
@@ -138,6 +147,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
     const innerTorso = new THREE.Mesh(torsoGeo, skinMaterial);
     innerTorso.position.y = 1.42;
     bodyMeshGroup.add(innerTorso);
+    proceduralParts.push(innerTorso);
 
     // Arms
     [-1, 1].forEach((side) => {
@@ -146,6 +156,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       arm.rotation.z = side * 0.14;
       arm.position.set(side * 0.33, 1.25, 0);
       bodyMeshGroup.add(arm);
+      proceduralParts.push(arm);
     });
 
     // Legs / Pants
@@ -154,7 +165,69 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       const leg = new THREE.Mesh(legGeo, pantsMaterial);
       leg.position.set(side * 0.13, 0.68, 0);
       bodyMeshGroup.add(leg);
+      proceduralParts.push(leg);
     });
+
+    // 6B. Load realistic 3D human GLB mesh from Blender MPFB engine if available
+    const targetGlb = customParams?.glbModelUrl || bodyData?.mesh?.url || '/models/body_default.glb';
+    if (targetGlb) {
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load(
+        targetGlb,
+        (gltf) => {
+          // Remove procedural placeholder parts
+          proceduralParts.forEach((part) => {
+            bodyMeshGroup.remove(part);
+          });
+
+          const gltfScene = gltf.scene;
+
+          // Compute bounding box and normalize scale & position
+          const bbox = new THREE.Box3().setFromObject(gltfScene);
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+          const center = new THREE.Vector3();
+          bbox.getCenter(center);
+
+          // Normalize avatar height to ~1.95 units
+          const targetAvatarHeight = 1.95;
+          const scaleFactor = size.y > 0 ? targetAvatarHeight / size.y : 1;
+          gltfScene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+          // Center x, z and place feet at ground level
+          gltfScene.position.x = -center.x * scaleFactor;
+          gltfScene.position.z = -center.z * scaleFactor;
+          gltfScene.position.y = -bbox.min.y * scaleFactor;
+
+          // Configure materials for shadows and skin tone
+          gltfScene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+              if (mesh.material) {
+                const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                materials.forEach((m) => {
+                  const mat = m as THREE.MeshStandardMaterial;
+                  mat.wireframe = isWireframe;
+                  if (customParams?.skinColorHex && !isWireframe) {
+                    mat.color = new THREE.Color(customParams.skinColorHex);
+                  }
+                });
+              }
+            }
+          });
+
+          bodyMeshGroup.add(gltfScene);
+          setModelMeshType('glb');
+        },
+        undefined,
+        (error) => {
+          console.warn('GLTFLoader could not load GLB model, keeping procedural mesh:', error);
+          setModelMeshType('procedural');
+        }
+      );
+    }
 
     // 7. Build Garment Mesh (Upper Torso, Collar, Sleeves)
     // Upper Chest Garment
@@ -236,7 +309,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
     };
-  }, [garment, isWireframe, isAutoRotate]);
+  }, [garment, isWireframe, isAutoRotate, customParams, bodyData]);
 
   // Update layer visibility
   useEffect(() => {
@@ -452,6 +525,30 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                 }}
               >
                 🖱️ Giữ chuột kéo để xoay 360°
+              </div>
+
+              {/* 3D Engine Status Badge */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  right: '1rem',
+                  backgroundColor: modelMeshType === 'glb' ? 'rgba(30, 58, 138, 0.85)' : 'rgba(2, 4, 9, 0.65)',
+                  backdropFilter: 'blur(6px)',
+                  color: '#ffffff',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.725rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  zIndex: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                }}
+              >
+                <span className="vfit-pulse-dot" style={{ width: '6px', height: '6px' }} />
+                <span>{modelMeshType === 'glb' ? '⚡ Blender MPFB 3D Mesh' : '👤 Mannequin Procedural'}</span>
               </div>
 
               {/* Canvas Mount Container */}

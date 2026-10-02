@@ -1,43 +1,50 @@
 import React, { useRef, useState } from 'react';
+import { BodyCustomParams, BodyPreset, BODY_PRESETS } from '../../data/bodyPresets';
+import { BodyMorphingPanel } from './BodyMorphingPanel';
 
 interface UploadStepProps {
-  onNext: (photoFile: File | null, photoPreviewUrl: string, heightCm: number) => void;
+  initialCustomParams?: BodyCustomParams;
+  onNext: (
+    photoFile: File | null,
+    photoPreviewUrl: string,
+    heightCm: number,
+    customParams: BodyCustomParams
+  ) => void;
 }
 
-export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
-  const [photoPreview, setPhotoPreview] = useState<string>('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80');
+const defaultInitialParams: BodyCustomParams = {
+  height: 170,
+  weight: 50,
+  gender: 'female',
+  age: 24,
+  skinTone: 'light',
+  skinColorHex: '#f5d0b5',
+  selectedPresetId: 'slim',
+  glbModelUrl: '/models/body_default.glb',
+  proportions: {
+    shoulder_width: 0.35,
+    waist: 0.28,
+    hips: 0.35,
+    chest: 0.35,
+    belly: 0.05,
+    muscle_tone: 0.2,
+    leg_length: 0.6,
+    arm_length: 0.5,
+    buttocks: 0.4,
+  },
+};
+
+export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onNext }) => {
+  const [customParams, setCustomParams] = useState<BodyCustomParams>(
+    initialCustomParams || defaultInitialParams
+  );
+  const [photoPreview, setPhotoPreview] = useState<string>(
+    BODY_PRESETS[0].img
+  );
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [heightCm, setHeightCm] = useState<number>(170);
+  const [heightCm, setHeightCm] = useState<number>(customParams.height || 170);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Model Presets
-  const presets = [
-    {
-      name: 'Linh Đan (Nữ)',
-      stats: '1m68 • 50kg',
-      height: 168,
-      img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
-    },
-    {
-      name: 'Minh Quân (Nam)',
-      stats: '1m80 • 74kg',
-      height: 180,
-      img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
-    },
-    {
-      name: 'Mai Anh (Nữ)',
-      stats: '1m72 • 52kg',
-      height: 172,
-      img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=80',
-    },
-    {
-      name: 'Thanh Trúc (Curvy)',
-      stats: '1m65 • 68kg',
-      height: 165,
-      img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=80',
-    },
-  ];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -57,14 +64,38 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
     }
   };
 
-  const handleSelectPreset = (preset: typeof presets[0]) => {
+  const handleSelectPreset = (preset: BodyPreset) => {
     setPhotoPreview(preset.img);
     setPhotoFile(null);
     setHeightCm(preset.height);
+    setCustomParams({
+      ...customParams,
+      height: preset.height,
+      weight: preset.weight,
+      gender: preset.gender,
+      selectedPresetId: preset.id,
+      glbModelUrl: preset.glbModelUrl,
+      proportions: { ...preset.proportions },
+    });
+  };
+
+  const handleCustomParamsChange = (newParams: BodyCustomParams) => {
+    setCustomParams(newParams);
+    if (newParams.height !== heightCm) {
+      setHeightCm(newParams.height);
+    }
+  };
+
+  const handleHeightSliderChange = (newHeight: number) => {
+    setHeightCm(newHeight);
+    setCustomParams((prev) => ({
+      ...prev,
+      height: newHeight,
+    }));
   };
 
   const handleContinue = () => {
-    onNext(photoFile, photoPreview, heightCm);
+    onNext(photoFile, photoPreview, heightCm, customParams);
   };
 
   return (
@@ -150,7 +181,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
               min="140"
               max="210"
               value={heightCm}
-              onChange={(e) => setHeightCm(Number(e.target.value))}
+              onChange={(e) => handleHeightSliderChange(Number(e.target.value))}
               style={{ width: '100%', accentColor: 'var(--vfit-primary-container)', cursor: 'pointer' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--vfit-outline)' }}>
@@ -160,28 +191,12 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
             </div>
           </div>
 
-          {/* Quick Select Presets */}
-          <div style={{ marginTop: '1.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--vfit-on-surface)', textTransform: 'uppercase' }}>
-              Hoặc thử nhanh với người mẫu chuẩn AI:
-            </span>
-            <div className="vfit-preset-grid">
-              {presets.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`vfit-preset-card ${photoPreview === preset.img ? 'selected' : ''}`}
-                  onClick={() => handleSelectPreset(preset)}
-                >
-                  <img src={preset.img} alt={preset.name} />
-                  <div className="vfit-preset-overlay">
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{preset.name}</span>
-                    <span style={{ fontSize: '0.65rem', color: '#cbd5e1' }}>{preset.stats}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Biometric Morphing & Preset Panel */}
+          <BodyMorphingPanel
+            customParams={customParams}
+            onChange={handleCustomParamsChange}
+            onSelectPreset={handleSelectPreset}
+          />
         </div>
       </div>
 
