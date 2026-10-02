@@ -7,9 +7,10 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { CatalogPage } from './pages/catalog/CatalogPage';
 import { HomePage } from './pages/home/HomePage';
-import { UploadPage } from './pages/UploadPage';
+import { TryOnPage } from './pages/tryon/TryOnPage';
 import './styles/auth.css';
 import './styles/home.css';
+import './styles/tryon.css';
 
 type AppTab = 'home' | 'catalog' | 'try-on' | 'history' | 'auth';
 
@@ -99,33 +100,11 @@ const MainContent: React.FC = () => {
         )}
 
         {currentTab === 'try-on' && (
-          <div style={{ paddingTop: '5.5rem', maxWidth: '1280px', margin: '0 auto', padding: '6rem 2rem 3rem 2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: 0 }}>
-                  PHÒNG THỬ ĐỒ ẢO 3D
-                </h1>
-                <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.95rem', margin: '0.35rem 0 0 0' }}>
-                  {selectedProduct
-                    ? `Đang chọn thử mẫu: ${selectedProduct.name} (${selectedProduct.categoryLabel})`
-                    : 'Tải ảnh của bạn để AI tái tạo mô hình 3D và thử trang phục'}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className="vfit-btn-secondary"
-                style={{ height: '2.5rem', fontSize: '0.85rem' }}
-                onClick={() => setCurrentTab('catalog')}
-              >
-                ← Chọn trang phục khác
-              </button>
-            </div>
-
-            {/* Upload & 3D Try-On Component */}
-            <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 4px 20px rgba(8, 10, 97, 0.05)' }}>
-              <UploadPage />
-            </div>
+          <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
+            <TryOnPage
+              initialGarment={selectedProduct}
+              onNavigateCatalog={() => setCurrentTab('catalog')}
+            />
           </div>
         )}
 
