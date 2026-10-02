@@ -115,6 +115,7 @@ const MainContent: React.FC = () => {
             onStartTryOn={handleStartTryOn}
             onExploreCatalog={() => setCurrentTab('catalog')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
+            onViewProductDetail={(product) => setModalProduct(product)}
           />
         )}
 
@@ -122,6 +123,7 @@ const MainContent: React.FC = () => {
           <CatalogPage
             onNavigateHome={() => setCurrentTab('home')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
+            onViewProductDetail={(product) => setModalProduct(product)}
           />
         )}
 

@@ -3,11 +3,13 @@ import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
 
 interface CatalogPageProps {
   onSelectProductForTryOn: (product: Product) => void;
+  onViewProductDetail?: (product: Product) => void;
   onNavigateHome: () => void;
 }
 
 export const CatalogPage: React.FC<CatalogPageProps> = ({
   onSelectProductForTryOn,
+  onViewProductDetail,
   onNavigateHome,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -398,7 +400,11 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               {filteredProducts.map((product) => (
                 <div key={product.id} className="vfit-product-card">
                   {/* Image Thumb */}
-                  <div className="vfit-product-thumb">
+                  <div
+                    className="vfit-product-thumb"
+                    style={{ cursor: onViewProductDetail ? 'pointer' : 'default' }}
+                    onClick={() => onViewProductDetail && onViewProductDetail(product)}
+                  >
                     <img src={product.imageUrl} alt={product.name} />
 
                     {/* Material Pill */}
@@ -474,7 +480,17 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                         </div>
                       </div>
 
-                      <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--vfit-on-surface)', margin: '0.35rem 0 0.4rem 0', lineHeight: '1.3' }}>
+                      <h3
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 700,
+                          color: 'var(--vfit-on-surface)',
+                          margin: '0.35rem 0 0.4rem 0',
+                          lineHeight: '1.3',
+                          cursor: onViewProductDetail ? 'pointer' : 'default',
+                        }}
+                        onClick={() => onViewProductDetail && onViewProductDetail(product)}
+                      >
                         {product.name}
                       </h3>
 

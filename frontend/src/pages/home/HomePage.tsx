@@ -8,12 +8,14 @@ interface HomePageProps {
   onStartTryOn: () => void;
   onExploreCatalog: () => void;
   onSelectProductForTryOn: (product: Product) => void;
+  onViewProductDetail?: (product: Product) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   onStartTryOn,
   onExploreCatalog,
   onSelectProductForTryOn,
+  onViewProductDetail,
 }) => {
   return (
     <div style={{ width: '100%' }}>
@@ -29,6 +31,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 3. Featured Products Lookbook */}
       <FeaturedProductsSection
         onSelectProductForTryOn={onSelectProductForTryOn}
+        onViewProductDetail={onViewProductDetail}
         onViewAllCatalog={onExploreCatalog}
       />
 

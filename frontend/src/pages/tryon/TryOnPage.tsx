@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { BodyData, FitResult, tryonApi } from '../../api/tryonApi';
+import { ConfirmTryOnStep } from '../../components/tryon/ConfirmTryOnStep';
 import { InteractiveViewer3DStep } from '../../components/tryon/InteractiveViewer3DStep';
 import { ProcessingStep } from '../../components/tryon/ProcessingStep';
 import { SelectGarmentStep } from '../../components/tryon/SelectGarmentStep';
 import { UploadStep } from '../../components/tryon/UploadStep';
 import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
 
-type TryOnStep = 'upload' | 'select-garment' | 'processing' | 'viewer-3d';
+type TryOnStep = 'upload' | 'select-garment' | 'confirm' | 'processing' | 'viewer-3d';
 
 interface TryOnPageProps {
   initialGarment?: Product | null;
@@ -20,7 +21,9 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
   );
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [photoPreview, setPhotoPreview] = useState<string>(
+    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80'
+  );
   const [heightCm, setHeightCm] = useState<number>(170);
 
   const [selectedGarment, setSelectedGarment] = useState<Product>(
@@ -44,10 +47,15 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
     setCurrentStep('select-garment');
   };
 
-  // 2. Sau khi xác nhận chọn đồ và size ở Bước 2 -> Bắt đầu xử lý AI
-  const handleConfirmGarment = async (garment: Product, size: string) => {
+  // 2. Sau khi chọn trang phục ở Bước 2 -> Chuyển sang Bước xác nhận (Confirm)
+  const handleGarmentSelected = (garment: Product, size: string) => {
     setSelectedGarment(garment);
     setSelectedSize(size);
+    setCurrentStep('confirm');
+  };
+
+  // 3. Sau khi người dùng xác nhận ở Bước 3 -> Chạy AI Processing
+  const handleStartProcessing = async () => {
     setCurrentStep('processing');
     setProcessingStatus('Đang gửi dữ liệu ảnh và quét vóc dáng...');
 
@@ -65,8 +73,8 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
       setProcessingStatus('Đang thực hiện draping trang phục và tính toán độ căng vải...');
       const fitRes = await tryonApi.fitAndPoll(
         bodyRes.body_id,
-        garment.id,
-        size,
+        selectedGarment.id,
+        selectedSize,
         (msg) => setProcessingStatus(msg)
       );
 
@@ -78,7 +86,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
     }
   };
 
-  // 3. Khởi động lại luồng từ đầu
+  // Khởi động lại luồng từ đầu
   const handleRestart = () => {
     setCurrentStep('upload');
     setFitResult(null);
@@ -86,7 +94,13 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
 
   // Determine active step index for Stepper Bar
   const stepIndex =
-    currentStep === 'upload' ? 1 : currentStep === 'select-garment' ? 2 : 3;
+    currentStep === 'upload'
+      ? 1
+      : currentStep === 'select-garment'
+      ? 2
+      : currentStep === 'confirm'
+      ? 3
+      : 4;
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 0 4rem 0' }}>
@@ -121,7 +135,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
             <div
               className="vfit-step-item"
               onClick={() =>
-                (currentStep === 'viewer-3d' || photoPreview) &&
+                (currentStep === 'viewer-3d' || currentStep === 'confirm' || photoPreview) &&
                 setCurrentStep('select-garment')
               }
             >
@@ -132,7 +146,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
               >
                 {stepIndex > 2 ? '✓' : '2'}
               </div>
-              <span className="vfit-step-label">Chọn trang phục & Size</span>
+              <span className="vfit-step-label">Chọn trang phục</span>
               <span className="vfit-step-sublabel">
                 {stepIndex === 2
                   ? 'Đang thực hiện'
@@ -147,16 +161,45 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
               className={`vfit-step-connector ${stepIndex >= 3 ? 'filled' : ''}`}
             />
 
-            {/* Step 3 */}
+            {/* Step 3: Xác nhận */}
+            <div
+              className="vfit-step-item"
+              onClick={() =>
+                currentStep === 'viewer-3d' && setCurrentStep('confirm')
+              }
+            >
+              <div
+                className={`vfit-step-circle ${
+                  stepIndex === 3 ? 'active' : stepIndex > 3 ? 'completed' : ''
+                }`}
+              >
+                {stepIndex > 3 ? '✓' : '3'}
+              </div>
+              <span className="vfit-step-label">Xác nhận cấu hình</span>
+              <span className="vfit-step-sublabel">
+                {stepIndex === 3
+                  ? 'Đang thực hiện'
+                  : stepIndex > 3
+                  ? 'Hoàn tất'
+                  : 'Bước kế tiếp'}
+              </span>
+            </div>
+
+            {/* Connector 3-4 */}
+            <div
+              className={`vfit-step-connector ${stepIndex >= 4 ? 'filled' : ''}`}
+            />
+
+            {/* Step 4: Kết quả */}
             <div className="vfit-step-item">
               <div
-                className={`vfit-step-circle ${stepIndex === 3 ? 'active' : ''}`}
+                className={`vfit-step-circle ${stepIndex === 4 ? 'active' : ''}`}
               >
-                3
+                4
               </div>
-              <span className="vfit-step-label">Kết quả 3D tương tác</span>
+              <span className="vfit-step-label">Kết quả 3D & AI 4K</span>
               <span className="vfit-step-sublabel">
-                {stepIndex === 3 ? 'Đang hiển thị' : 'Chờ xử lý'}
+                {stepIndex === 4 ? 'Đang hiển thị' : 'Chờ xử lý'}
               </span>
             </div>
           </div>
@@ -172,7 +215,20 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
         <SelectGarmentStep
           initialGarment={selectedGarment}
           onBack={() => setCurrentStep('upload')}
-          onConfirm={handleConfirmGarment}
+          onConfirm={handleGarmentSelected}
+        />
+      )}
+
+      {currentStep === 'confirm' && (
+        <ConfirmTryOnStep
+          photoPreview={photoPreview}
+          heightCm={heightCm}
+          garment={selectedGarment}
+          selectedSize={selectedSize}
+          onBack={() => setCurrentStep('select-garment')}
+          onChangeModel={() => setCurrentStep('upload')}
+          onChangeGarment={() => setCurrentStep('select-garment')}
+          onConfirmStart={handleStartProcessing}
         />
       )}
 
@@ -194,3 +250,5 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
     </div>
   );
 };
+
+export default TryOnPage;
