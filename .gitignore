@@ -47,6 +47,7 @@ data/external/
 data/raw/
 data/synthetic/
 data/outputs/
+data/garment3d.sqlite3*
 !data/external/.gitkeep
 !data/raw/.gitkeep
 !data/synthetic/.gitkeep
@@ -55,3 +56,7 @@ data/outputs/
 # Blender / 3D temp files
 *.blend1
 *.blend2
+
+# Local planning documents
+/docs/plan/
+.env
