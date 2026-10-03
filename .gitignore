@@ -55,3 +55,14 @@ data/outputs/
 # Blender / 3D temp files
 *.blend1
 *.blend2
+
+# Ignore Virtual Environment and Python Cache
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+
+# AI datasets
+ai/dataset/data/
+tmp/hf_cache/
