@@ -16,12 +16,26 @@ from ai.dataset.labeling.size_labeler import (
     check_size_distribution,
     get_size_from_bust,
 )
+from ai.dataset.labeling.fit_labeler import (
+    FIT_CLASSES,
+    FIT_THRESHOLDS,
+    assign_fit_labels,
+    compute_reference_fit_score,
+    get_fit_class_from_ease,
+)
 from ai.dataset.split import split_dataset_by_person
 from ai.models.size_recommender import (
     DummySizeRecommender,
     MLSizeRecommender,
     RuleBasedSizeRecommender,
     SizeRecommender,
+)
+from ai.models.fit_predictor import (
+    FIT_FEATURE_COLUMNS,
+    DummyFitPredictor,
+    FitPredictor,
+    MLFitPredictor,
+    RuleBasedFitPredictor,
 )
 
 
@@ -36,12 +50,13 @@ def mock_dataset() -> pd.DataFrame:
     # 6 người mẫu, mỗi người mặc 5 áo
     for p_id in range(1, 7):
         p_path = f"images/person/person_{p_id:02d}.jpg"
-        base_bust = 85.0 + (p_id - 1) * 7.0  # Tạo giải từ 85cm đến 120cm
+        base_bust = 85.0 + (p_id - 1) * 7.0  # Tạo dải từ 85cm đến 120cm
         base_height = 160.0 + p_id * 3.0
         base_hips = 90.0 + p_id * 4.0
         base_waist = 70.0 + p_id * 5.0
 
         for c_id in range(1, 6):
+            garment_bust = 85.0 + (c_id - 1) * 10.0  # Tạo dải từ 85cm đến 125cm
             rows.append({
                 "id": f"fit_{p_id}_{c_id}",
                 "person_path": p_path,
@@ -50,6 +65,8 @@ def mock_dataset() -> pd.DataFrame:
                 "body_height": base_height,
                 "body_hips": base_hips,
                 "body_waist": base_waist,
+                "garment_bust": garment_bust,
+                "garment_length": 65.0 + c_id * 2.0,
             })
 
     return pd.DataFrame(rows)
@@ -219,3 +236,197 @@ def test_unified_size_recommender_emergency_fallback_empty():
     assert result["recommended_size"] == "M"
     assert result["fallback_used"] is True
     assert result["method"] == "emergency_default"
+
+
+# ==============================================================================
+# 5. TC-AI-03: FIT LABELING & SCORE TESTS
+# ==============================================================================
+@pytest.mark.fast
+def test_get_fit_class_from_ease_boundaries():
+    """Kiểm tra logic phân loại độ vừa vặn tại các điểm biên."""
+    # Chật: bust_diff < 2.0
+    assert get_fit_class_from_ease(-5.0) == "Too Tight"
+    assert get_fit_class_from_ease(0.0) == "Too Tight"
+    assert get_fit_class_from_ease(1.99) == "Too Tight"
+
+    # Vừa vặn: 2.0 <= bust_diff <= 12.0
+    assert get_fit_class_from_ease(2.0) == "Good"
+    assert get_fit_class_from_ease(6.0) == "Good"
+    assert get_fit_class_from_ease(12.0) == "Good"
+
+    # Rộng: bust_diff > 12.0
+    assert get_fit_class_from_ease(12.01) == "Too Loose"
+    assert get_fit_class_from_ease(20.0) == "Too Loose"
+
+
+@pytest.mark.fast
+def test_compute_reference_fit_score_properties():
+    """Kiểm tra đặc tính của điểm số Fit Score tham chiếu."""
+    # Điểm đạt 100 tại điểm tối ưu
+    optimal_score = compute_reference_fit_score(FIT_THRESHOLDS["OPTIMAL_EASE"])
+    assert optimal_score == 100.0
+
+    # Điểm giảm dần khi quá chật và bị chặn dưới ở mức >= 0.0
+    tight_score = compute_reference_fit_score(-5.0)
+    assert 0.0 <= tight_score < optimal_score
+
+    extreme_tight = compute_reference_fit_score(-25.0)
+    assert extreme_tight == 0.0
+
+    # Điểm giảm dần khi quá rộng và bị chặn trên ở mức <= 100.0
+    loose_score = compute_reference_fit_score(20.0)
+    assert 0.0 <= loose_score < optimal_score
+
+    # Kiểm tra tính hợp lệ của input
+    with pytest.raises(ValueError):
+        compute_reference_fit_score(np.nan)
+
+
+@pytest.mark.fast
+def test_assign_fit_labels_pipeline(mock_dataset):
+    """Kiểm tra pipeline gán nhãn Fit Class & Fit Score trên DataFrame (TC-AI-03)."""
+    labeled_df = assign_fit_labels(mock_dataset)
+
+    # 1. Kiểm tra tồn tại đầy đủ các cột mới
+    assert "bust_diff" in labeled_df.columns
+    assert "fit_class" in labeled_df.columns
+    assert "fit_score" in labeled_df.columns
+
+    # 2. Không chứa giá trị NaN
+    assert not labeled_df["bust_diff"].isna().any()
+    assert not labeled_df["fit_class"].isna().any()
+    assert not labeled_df["fit_score"].isna().any()
+
+    # 3. Điểm số nằm nghiêm ngặt trong đoạn [0, 100]
+    assert labeled_df["fit_score"].between(0.0, 100.0).all()
+
+    # 4. Đủ 3 nhãn phân loại 'Too Tight', 'Good', 'Too Loose'
+    unique_classes = set(labeled_df["fit_class"].unique())
+    assert unique_classes == set(FIT_CLASSES)
+
+    # 5. Mỗi nhãn chiếm >= 15% tổng số mẫu theo tiêu chuẩn TC-AI-03
+    class_dist = labeled_df["fit_class"].value_counts(normalize=True)
+    for cls_name in FIT_CLASSES:
+        assert class_dist[cls_name] >= 0.15, (
+            f"Nhãn {cls_name} chỉ chiếm {class_dist[cls_name]:.2%}, yêu cầu >= 15%"
+        )
+
+
+# ==============================================================================
+# 6. TC-AI-04: FIT PREDICTOR & CLASSIFIER BASELINES TESTS
+# ==============================================================================
+@pytest.mark.fast
+def test_rule_based_fit_predictor(mock_dataset):
+    """Kiểm tra dự đoán của Rule-based Fit Heuristic."""
+    labeled_df = assign_fit_labels(mock_dataset)
+    predictor = RuleBasedFitPredictor()
+
+    pred_classes, pred_scores = predictor.predict(labeled_df)
+    assert len(pred_classes) == len(mock_dataset)
+    assert len(pred_scores) == len(mock_dataset)
+    assert set(pred_classes).issubset(set(FIT_CLASSES))
+    assert np.all((pred_scores >= 0.0) & (pred_scores <= 100.0))
+
+    probs = predictor.predict_proba(labeled_df)
+    assert probs.shape == (len(mock_dataset), len(FIT_CLASSES))
+    assert np.all(np.max(probs, axis=1) == 1.0)
+
+
+@pytest.mark.fast
+def test_dummy_fit_predictor(mock_dataset):
+    """Kiểm tra Dummy Fit Predictor (ngưỡng sàn tham chiếu)."""
+    labeled_df = assign_fit_labels(mock_dataset)
+    X = labeled_df[FIT_FEATURE_COLUMNS]
+    y_class = labeled_df["fit_class"]
+    y_score = labeled_df["fit_score"]
+
+    dummy = DummyFitPredictor()
+    dummy.fit(X, y_class, y_score)
+
+    pred_classes, pred_scores = dummy.predict(X)
+    assert len(pred_classes) == len(X)
+    assert len(pred_scores) == len(X)
+    # Dummy regressor trả về giá trị trung bình
+    assert np.allclose(pred_scores, y_score.mean())
+
+
+@pytest.mark.fast
+def test_ml_fit_predictor_pipeline(mock_dataset):
+    """Kiểm tra huấn luyện và suy luận của ML Fit Predictor (Ridge + LogReg)."""
+    labeled_df = assign_fit_labels(mock_dataset)
+    X = labeled_df[FIT_FEATURE_COLUMNS]
+    y_class = labeled_df["fit_class"]
+    y_score = labeled_df["fit_score"]
+
+    ml_model = MLFitPredictor(random_state=42)
+    ml_model.fit(X, y_class, y_score)
+
+    pred_classes, pred_scores = ml_model.predict(X)
+    assert len(pred_classes) == len(X)
+    assert len(pred_scores) == len(X)
+    assert set(pred_classes).issubset(set(FIT_CLASSES))
+    assert np.all((pred_scores >= 0.0) & (pred_scores <= 100.0))
+
+    probs = ml_model.predict_proba(X)
+    assert probs.shape == (len(X), len(FIT_CLASSES))
+    assert np.allclose(probs.sum(axis=1), 1.0)
+
+
+# ==============================================================================
+# 7. TC-AI-04 & TC-AI-07: UNIFIED FIT PREDICTOR & FALLBACK TESTS
+# ==============================================================================
+@pytest.mark.fast
+def test_unified_fit_predictor_inference(mock_dataset):
+    """Kiểm tra wrapper FitPredictor khi có đầy đủ tham số đầu vào."""
+    labeled_df = assign_fit_labels(mock_dataset)
+    X = labeled_df[FIT_FEATURE_COLUMNS]
+    y_class = labeled_df["fit_class"]
+    y_score = labeled_df["fit_score"]
+
+    predictor = FitPredictor(model_type="ml_baseline")
+    predictor.fit(X, y_class, y_score)
+
+    res = predictor.predict_single({
+        "body_bust": 90.0,
+        "body_height": 168.0,
+        "body_hips": 94.0,
+        "body_waist": 74.0,
+        "garment_bust": 96.0,
+        "garment_length": 68.0,
+    })
+
+    assert res["classification"] in FIT_CLASSES
+    assert 0.0 <= res["fit_score"] <= 100.0
+    assert 0.0 <= res["confidence"] <= 1.0
+    assert res["fallback_used"] is False
+    assert res["method"] == "ml_baseline"
+
+
+@pytest.mark.fast
+def test_unified_fit_predictor_fallback_on_missing_features():
+    """Kiểm tra tự động fallback sang Rule-based (TC-AI-07) khi thiếu các trường phụ."""
+    predictor = FitPredictor(model_type="ml_baseline")
+    # Chưa huấn luyện, chỉ truyền 2 số đo tối thiểu
+    res = predictor.predict_single({
+        "body_bust": 92.0,
+        "garment_bust": 98.0,
+    })
+
+    assert res["classification"] == "Good"
+    assert res["fit_score"] == 100.0
+    assert res["fallback_used"] is True
+    assert res["method"] == "rule_based_fallback"
+
+
+@pytest.mark.fast
+def test_unified_fit_predictor_emergency_fallback_empty():
+    """Kiểm tra fallback khẩn cấp khi dict rỗng, bảo đảm Zero Crash."""
+    predictor = FitPredictor(model_type="ml_baseline")
+    res = predictor.predict_single({})
+
+    assert res["classification"] == "Good"
+    assert res["fit_score"] == 75.0
+    assert res["fallback_used"] is True
+    assert res["method"] == "emergency_default"
+
+

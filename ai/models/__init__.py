@@ -7,6 +7,13 @@ from ai.models.size_recommender import (
     RuleBasedSizeRecommender,
     SizeRecommender,
 )
+from ai.models.fit_predictor import (
+    FIT_FEATURE_COLUMNS,
+    DummyFitPredictor,
+    FitPredictor,
+    MLFitPredictor,
+    RuleBasedFitPredictor,
+)
 
 __all__ = [
     "FEATURE_COLUMNS",
@@ -14,4 +21,9 @@ __all__ = [
     "DummySizeRecommender",
     "MLSizeRecommender",
     "SizeRecommender",
+    "FIT_FEATURE_COLUMNS",
+    "RuleBasedFitPredictor",
+    "DummyFitPredictor",
+    "MLFitPredictor",
+    "FitPredictor",
 ]
