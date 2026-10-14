@@ -11,6 +11,11 @@ npm run dev
 
 Open `http://localhost:5173/garment3d.html`.
 
+The form asks for garment type and an optional real garment length. Supplying
+the length enables centimetre measurements and marks the result as ready for
+body-size integration. Completed results expose both the GLB and its body-ready
+metadata JSON for download.
+
 Build only this isolated entrypoint with:
 
 ```powershell

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useMemo, useRef } from 'react';
+import React, { ChangeEvent, DragEvent, useEffect, useMemo, useRef } from 'react';
 import { GarmentView } from '../api/garment3d';
 
 export type GarmentFiles = Partial<Record<GarmentView, File>>;
@@ -41,6 +41,12 @@ function ViewSlot({
   );
 
   const select = (event: ChangeEvent<HTMLInputElement>) => onFile(event.target.files?.[0]);
+  const drop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    if (disabled) return;
+    const dropped = event.dataTransfer.files?.[0];
+    if (dropped) onFile(dropped);
+  };
   const remove = () => {
     if (inputRef.current) inputRef.current.value = '';
     onFile(undefined);
@@ -53,7 +59,12 @@ function ViewSlot({
           {required ? 'Bắt buộc' : 'Tùy chọn'}
         </span>
       </div>
-      <label htmlFor={`garment-${view}`} className="g3d-upload-card__dropzone">
+      <label
+        htmlFor={`garment-${view}`}
+        className="g3d-upload-card__dropzone"
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={drop}
+      >
         {preview ? (
           <img
             src={preview}
@@ -63,8 +74,8 @@ function ViewSlot({
         ) : (
           <div className="g3d-upload-card__empty">
             <span className="g3d-upload-card__icon" aria-hidden="true">+</span>
-            <strong>Chọn ảnh {label.toLowerCase()}</strong>
-            <small>JPEG, PNG hoặc WebP</small>
+            <strong>Chọn hoặc kéo ảnh {label.toLowerCase()} vào đây</strong>
+            <small>JPEG, PNG, WebP hoặc BMP</small>
           </div>
         )}
       </label>
@@ -73,7 +84,7 @@ function ViewSlot({
         id={`garment-${view}`}
         className="g3d-visually-hidden"
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp"
         disabled={disabled}
         onChange={select}
       />

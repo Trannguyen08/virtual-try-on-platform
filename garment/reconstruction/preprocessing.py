@@ -14,6 +14,7 @@ FORMAT_TO_MEDIA_TYPE = {
     "JPEG": "image/jpeg",
     "PNG": "image/png",
     "WEBP": "image/webp",
+    "BMP": "image/bmp",
 }
 
 
@@ -79,7 +80,7 @@ class ImagePreprocessor:
             if detected_format not in FORMAT_TO_MEDIA_TYPE:
                 raise InvalidImageError(
                     "UNSUPPORTED_IMAGE_FORMAT",
-                    f"{view.value} must be JPEG, PNG, or WebP",
+                    f"{view.value} must be JPEG, PNG, WebP, or BMP",
                 )
             with Image.open(source) as opened:
                 image = ImageOps.exif_transpose(opened)

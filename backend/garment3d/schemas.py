@@ -37,6 +37,7 @@ class JobResponse(BaseModel):
 class AssetLinks(BaseModel):
     glb_url: str
     thumbnail_url: str | None = None
+    metadata_url: str | None = None
 
 
 class GenerationResponse(BaseModel):
@@ -46,4 +47,5 @@ class GenerationResponse(BaseModel):
     views: list[str]
     assets: AssetLinks | None = None
     mesh: dict[str, Any] | None = None
+    garment: dict[str, Any] | None = None
     warnings: list[str] = Field(default_factory=list)

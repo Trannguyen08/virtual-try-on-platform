@@ -23,7 +23,17 @@ export const GarmentGenerationProgress: React.FC<{ job: Garment3DJob }> = ({ job
     <div className="g3d-progress__header">
       <div>
         <span className="g3d-eyebrow">Đang xử lý</span>
-        <h2>{LABELS[job.status] ?? 'Đang xử lý'}</h2>
+        <h2>
+          {job.status === 'generating' && job.provider === 'local'
+            ? job.progress < 40
+              ? 'Đang tách nền trang phục'
+              : job.progress < 65
+                ? 'Đang xác định điểm đo'
+                : job.progress < 90
+                  ? 'Đang dựng mesh 3D'
+                  : 'Đang đóng gói texture và GLB'
+            : LABELS[job.status] ?? 'Đang xử lý'}
+        </h2>
       </div>
       <strong>{job.progress}%</strong>
     </div>

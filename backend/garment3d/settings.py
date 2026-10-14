@@ -41,7 +41,7 @@ class Garment3DSettings:
             os.getenv("GARMENT3D_DATA_DIR", str(WORKSPACE_ROOT / "data"))
         ).resolve()
         return cls(
-            provider=os.getenv("GARMENT3D_PROVIDER", "mock").lower(),
+            provider=os.getenv("GARMENT3D_PROVIDER", "local").lower(),
             preset=os.getenv("GARMENT3D_PRESET", "balanced").lower(),
             output_dir=Path(
                 os.getenv(
@@ -70,8 +70,8 @@ class Garment3DSettings:
         )
 
     def validate(self) -> None:
-        if self.provider not in {"mock", "tripo"}:
-            raise ValueError("GARMENT3D_PROVIDER must be 'mock' or 'tripo'")
+        if self.provider not in {"local", "mock", "tripo"}:
+            raise ValueError("GARMENT3D_PROVIDER must be 'local', 'mock', or 'tripo'")
         if self.provider == "tripo" and not self.tripo_api_key:
             raise ValueError("TRIPO_API_KEY is required for GARMENT3D_PROVIDER=tripo")
         if self.postprocessor not in {"passthrough", "blender"}:

@@ -2,6 +2,50 @@ import { API_BASE_URL } from './config';
 
 export type GarmentView = 'front' | 'left' | 'back' | 'right';
 export type GarmentImageSet = Partial<Record<GarmentView, File>> & { front: File };
+export type GarmentType = 'tshirt' | 'shirt' | 'jacket' | 'pants' | 'skirt' | 'dress';
+
+export interface GarmentGenerationOptions {
+  garmentType: GarmentType;
+  referenceMeasurement?: string;
+  referenceValueCm?: number;
+}
+
+export interface GarmentMeasurement {
+  value_cm: number | null;
+  value_px: number;
+  method: string;
+  source: string;
+  confidence: number;
+}
+
+export interface GarmentLandmark {
+  image_px?: [number, number];
+  image_normalized?: [number, number];
+  front_vertex?: number;
+  back_vertex?: number;
+  front_position_m?: [number, number, number];
+  back_position_m?: [number, number, number];
+  source?: string;
+  annotation_visible?: boolean;
+}
+
+export interface GarmentAttachmentRegion {
+  body_region: string;
+  landmarks: string[];
+  front_vertex_indices: number[];
+  recommended_clearance_cm: number;
+}
+
+export interface BodyReadyGarmentMetadata {
+  schema_version: string;
+  reconstruction_mode: string;
+  fit_ready: boolean;
+  garment_type: GarmentType;
+  measurements: Record<string, GarmentMeasurement>;
+  landmarks?: Record<string, GarmentLandmark>;
+  attachment_regions?: Record<string, GarmentAttachmentRegion>;
+  warnings: string[];
+}
 
 export interface Garment3DError {
   code: string;
@@ -37,8 +81,10 @@ export interface Garment3DGeneration {
   assets: {
     glb_url: string;
     thumbnail_url: string | null;
+    metadata_url: string | null;
   } | null;
   mesh: Record<string, unknown> | null;
+  garment: BodyReadyGarmentMetadata | null;
   warnings: string[];
 }
 
@@ -51,6 +97,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
 export async function createGarmentGeneration(
   images: GarmentImageSet,
+  options: GarmentGenerationOptions,
   signal?: AbortSignal,
 ): Promise<CreateGenerationResponse> {
   const form = new FormData();
@@ -58,6 +105,11 @@ export async function createGarmentGeneration(
     const file = images[view];
     if (file) form.append(view, file);
   });
+  form.append('garment_type', options.garmentType);
+  if (options.referenceMeasurement && options.referenceValueCm) {
+    form.append('reference_measurement', options.referenceMeasurement);
+    form.append('reference_value_cm', String(options.referenceValueCm));
+  }
   const response = await fetch(`${API_BASE_URL}/garment3d/generations`, {
     method: 'POST',
     body: form,
@@ -85,6 +137,12 @@ export async function getGarmentGeneration(
     if (generation.assets.thumbnail_url) {
       generation.assets.thumbnail_url = new URL(
         generation.assets.thumbnail_url,
+        API_BASE_URL,
+      ).toString();
+    }
+    if (generation.assets.metadata_url) {
+      generation.assets.metadata_url = new URL(
+        generation.assets.metadata_url,
         API_BASE_URL,
       ).toString();
     }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import uuid
 from collections.abc import Mapping
 from dataclasses import asdict
@@ -13,6 +14,7 @@ from garment.reconstruction.contracts import (
     GarmentView,
     GenerationRequest,
     MeshPostProcessor,
+    ProviderResult,
     TaskState,
 )
 from garment.reconstruction.errors import ReconstructionError
@@ -48,7 +50,14 @@ class Garment3DService:
         self.poll_cache_seconds = poll_cache_seconds
         self._locks: dict[str, asyncio.Lock] = {}
 
-    async def submit(self, sources: Mapping[GarmentView, Path]) -> JobRecord:
+    async def submit(
+        self,
+        sources: Mapping[GarmentView, Path],
+        *,
+        garment_type: str = "tshirt",
+        reference_measurement: str | None = None,
+        reference_value_cm: float | None = None,
+    ) -> JobRecord:
         job_id = f"job_{uuid.uuid4().hex}"
         generation_id = f"gen_{uuid.uuid4().hex}"
         now = utc_now()
@@ -90,7 +99,12 @@ class Garment3DService:
 
             request = GenerationRequest(
                 images=images,
-                options=get_preset(self.preset).to_options(seed=0),
+                options=get_preset(self.preset).to_options(
+                    seed=0,
+                    garment_type=garment_type,
+                    reference_measurement=reference_measurement,
+                    reference_value_cm=reference_value_cm,
+                ),
             )
             task = await self.provider.create_task(request)
             record = record.transition(
@@ -161,9 +175,7 @@ class Garment3DService:
                         JobStatus.CANCELLED, last_polled_at=polled_at
                     )
                 elif snapshot.state is TaskState.SUCCESS and snapshot.result:
-                    record = await self._materialize(
-                        record, snapshot.result.model_url, snapshot.result.thumbnail_url
-                    )
+                    record = await self._materialize(record, snapshot.result)
                 else:
                     record = self._fail(
                         record,
@@ -180,15 +192,16 @@ class Garment3DService:
     async def _materialize(
         self,
         record: JobRecord,
-        model_url: str,
-        thumbnail_url: str | None,
+        result: ProviderResult,
     ) -> JobRecord:
         generation_dir = self.output_dir / record.generation_id
         source = generation_dir / "source.glb"
         model = generation_dir / "model.glb"
         if record.status in {JobStatus.QUEUED, JobStatus.GENERATING}:
             record = record.transition(
-                JobStatus.DOWNLOADING, progress=90, last_polled_at=utc_now()
+                JobStatus.DOWNLOADING,
+                progress=max(record.progress, 90),
+                last_polled_at=utc_now(),
             )
             self.repository.save(record)
         if not source.is_file():
@@ -198,7 +211,9 @@ class Garment3DService:
                     "Generated source artifact is missing during recovery",
                     http_status=500,
                 )
-            await self.provider.download(model_url, source, self.max_artifact_bytes)
+            await self.provider.download(
+                result.model_url, source, self.max_artifact_bytes
+            )
 
         if record.status is JobStatus.DOWNLOADING:
             record = record.transition(JobStatus.POSTPROCESSING, progress=94)
@@ -218,13 +233,32 @@ class Garment3DService:
         if record.status is JobStatus.POSTPROCESSING:
             record = record.transition(JobStatus.VALIDATING_MESH, progress=98)
             self.repository.save(record)
-        metadata = await asyncio.to_thread(self.validator.validate, model)
+        mesh_metadata = await asyncio.to_thread(self.validator.validate, model)
+        combined_metadata = asdict(mesh_metadata)
+        garment_metadata = None
+        if result.metadata.get("schema_version") == "garment-fit-ready/1.0":
+            garment_metadata = dict(result.metadata)
+            if self.postprocessor.name != "passthrough":
+                garment_metadata["fit_ready"] = False
+                garment_metadata.setdefault("warnings", []).append(
+                    "VERTEX_BINDINGS_INVALIDATED_BY_POSTPROCESSOR"
+                )
+            combined_metadata["garment"] = garment_metadata
+            metadata_path = generation_dir / "garment-metadata.json"
+            metadata_path.write_text(
+                json.dumps(garment_metadata, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        elif result.metadata:
+            combined_metadata["provider"] = dict(result.metadata)
 
         thumbnail_path = None
-        if thumbnail_url:
+        if result.thumbnail_url:
             thumbnail = generation_dir / "thumbnail.png"
             try:
-                await self.provider.download(thumbnail_url, thumbnail, 10 * 1024 * 1024)
+                await self.provider.download(
+                    result.thumbnail_url, thumbnail, 10 * 1024 * 1024
+                )
                 thumbnail_path = str(thumbnail)
             except ReconstructionError:
                 thumbnail.unlink(missing_ok=True)
@@ -234,7 +268,9 @@ class Garment3DService:
             progress=100,
             artifact_path=str(model),
             thumbnail_path=thumbnail_path,
-            mesh_metadata=asdict(metadata),
+            mesh_metadata=combined_metadata,
+            warnings=record.warnings
+            + tuple((garment_metadata or {}).get("warnings", ())),
             last_polled_at=utc_now(),
         )
 
@@ -245,7 +281,14 @@ class Garment3DService:
         record = self.get_by_generation(generation_id)
         if not record or record.status is not JobStatus.COMPLETED:
             return None
-        value = record.artifact_path if kind == "model" else record.thumbnail_path
+        if kind == "model":
+            value = record.artifact_path
+        elif kind == "thumbnail":
+            value = record.thumbnail_path
+        elif kind == "metadata":
+            value = str(self.output_dir / generation_id / "garment-metadata.json")
+        else:
+            return None
         if not value:
             return None
         path = Path(value).resolve()

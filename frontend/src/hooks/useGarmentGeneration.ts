@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createGarmentGeneration,
+  GarmentGenerationOptions,
   Garment3DGeneration,
   Garment3DJob,
   GarmentImageSet,
@@ -54,7 +55,7 @@ export function useGarmentGeneration() {
   );
 
   const submit = useCallback(
-    async (images: GarmentImageSet) => {
+    async (images: GarmentImageSet, options: GarmentGenerationOptions) => {
       stop();
       setSubmitting(true);
       setError(null);
@@ -63,7 +64,7 @@ export function useGarmentGeneration() {
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const created = await createGarmentGeneration(images, controller.signal);
+        const created = await createGarmentGeneration(images, options, controller.signal);
         await poll(created.job_id, Date.now());
       } catch (reason) {
         if (!controller.signal.aborted) {

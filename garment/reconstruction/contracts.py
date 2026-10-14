@@ -7,6 +7,22 @@ from pathlib import Path
 from typing import Any, Protocol
 
 
+SUPPORTED_GARMENT_TYPES = frozenset(
+    {"tshirt", "shirt", "jacket", "pants", "skirt", "dress"}
+)
+SUPPORTED_REFERENCE_MEASUREMENTS = frozenset(
+    {
+        "garment_length",
+        "shoulder_width",
+        "chest_flat_width",
+        "waist_flat_width",
+        "hip_flat_width",
+        "sleeve_length",
+        "inseam",
+    }
+)
+
+
 class GarmentView(str, Enum):
     FRONT = "front"
     LEFT = "left"
@@ -48,6 +64,9 @@ class GenerationOptions:
     generate_texture: bool = True
     generate_pbr: bool = True
     seed: int = 0
+    garment_type: str = "tshirt"
+    reference_measurement: str | None = None
+    reference_value_cm: float | None = None
 
 
 @dataclass(frozen=True)

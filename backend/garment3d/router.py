@@ -5,10 +5,14 @@ import tempfile
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 
-from garment.reconstruction.contracts import GarmentView
+from garment.reconstruction.contracts import (
+    GarmentView,
+    SUPPORTED_GARMENT_TYPES,
+    SUPPORTED_REFERENCE_MEASUREMENTS,
+)
 from garment.reconstruction.errors import ReconstructionError
 
 from .models import JobRecord, JobStatus
@@ -36,6 +40,9 @@ async def create_generation(
     left: Annotated[UploadFile | None, File()] = None,
     back: Annotated[UploadFile | None, File()] = None,
     right: Annotated[UploadFile | None, File()] = None,
+    garment_type: Annotated[str, Form()] = "tshirt",
+    reference_measurement: Annotated[str | None, Form()] = None,
+    reference_value_cm: Annotated[float | None, Form()] = None,
 ) -> CreateGenerationResponse:
     settings = request.app.state.garment3d_settings
     uploads = {
@@ -49,13 +56,52 @@ async def create_generation(
     )
     sources: dict[GarmentView, Path] = {}
     try:
+        garment_type = garment_type.lower().strip()
+        if garment_type not in SUPPORTED_GARMENT_TYPES:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code": "UNSUPPORTED_GARMENT_TYPE",
+                    "message": "Unsupported garment type",
+                },
+            )
         for view, upload in uploads.items():
             if upload is None:
                 continue
             destination = temp_dir / f"{view.value}.upload"
             await save_upload(upload, destination, settings.max_upload_bytes)
             sources[view] = destination
-        record = await service_from(request).submit(sources)
+        if (reference_measurement is None) != (reference_value_cm is None):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code": "INCOMPLETE_SCALE_REFERENCE",
+                    "message": "Reference measurement and value must be provided together",
+                },
+            )
+        if reference_measurement is not None:
+            if reference_measurement not in SUPPORTED_REFERENCE_MEASUREMENTS:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "code": "UNSUPPORTED_REFERENCE_MEASUREMENT",
+                        "message": "Unsupported scale reference measurement",
+                    },
+                )
+            if reference_value_cm is None or not 1.0 <= reference_value_cm <= 300.0:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "code": "INVALID_REFERENCE_VALUE",
+                        "message": "Reference value must be between 1 and 300 cm",
+                    },
+                )
+        record = await service_from(request).submit(
+            sources,
+            garment_type=garment_type,
+            reference_measurement=reference_measurement,
+            reference_value_cm=reference_value_cm,
+        )
     except ReconstructionError as exc:
         raise HTTPException(
             status_code=exc.http_status,
@@ -107,6 +153,11 @@ async def get_generation(request: Request, generation_id: str) -> GenerationResp
                 if record.thumbnail_path
                 else None
             ),
+            metadata_url=(
+                f"/garment3d/artifacts/{generation_id}/garment-metadata.json"
+                if record.mesh_metadata and record.mesh_metadata.get("garment")
+                else None
+            ),
         )
     return GenerationResponse(
         id=generation_id,
@@ -115,6 +166,7 @@ async def get_generation(request: Request, generation_id: str) -> GenerationResp
         views=list(record.views),
         assets=assets,
         mesh=record.mesh_metadata,
+        garment=(record.mesh_metadata or {}).get("garment"),
         warnings=list(record.warnings),
     )
 
@@ -135,6 +187,21 @@ async def get_thumbnail(request: Request, generation_id: str) -> FileResponse:
     if path is None:
         raise HTTPException(status_code=404, detail="Thumbnail not found")
     return FileResponse(path, media_type="image/png", filename=f"{generation_id}.png")
+
+
+@router.get(
+    "/artifacts/{generation_id}/garment-metadata.json",
+    response_class=FileResponse,
+)
+async def get_metadata(request: Request, generation_id: str) -> FileResponse:
+    path = service_from(request).artifact(generation_id, "metadata")
+    if path is None:
+        raise HTTPException(status_code=404, detail="Garment metadata not found")
+    return FileResponse(
+        path,
+        media_type="application/json",
+        filename=f"{generation_id}-garment-metadata.json",
+    )
 
 
 def job_response(record: JobRecord) -> JobResponse:

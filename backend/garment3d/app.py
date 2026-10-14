@@ -39,8 +39,12 @@ def create_app(settings: Garment3DSettings | None = None) -> FastAPI:
                 base_url=active_settings.tripo_base_url,
                 model=active_settings.tripo_model,
             )
-        else:
+        elif active_settings.provider == "mock":
             provider = MockGarment3DProvider(active_settings.output_dir / ".mock")
+        else:
+            from garment.reconstruction.providers.local import LocalGarment3DProvider
+
+            provider = LocalGarment3DProvider(active_settings.output_dir / ".local")
 
         if active_settings.postprocessor == "blender":
             postprocessor = BlenderPostProcessor(
@@ -74,7 +78,11 @@ def create_app(settings: Garment3DSettings | None = None) -> FastAPI:
     )
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:5173"],
+        allow_origins=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

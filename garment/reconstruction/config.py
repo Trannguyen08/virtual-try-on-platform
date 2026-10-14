@@ -12,13 +12,23 @@ class GenerationPreset:
     generate_texture: bool
     generate_pbr: bool
 
-    def to_options(self, *, seed: int = 0) -> GenerationOptions:
+    def to_options(
+        self,
+        *,
+        seed: int = 0,
+        garment_type: str = "tshirt",
+        reference_measurement: str | None = None,
+        reference_value_cm: float | None = None,
+    ) -> GenerationOptions:
         return GenerationOptions(
             preset=self.name,
             target_face_count=self.target_face_count,
             generate_texture=self.generate_texture,
             generate_pbr=self.generate_pbr,
             seed=seed,
+            garment_type=garment_type,
+            reference_measurement=reference_measurement,
+            reference_value_cm=reference_value_cm,
         )
 
 
