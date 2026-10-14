@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import assets, garments, health, jobs, tryon
+from backend.api import assets, body_builder, garments, health, jobs, tryon
 from backend.core.config import Settings
 from backend.core.errors import register_error_handlers
 from backend.schemas.common import ErrorResponse
@@ -24,7 +24,7 @@ def create_app(settings: Settings | None = None, provider: TryOnProvider | None 
     )
     register_error_handlers(app)
     app.include_router(health.router)
-    for router in (garments.router, tryon.router, jobs.router, assets.router):
+    for router in (garments.router, tryon.router, jobs.router, assets.router, body_builder.router):
         app.include_router(router, prefix="/api")
     return app
 

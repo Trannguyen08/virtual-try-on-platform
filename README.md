@@ -10,12 +10,12 @@ Tổng quan và kiến trúc hệ thống: [docs/project-overview.md](docs/proje
 ## Chạy backend trên Windows
 
 Python 3.10+; chạy từ thư mục gốc repo. Các lệnh dưới dùng được trong **CMD và
-PowerShell**, không cần activate venv. Nếu `.venv` đã tồn tại, bỏ qua lệnh tạo.
+PowerShell**, không cần activate venv. Nếu `.venv` đã tồn tại, bỏ qua lệnh tạo. Sao chép `.env.example` thành `.env` nếu chưa có và chỉnh `BLENDER_PATH` trong `.env`.
 
 ```text
 py -3.10 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
-.\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --env-file .env --reload --host 127.0.0.1 --port 8000
 ```
 
 Mở [Swagger UI](http://localhost:8000/docs) hoặc
@@ -40,7 +40,24 @@ set CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 $env:CORS_ORIGINS = 'http://localhost:5173,http://127.0.0.1:5173'
 ```
 
-Không tự đọc `.env`; dùng env của shell hoặc `uvicorn --env-file .env`.
+Backend đọc `.env` khi khởi động bằng tùy chọn `--env-file .env`; sửa file này cần khởi động lại Uvicorn.
+
+## Tạo body 3D bằng Blender trong giao diện hiện tại
+
+Luồng thử đồ dùng Blender MPFB2 để xuất GLB cho cả body mặc định và body chỉnh từ thông số. Người dùng chỉnh chiều cao, cân nặng, tuổi, giới tính, màu da và tỷ lệ; chọn sản phẩm. Viewer trong giao diện hiện tại cho xem body hoặc body có trang phục minh họa, xoay/zoom, đổi màu, xem khung lưới và tải GLB. Ảnh ở bước đầu chỉ được xem trước, chưa dùng để suy hình dáng hoặc số đo.
+
+Cài Blender 4.x hoặc 5.x và đặt đường dẫn trong `.env`:
+
+```dotenv
+BLENDER_PATH=D:/Blender/blender.exe
+```
+
+Đường dẫn trên là vị trí Blender đã xác nhận trên máy này; thay bằng vị trí Blender của bạn nếu khác. Lệnh chạy backend ở trên dùng `--env-file .env` để nạp giá trị này; sau khi sửa file phải khởi động lại Uvicorn. Nếu terminal cũ đã đặt `BLENDER_PATH`, hãy mở terminal mới để ưu tiên giá trị từ `.env`. Nếu `BLENDER_PATH` trống, backend thử `PATH`, các thư mục `C:\Blender`, `D:\Blender`, `E:\Blender` và Blender Foundation trong Program Files. Cần cài và bật MPFB2 trong phiên bản Blender được chọn. Script nhận add-on từ `bl_ext.blender_org.mpfb`, `bl_ext.user_default.mpfb` hoặc `mpfb`; nếu tạo MPFB thất bại, job báo lỗi và không xuất mannequin thay thế. Job chạy trong bộ nhớ tiến trình; file GLB nằm ở `data/outputs/blender_body/` và không được commit. Restart backend làm mất job ID.
+Backend nhận tối đa hai job Blender đang chờ/chạy; khi bận, UI hiển thị lỗi để người dùng thử lại.
+
+API riêng cho luồng này: `POST /api/body-builder/generate`, `POST /api/body-builder/clothing`, `GET /api/body-builder/jobs/{job_id}`, `GET /api/body-builder/assets/{job_id}.glb`. Trang thử đồ hiện dùng API này cho kết quả 3D, không gọi `/api/tryon/analyze` từ luồng giao diện; các tỷ lệ không phải số đo từ ảnh. Body mặc định có giới tính trung tính và các giá trị MPFB cơ bản ở mức 0,5 như preset “From scratch”; breast size/firmness ở mức 0,55 tương ứng influence 0,10 trong ảnh Blender, chiều cao được co giãn theo số cm chọn. Khi không có asset áo, Blender dựng hình khối theo loại sản phẩm; màu và size thay đổi hình minh họa. Chưa có fitting, mô phỏng vải hay điểm fit từ Blender.
+
+Có thể đặt asset trang phục tùy chọn tại `data/external/clothing/<garment_id>.glb` hoặc `.obj` (ví dụ `demo-tshirt.glb`). Asset cần được dựng quanh body cao khoảng 1,7 m, Z-up trong Blender; hệ thống co giãn theo chiều cao body trước khi xuất Y-up GLB. Nếu thiếu asset thì dùng hình minh họa. File trong `data/external/` đã được Git bỏ qua. Nạp asset hiện chỉ chồng mesh và đổi màu; không tự fit vào body.
 
 ## Gọi thử API
 

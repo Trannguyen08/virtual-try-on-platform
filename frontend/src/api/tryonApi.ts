@@ -1,4 +1,5 @@
 import { ApiResponse } from './types';
+import { API_BASE_URL } from './config';
 
 export interface BodyMeasurement {
   height_cm: number;
@@ -67,7 +68,7 @@ export interface JobData {
   error: { code: string; message: string } | null;
 }
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = API_BASE_URL;
 
 export const tryonApi = {
   /**
@@ -149,7 +150,7 @@ export const tryonApi = {
                 return jobJson.data.result;
               }
               if (jobJson.data?.status === 'running') {
-                onProgress?.('Đang mô phỏng nếp gấp vải trên vóc dáng 3D...');
+                onProgress?.('Đang xử lý kết quả thử đồ...');
               }
             }
           }
@@ -160,11 +161,11 @@ export const tryonApi = {
     }
 
     // Client mock simulation
-    onProgress?.('Lập bản đồ 3D điểm khớp cơ thể...');
+    onProgress?.('Đang chuẩn bị kết quả mẫu...');
     await new Promise((r) => setTimeout(r, 600));
-    onProgress?.('Mô phỏng động lực học trọng lực nếp vải...');
+    onProgress?.('Đang tải mô hình minh họa...');
     await new Promise((r) => setTimeout(r, 700));
-    onProgress?.('Đánh giá độ căng 4 phân vùng giải phẫu...');
+    onProgress?.('Đang hiển thị dữ liệu demo...');
     await new Promise((r) => setTimeout(r, 600));
 
     const labelMap: Record<string, 'tight' | 'good' | 'loose'> = {
@@ -194,15 +195,15 @@ export const tryonApi = {
       overall: {
         source: 'mock',
         method: 'fixed_demo_fit',
-        score: currentLabel === 'good' ? 95 : currentLabel === 'tight' ? 68 : 74,
+        score: null,
         label: currentLabel,
         confidence: null,
       },
       regions: [
-        { region: 'chest', score: currentLabel === 'good' ? 96 : 70, label: currentLabel, confidence: null },
-        { region: 'waist', score: currentLabel === 'good' ? 94 : 65, label: currentLabel, confidence: null },
-        { region: 'hip', score: currentLabel === 'good' ? 98 : 75, label: currentLabel, confidence: null },
-        { region: 'shoulder', score: currentLabel === 'good' ? 95 : 72, label: currentLabel, confidence: null },
+        { region: 'chest', score: null, label: currentLabel, confidence: null },
+        { region: 'waist', score: null, label: currentLabel, confidence: null },
+        { region: 'hip', score: null, label: currentLabel, confidence: null },
+        { region: 'shoulder', score: null, label: currentLabel, confidence: null },
       ],
       assets: {
         body_mesh: {

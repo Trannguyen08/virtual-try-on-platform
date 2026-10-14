@@ -1,19 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 interface ProcessingStepProps {
   statusMessage: string;
 }
 
 export const ProcessingStep: React.FC<ProcessingStepProps> = ({ statusMessage }) => {
-  const [progress, setProgress] = useState(15);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => (prev < 90 ? prev + 12 : prev));
-    }, 400);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <div
       style={{
@@ -47,7 +38,7 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({ statusMessage })
         }}
       >
         <span className="vfit-pulse-dot" />
-        AI Engine Đang Xử Lý 3D Realtime
+        Đang chuẩn bị mô hình 3D
       </span>
 
       <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0' }}>
@@ -55,29 +46,29 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({ statusMessage })
       </h2>
 
       <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.95rem', minHeight: '1.5rem', margin: '0.5rem 0 1.5rem 0', fontWeight: 600 }}>
-        {statusMessage || 'Đang quét vóc dáng và khớp mô hình vải...'}
+        {statusMessage || 'Đang chờ kết quả xử lý...'}
       </p>
 
-      {/* Progress Bar */}
+      {/* Indeterminate activity indicator; Blender does not report a percentage. */}
       <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--vfit-surface-container-high)', borderRadius: '9999px', overflow: 'hidden', margin: '0 auto 1.5rem auto' }}>
         <div
           style={{
-            width: `${progress}%`,
+            width: '35%',
             height: '100%',
             background: 'linear-gradient(90deg, var(--vfit-primary-container) 0%, var(--vfit-focus-ring) 100%)',
             borderRadius: '9999px',
-            transition: 'width 0.4s ease',
+            animation: 'vfit-processing-indeterminate 1.5s ease-in-out infinite alternate',
           }}
         />
       </div>
 
       {/* Subtext info */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', color: 'var(--vfit-outline)', fontSize: '0.8rem' }}>
-        <span>⚡ SMPL-X Biometrics</span>
+        <span>⚡ Đang xử lý</span>
         <span>•</span>
         <span>🌐 Three.js WebGL</span>
         <span>•</span>
-        <span>📐 Chuẩn xác 99.4%</span>
+        <span>📐 Bản xem thử 3D</span>
       </div>
     </div>
   );

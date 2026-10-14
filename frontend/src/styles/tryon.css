@@ -311,3 +311,62 @@
   background-color: #fef3c7;
   color: #92400e;
 }
+.vfit-zone-chip.unknown { background-color: #e5e7eb; color: #4b5563; }
+
+/* Blender body builder uses the existing try-on palette and controls. */
+.vfit-builder-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.vfit-builder-card {
+  background: var(--vfit-surface-card);
+  border-radius: var(--vfit-radius-xl);
+  padding: 1.75rem;
+  box-shadow: 0 2px 12px rgba(8, 10, 97, 0.05);
+}
+
+.vfit-builder-card h2, .vfit-builder-card h3, .vfit-builder-result-header h2 {
+  color: var(--vfit-on-surface);
+  margin: 0.5rem 0 0.75rem;
+}
+
+.vfit-builder-card p { color: var(--vfit-secondary); line-height: 1.55; }
+.vfit-builder-eyebrow { color: var(--vfit-primary-container); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; }
+.vfit-builder-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.vfit-builder-fields label, .vfit-builder-sliders label { display: flex; flex-direction: column; gap: 0.45rem; color: var(--vfit-on-surface); font-weight: 650; }
+.vfit-builder-fields input[type="number"], .vfit-builder-fields select {
+  width: min(100%, 110px);
+  padding: 0.5rem;
+  border: 1px solid var(--vfit-outline);
+  border-radius: var(--vfit-radius-md);
+  background: #fff;
+  color: var(--vfit-on-surface);
+}
+.vfit-builder-fields input[type="color"] { width: 3rem; height: 2.5rem; border: 0; cursor: pointer; }
+.vfit-builder-sliders { display: grid; gap: 0.85rem; }
+.vfit-builder-sliders label > span { display: flex; justify-content: space-between; }
+.vfit-builder-sliders input { width: 100%; accent-color: var(--vfit-primary-container); }
+.vfit-builder-presets, .vfit-builder-actions { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; margin-top: 1.4rem; }
+.vfit-builder-presets button:not(.vfit-builder-swatch) {
+  border: 1px solid var(--vfit-outline);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  color: var(--vfit-primary-container);
+  cursor: pointer;
+}
+.vfit-builder-note { margin-top: 1.5rem; padding: 0.9rem; border-radius: var(--vfit-radius-md); background: var(--vfit-surface-container-low); font-size: 0.84rem; }
+.vfit-builder-error { padding: 0.85rem; border-radius: var(--vfit-radius-md); background: #fee2e2; color: #991b1b; }
+.vfit-builder-result { display: grid; gap: 1.25rem; }
+.vfit-builder-result-header { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.vfit-builder-result-header span { color: var(--vfit-secondary); }
+.vfit-builder-viewport { position: relative; height: 600px; background: linear-gradient(180deg, #f8f6f9, #eef0f8); border-radius: var(--vfit-radius-xl); overflow: hidden; }
+.vfit-builder-canvas { width: 100%; height: 100%; }
+.vfit-builder-viewport .vfit-builder-error { position: absolute; top: 4rem; left: 1rem; right: 1rem; }
+.vfit-builder-swatch { width: 2rem; height: 2rem; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 0 1px var(--vfit-outline); cursor: pointer; }
+.vfit-builder-swatch.active { box-shadow: 0 0 0 3px var(--vfit-primary-container); }
+.vfit-builder-viewport .vfit-3d-floating-toolbar { max-width: calc(100% - 1rem); flex-wrap: wrap; justify-content: center; }
+@keyframes vfit-processing-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(285%); } }

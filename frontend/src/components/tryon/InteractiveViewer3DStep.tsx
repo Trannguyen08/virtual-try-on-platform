@@ -259,8 +259,8 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
     }
   };
 
-  const overallLabel = fitResult?.overall.label || 'good';
-  const overallScore = fitResult?.overall.score ?? 95;
+  const overallLabel = fitResult?.overall.label || 'unknown';
+  const overallScore = fitResult?.overall.score;
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -314,7 +314,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
             }}
           >
             <span className="vfit-pulse-dot" />
-            Khớp phom chuẩn 99.4%
+            {fitResult?.source === 'mock' || !fitResult ? 'Mô hình và fit minh họa' : 'Kết quả thử đồ'}
           </span>
         </div>
       </div>
@@ -461,22 +461,22 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
             >
               <div>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--vfit-on-primary-fixed-variant)', letterSpacing: '0.05em' }}>
-                  Khuyến nghị kích thước từ AI
+                  Gợi ý size {fitResult?.source === 'mock' || !fitResult ? '(mẫu)' : ''}
                 </span>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-primary-container)', marginTop: '0.2rem' }}>
-                  Size {fitResult?.recommendation.size || 'M'} phù hợp nhất
+                  {fitResult?.recommendation.size ? `Size ${fitResult.recommendation.size} (tham khảo)` : 'Chưa có gợi ý size'}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--vfit-secondary)', marginTop: '0.2rem' }}>
-                  Độ căng sợi vải phân bổ đồng đều ở ngực và eo
+                  {fitResult?.source === 'mock' || !fitResult ? 'Dữ liệu demo; chưa đánh giá độ vừa vặn thực tế.' : 'Xem kết quả theo từng vùng bên dưới.'}
                 </div>
               </div>
 
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--vfit-dark-primary)' }}>
-                  {overallScore}/100
+                  {overallScore == null ? 'Chưa có điểm' : `${overallScore}/100`}
                 </div>
                 <span className={`vfit-zone-chip ${overallLabel}`}>
-                  {overallLabel === 'good' ? 'Vừa vặn' : overallLabel === 'tight' ? 'Hơi chật' : 'Hơi rộng'}
+                  {overallLabel === 'good' ? 'Vừa vặn' : overallLabel === 'tight' ? 'Hơi chật' : overallLabel === 'loose' ? 'Hơi rộng' : 'Chưa có'}
                 </span>
               </div>
             </div>
@@ -484,15 +484,15 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
             {/* 4 Anatomical Tension Zones */}
             <div style={{ marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--vfit-on-surface)', letterSpacing: '0.05em', display: 'block', marginBottom: '0.85rem' }}>
-                Đánh giá áp lực vải 4 vùng cơ thể:
+                Vùng cơ thể (dữ liệu demo khi nguồn là mock):
               </span>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
                 {[
-                  { key: 'chest', label: 'Ngực (Chest)', val: bodyData?.measurements.chest_cm || 96 },
-                  { key: 'waist', label: 'Eo (Waist)', val: bodyData?.measurements.waist_cm || 80 },
-                  { key: 'hip', label: 'Hông (Hip)', val: bodyData?.measurements.hip_cm || 98 },
-                  { key: 'shoulder', label: 'Vai (Shoulder)', val: bodyData?.measurements.shoulder_width_cm || 44 },
+                  { key: 'chest', label: 'Ngực (Chest)', val: bodyData?.measurements.chest_cm },
+                  { key: 'waist', label: 'Eo (Waist)', val: bodyData?.measurements.waist_cm },
+                  { key: 'hip', label: 'Hông (Hip)', val: bodyData?.measurements.hip_cm },
+                  { key: 'shoulder', label: 'Vai (Shoulder)', val: bodyData?.measurements.shoulder_width_cm },
                 ].map((zone) => {
                   const regionFit = fitResult?.regions.find((r) => r.region === zone.key);
                   const label = regionFit?.label || overallLabel;
@@ -513,11 +513,11 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                           {zone.label}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--vfit-secondary)' }}>
-                          {zone.val} cm
+                          {zone.val == null ? 'Chưa có số đo' : `${zone.val} cm`}
                         </div>
                       </div>
                       <span className={`vfit-zone-chip ${label}`}>
-                        {label === 'good' ? 'Chuẩn form' : label === 'tight' ? 'Chật' : 'Rộng'}
+                        {label === 'good' ? 'Mẫu: vừa' : label === 'tight' ? 'Mẫu: chật' : label === 'loose' ? 'Mẫu: rộng' : 'Chưa có'}
                       </span>
                     </div>
                   );

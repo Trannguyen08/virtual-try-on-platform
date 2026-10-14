@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 
 interface UploadStepProps {
-  onNext: (photoFile: File | null, photoPreviewUrl: string, heightCm: number) => void;
+  onNext: (heightCm: number) => void;
+  onCreateBody: () => void;
 }
 
-export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
+export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) => {
   const [photoPreview, setPhotoPreview] = useState<string>('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [heightCm, setHeightCm] = useState<number>(170);
@@ -64,7 +65,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
   };
 
   const handleContinue = () => {
-    onNext(photoFile, photoPreview, heightCm);
+    onNext(heightCm);
   };
 
   return (
@@ -80,7 +81,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
             ẢNH CHÂN DUNG CỦA BẠN
           </h2>
           <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 1.5rem 0' }}>
-            Tải ảnh toàn thân rõ nét để AI lập bản đồ 3D vóc dáng và ướm đồ chuẩn xác từng nếp vải.
+            Ảnh chỉ dùng để xem trước. Body 3D được tạo bằng MPFB2 từ thông số mặc định và chiều cao bạn chọn; ảnh chưa được dùng để đo hoặc dựng cơ thể.
           </p>
 
           {/* Interactive Dropzone */}
@@ -111,7 +112,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
                     {photoFile ? photoFile.name : 'Ảnh người mẫu mẫu'}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--vfit-focus-ring)', fontWeight: 600, marginTop: '0.2rem' }}>
-                    ✓ Sẵn sàng quét phân tích 3D
+                    ✓ Sẵn sàng dựng body mẫu bằng Blender
                   </div>
                   <button
                     type="button"
@@ -163,7 +164,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
           {/* Quick Select Presets */}
           <div style={{ marginTop: '1.5rem' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--vfit-on-surface)', textTransform: 'uppercase' }}>
-              Hoặc thử nhanh với người mẫu chuẩn AI:
+              Hoặc thử giao diện với ảnh người mẫu mẫu:
             </span>
             <div className="vfit-preset-grid">
               {presets.map((preset, idx) => (
@@ -189,10 +190,10 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
       <div>
         <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 2px 10px rgba(8,10,97,0.03)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0' }}>
-            TIÊU CHUẨN ĐỂ ĐẠT KẾT QUẢ ĐẸP NHẤT
+            GỢI Ý ẢNH CHO PHIÊN BẢN XỬ LÝ ẢNH SAU NÀY
           </h3>
           <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.875rem', margin: '0 0 1.25rem 0' }}>
-            Độ tương thích trang phục 3D phụ thuộc trực tiếp vào tư thế và ánh sáng trong ảnh gốc.
+            Ảnh hiện chưa tham gia vào quá trình dựng body. Những gợi ý này dành cho tính năng xử lý ảnh sau này.
           </p>
 
           {/* DOs */}
@@ -224,13 +225,18 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext }) => {
 
           {/* Continue CTA */}
           <div style={{ marginTop: '1.75rem' }}>
+            <button type="button" className="vfit-btn-primary"
+              style={{ width: '100%', justifyContent: 'center', marginBottom: '0.75rem' }}
+              onClick={onCreateBody}>
+              Tạo body bằng Blender từ thông số
+            </button>
             <button
               type="button"
-              className="vfit-btn-primary"
+              className="vfit-btn-secondary"
               style={{ width: '100%', height: '3.25rem', fontSize: '1rem' }}
               onClick={handleContinue}
             >
-              <span>TIẾP TỤC CHỌN ĐỒ</span>
+              <span>TIẾP TỤC VỚI BODY MẪU</span>
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
