@@ -1,31 +1,37 @@
-:root {
+.vfit-garment-page {
+  padding-top: 5rem;
+  background: radial-gradient(circle at 12% 0%, rgba(92, 92, 238, 0.09), transparent 28rem), #f4f6fb;
+}
+
+.vfit-garment-loading {
+  margin: 0;
+  padding: 8rem 1.5rem;
+  color: var(--vfit-secondary);
+  text-align: center;
+}
+
+.g3d-app {
   color: #172033;
-  background: #f4f6fb;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
-* { box-sizing: border-box; }
+.g3d-app, .g3d-app * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(92, 92, 238, 0.12), transparent 28rem),
-    radial-gradient(circle at 90% 14%, rgba(22, 170, 190, 0.1), transparent 24rem),
-    #f4f6fb;
-}
-
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-button:disabled { cursor: not-allowed; opacity: 0.55; }
+.g3d-app button, .g3d-app input, .g3d-app select { font: inherit; }
+.g3d-app button { cursor: pointer; }
+.g3d-app button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 .g3d-app {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
   padding: 48px 0 72px;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .vfit-garment-page { padding-top: 4.25rem; }
 }
 
 .g3d-hero {
@@ -176,5 +182,5 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+  .g3d-app, .g3d-app *, .g3d-app *::before, .g3d-app *::after { scroll-behavior: auto !important; transition: none !important; }
 }

@@ -39,7 +39,7 @@ export const GarmentGenerationProgress: React.FC<{ job: Garment3DJob }> = ({ job
     </div>
     <progress max={100} value={job.progress}>{job.progress}%</progress>
     {job.warnings.includes('BACK_AND_SIDES_INFERRED_FROM_SINGLE_IMAGE') && (
-      <p className="g3d-warning">Mặt bên và mặt sau đang được AI suy đoán từ một ảnh.</p>
+      <p className="g3d-warning">Mặt bên và mặt sau được ước lượng từ ảnh mặt trước.</p>
     )}
   </section>
 );

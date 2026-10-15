@@ -1,30 +1,32 @@
-# Garment 3D standalone page
+# Tạo trang phục 3D trong ứng dụng chính
 
-This additive entrypoint avoids changing the shared frontend router or app shell.
+Trang **Tạo trang phục 3D** nằm trong menu của ứng dụng tại `/garment-3d`.
+Đường dẫn cũ `/garment3d.html` chuyển tiếp đến trang này. Giao diện dùng chung
+header và footer với các trang còn lại.
 
-```powershell
-cd frontend
-npm install
-$env:VITE_API_URL = "http://localhost:8000"
-$env:VITE_GARMENT3D_API_URL = "http://localhost:8001"
-npm run dev
-```
-
-Open `http://localhost:5173/garment3d.html`.
-
-Run the existing backend on port 8000 and the garment service on port 8001
-with `python -m uvicorn backend.garment3d.app:app --port 8001`. If only the
-garment service is running on port 8000, `VITE_GARMENT3D_API_URL` may be omitted.
-
-The form asks for garment type and an optional real garment length. Supplying
-the length enables centimetre measurements and marks the result as ready for
-body-size integration. Completed results expose both the GLB and its body-ready
-metadata JSON for download.
-
-Build the existing application and this page together with:
+Backend tạo garment vẫn chạy như một service riêng tại cổng 8001. Đặt
+`GARMENT3D_PROVIDER=local` trong `.env` ở gốc repo, cài dependency theo
+`backend/garment3d/requirements-dev.txt`, rồi chạy:
 
 ```powershell
-npm run build
+.\.venv\Scripts\python.exe -m uvicorn backend.garment3d.app:app --port 8001
 ```
 
-When the shared router stabilizes, import `Garment3DPage` into it and keep this page as an isolated demo.
+Chạy frontend từ `frontend/`:
+
+```powershell
+npm.cmd run dev
+```
+
+Trong chế độ dev, trang Garment 3D gọi `http://localhost:8001` theo mặc định.
+Đặt `VITE_GARMENT3D_API_URL` nếu service dùng origin khác. Bản production cần
+cấu hình biến này đến service garment đã triển khai; nếu bỏ trống, client dùng
+`VITE_API_URL`.
+
+Trang nhận một đến bốn ảnh của cùng một trang phục và chiều dài thật tùy chọn.
+Chiều dài giúp quy đổi pixel sang centimet; nếu thiếu, GLB vẫn xem được nhưng
+metadata không đánh dấu `fit_ready`. Bảng size trên trang là tham khảo. Kết quả
+hiện chỉ tạo/xem/tải garment GLB; API thử đồ của body chưa nhận GLB này làm
+trang phục để mặc lên body.
+
+`npm.cmd run build` tạo một ứng dụng Vite với trang Garment 3D trong cùng luồng.
