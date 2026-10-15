@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --config vite.garment3d.config.ts",
     "preview": "vite preview",
     "test": "vitest"
   },

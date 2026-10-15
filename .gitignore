@@ -55,6 +55,9 @@ data/outputs/
 !data/outputs/.gitkeep
 *.sqlite3
 *.db
+.ipynb_checkpoints/
+ai/dataset/data/
+tmp/hf_cache/
 
 # Plans & scratch
 docs/plan/
