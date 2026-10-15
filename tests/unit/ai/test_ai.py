@@ -37,6 +37,12 @@ from ai.models.fit_predictor import (
     MLFitPredictor,
     RuleBasedFitPredictor,
 )
+from ai.dataset.preprocessing.feature_engineer import (
+    ALL_FEATURE_COLS,
+    clean_measurements,
+    extract_fit_features,
+    extract_fit_features_single,
+)
 
 
 # ==============================================================================
@@ -428,5 +434,104 @@ def test_unified_fit_predictor_emergency_fallback_empty():
     assert res["fit_score"] == 75.0
     assert res["fallback_used"] is True
     assert res["method"] == "emergency_default"
+
+
+# ==============================================================================
+# 8. FEATURE ENGINEERING & DATA CLEANING TESTS
+# ==============================================================================
+@pytest.mark.fast
+def test_clean_measurements():
+    """Kiểm tra dọn sạch các cột đường dẫn thừa và làm tròn số đo về 1 chữ số thập phân."""
+    df_raw = pd.DataFrame([{
+        "id": "fit_001",
+        "cloth_path": "images/cloth/c1.jpg",
+        "target_path": "images/target/t1.jpg",
+        "person_path": "images/person/p1.jpg",
+        "body_bust": 95.123456,
+        "body_height": 172.987654,
+        "garment_bust": 102.555555,
+        "garment_length": 68.444444,
+    }])
+
+    cleaned = clean_measurements(df_raw)
+
+    # 1. Các cột đường dẫn thừa đã bị loại bỏ
+    assert "cloth_path" not in cleaned.columns
+    assert "target_path" not in cleaned.columns
+    # Cột định danh người vẫn được bảo lưu
+    assert "person_path" in cleaned.columns
+
+    # 2. Số đo được làm tròn chuẩn 1 chữ số thập phân (1 mm)
+    assert cleaned["body_bust"].iloc[0] == 95.1
+    assert cleaned["body_height"].iloc[0] == 173.0
+    assert cleaned["garment_bust"].iloc[0] == 102.6
+    assert cleaned["garment_length"].iloc[0] == 68.4
+
+
+@pytest.mark.fast
+def test_extract_fit_features(mock_dataset):
+    """Kiểm tra trích xuất đủ 15 đặc trưng nhân trắc học & tương tác không bị NaN."""
+    feat_df = extract_fit_features(mock_dataset)
+
+    # 1. Đầy đủ 15 cột đặc trưng
+    for col in ALL_FEATURE_COLS:
+        assert col in feat_df.columns, f"Thiếu cột đặc trưng: {col}"
+
+    # 2. Không chứa bất kỳ giá trị NaN nào
+    assert not feat_df[ALL_FEATURE_COLS].isna().any().any()
+
+    # 3. Giá trị cờ is_negative_ease chỉ là 0 hoặc 1
+    assert set(feat_df["is_negative_ease"].unique()).issubset({0, 1})
+
+
+@pytest.mark.fast
+def test_extract_fit_features_single():
+    """Kiểm tra trích xuất đặc trưng cho một mẫu thời gian thực (Real-time)."""
+    single_input = {
+        "body_bust": 90.0,
+        "body_height": 170.0,
+        "body_hips": 95.0,
+        "body_waist": 75.0,
+        "garment_bust": 96.0,
+        "garment_length": 65.0,
+    }
+
+    res = extract_fit_features_single(single_input)
+
+    assert len(res) == len(ALL_FEATURE_COLS)
+    assert res["bust_diff"] == 6.0
+    assert res["abs_optimal_delta"] == 0.0
+    assert res["is_negative_ease"] == 0
+    assert res["ease_ratio"] == round(96.0 / 90.0, 3)
+
+
+@pytest.mark.fast
+def test_fit_predictor_random_forest_workflow(mock_dataset):
+    """Kiểm tra workflow hoàn chỉnh của FitPredictor với thuật toán Random Forest."""
+    labeled_df = assign_fit_labels(mock_dataset)
+    feat_df = extract_fit_features(labeled_df)
+    X = feat_df[ALL_FEATURE_COLS]
+    y_class = feat_df["fit_class"]
+    y_score = feat_df["fit_score"]
+
+    predictor = FitPredictor(model_type="random_forest")
+    predictor.fit(X, y_class, y_score)
+
+    # 1. Dự đoán qua predict_single với raw measurements (tự động extract 15 đặc trưng)
+    res = predictor.predict_single({
+        "body_bust": 95.0,
+        "body_height": 172.0,
+        "body_hips": 98.0,
+        "body_waist": 80.0,
+        "garment_bust": 101.0,
+        "garment_length": 68.0,
+    })
+
+    assert res["classification"] in FIT_CLASSES
+    assert 0.0 <= res["fit_score"] <= 100.0
+    assert res["fallback_used"] is False
+    assert res["method"] == "random_forest"
+
+
 
 

@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from sklearn.dummy import DummyClassifier, DummyRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
@@ -19,6 +20,10 @@ from ai.dataset.labeling.fit_labeler import (
     FIT_CLASSES,
     compute_reference_fit_score,
     get_fit_class_from_ease,
+)
+from ai.dataset.preprocessing.feature_engineer import (
+    ALL_FEATURE_COLS,
+    extract_fit_features_single,
 )
 
 FIT_FEATURE_COLUMNS: List[str] = [
@@ -117,23 +122,32 @@ class DummyFitPredictor:
 
 
 class MLFitPredictor:
-    """Baseline 3: Mô hình học máy cơ sở (Ridge Regression + Logistic Regression)."""
+    """Mô hình học máy dự đoán Fit (Hỗ trợ Linear/Ridge và Random Forest v1)."""
 
-    def __init__(self, random_state: int = 42) -> None:
+    def __init__(self, algorithm: str = "linear", random_state: int = 42) -> None:
+        self.algorithm = algorithm
         self.random_state = random_state
 
-        self.clf_pipeline = Pipeline(
-            [
-                ("scaler", RobustScaler()),
-                ("clf", LogisticRegression(max_iter=1000, random_state=random_state, C=1.0)),
-            ]
-        )
-        self.reg_pipeline = Pipeline(
-            [
-                ("scaler", RobustScaler()),
-                ("reg", Ridge(alpha=1.0, random_state=random_state)),
-            ]
-        )
+        if algorithm == "random_forest":
+            self.clf_pipeline = RandomForestClassifier(
+                n_estimators=100, max_depth=16, random_state=random_state, n_jobs=-1
+            )
+            self.reg_pipeline = RandomForestRegressor(
+                n_estimators=100, max_depth=16, random_state=random_state, n_jobs=-1
+            )
+        else:
+            self.clf_pipeline = Pipeline(
+                [
+                    ("scaler", RobustScaler()),
+                    ("clf", LogisticRegression(max_iter=1000, random_state=random_state, C=1.0)),
+                ]
+            )
+            self.reg_pipeline = Pipeline(
+                [
+                    ("scaler", RobustScaler()),
+                    ("reg", Ridge(alpha=1.0, random_state=random_state)),
+                ]
+            )
         self.classes_: Optional[np.ndarray] = None
 
     def fit(
@@ -144,7 +158,10 @@ class MLFitPredictor:
     ) -> "MLFitPredictor":
         self.clf_pipeline.fit(X, y_class)
         self.reg_pipeline.fit(X, y_score)
-        self.classes_ = self.clf_pipeline.named_steps["clf"].classes_
+        if hasattr(self.clf_pipeline, "classes_"):
+            self.classes_ = self.clf_pipeline.classes_
+        else:
+            self.classes_ = self.clf_pipeline.named_steps["clf"].classes_
         return self
 
     def predict_class(self, X: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
@@ -177,7 +194,9 @@ class FitPredictor:
         elif model_type == "rule_based":
             self.model = self.fallback_engine
         elif model_type == "ml_baseline":
-            self.model = MLFitPredictor()
+            self.model = MLFitPredictor(algorithm="linear")
+        elif model_type == "random_forest":
+            self.model = MLFitPredictor(algorithm="random_forest")
         else:
             raise ValueError(f"Không hỗ trợ model_type '{model_type}'")
 
@@ -223,9 +242,11 @@ class FitPredictor:
                 "fallback_used": True,
             }
 
-        # Nếu model ML chưa được huấn luyện hoặc thiếu các trường phụ -> Rule-based Fallback
-        has_all_features = all(k in inputs for k in FIT_FEATURE_COLUMNS if k != "bust_diff")
-        if not self.is_fitted or not has_all_features:
+        # Kiểm tra điều kiện Fallback nếu thiếu trường
+        required_raw = ["body_bust", "body_height", "body_hips", "body_waist", "garment_bust", "garment_length"]
+        has_all_raw = all(k in inputs for k in required_raw)
+
+        if not self.is_fitted or not has_all_raw:
             diff = float(garment_bust) - float(body_bust)
             pred_class = get_fit_class_from_ease(diff)
             pred_score = compute_reference_fit_score(diff)
@@ -239,11 +260,15 @@ class FitPredictor:
 
         # Dự đoán bằng mô hình học máy
         try:
-            sample = dict(inputs)
-            if "bust_diff" not in sample:
-                sample["bust_diff"] = float(sample["garment_bust"]) - float(sample["body_bust"])
+            if self.model_type == "random_forest":
+                sample = extract_fit_features_single(inputs)
+                input_df = pd.DataFrame([sample])[ALL_FEATURE_COLS]
+            else:
+                sample = dict(inputs)
+                if "bust_diff" not in sample:
+                    sample["bust_diff"] = float(sample["garment_bust"]) - float(sample["body_bust"])
+                input_df = pd.DataFrame([sample])[FIT_FEATURE_COLUMNS]
 
-            input_df = pd.DataFrame([sample])[FIT_FEATURE_COLUMNS]
             pred_class = str(self.model.predict_class(input_df)[0])
             pred_score = float(self.model.predict_score(input_df)[0])
 
