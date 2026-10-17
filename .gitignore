@@ -67,6 +67,18 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
+<<<<<<< HEAD
 # AI datasets
 ai/dataset/data/
 tmp/hf_cache/
+=======
+
+# AI datasets & Model Weights
+ai/dataset/data/
+tmp/hf_cache/
+ai/models/weights/
+*.joblib
+*.pkl
+*.pt
+*.onnx
+>>>>>>> ad15bcb22421cad2ace34eca9b789c547ad01653
