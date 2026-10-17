@@ -3,3 +3,4 @@ uvicorn[standard]>=0.28,<1
 pydantic>=2.6,<3
 python-multipart>=0.0.20,<1
 pillow>=10.2,<13
+-r garment3d/requirements.txt

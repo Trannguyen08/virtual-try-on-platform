@@ -20,18 +20,20 @@ This is a parametric reconstruction. It does not claim to recover invisible
 geometry from a single image. `fit_ready` is only true when the request includes
 a real garment measurement for pixel-to-centimetre calibration.
 
-## Install and run on Windows
+## Install and run with the main API on Windows
 
 ```powershell
 py -3.11 -m venv .venv
-.venv\Scripts\python -m pip install -r backend\garment3d\requirements-dev.txt
-.venv\Scripts\python -m uvicorn backend.garment3d.app:app --port 8000
+.venv\Scripts\python -m pip install -r backend\requirements-dev.txt
+.venv\Scripts\python -m uvicorn backend.main:app --env-file .env --port 8000
 ```
 
 Set `GARMENT3D_PROVIDER=local` in the repository `.env` file before starting.
 The service intentionally treats that ignored file as its configuration source.
 
-Open `http://localhost:8000/docs` for the API explorer.
+Open `http://localhost:8000/garment3d/docs` for the Garment 3D API explorer.
+The standalone app factory remains available for isolated tests; the application
+uses `backend.main:app` for both the core API and Garment 3D routes.
 
 ## API flow
 

@@ -4,12 +4,12 @@ Trang **Tạo trang phục 3D** nằm trong menu của ứng dụng tại `/garm
 Đường dẫn cũ `/garment3d.html` chuyển tiếp đến trang này. Giao diện dùng chung
 header và footer với các trang còn lại.
 
-Backend tạo garment vẫn chạy như một service riêng tại cổng 8001. Đặt
-`GARMENT3D_PROVIDER=local` trong `.env` ở gốc repo, cài dependency theo
-`backend/garment3d/requirements-dev.txt`, rồi chạy:
+Backend chính phục vụ Garment 3D cùng trên cổng 8000. Đặt
+`GARMENT3D_PROVIDER=local` trong `.env` ở gốc repo nếu muốn ghi rõ provider mặc định,
+cài dependency theo `backend/requirements-dev.txt`, rồi chạy:
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn backend.garment3d.app:app --port 8001
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --env-file .env --reload --host 127.0.0.1 --port 8000
 ```
 
 Chạy frontend từ `frontend/`:
@@ -18,10 +18,9 @@ Chạy frontend từ `frontend/`:
 npm.cmd run dev
 ```
 
-Trong chế độ dev, trang Garment 3D gọi `http://localhost:8001` theo mặc định.
-Đặt `VITE_GARMENT3D_API_URL` nếu service dùng origin khác. Bản production cần
-cấu hình biến này đến service garment đã triển khai; nếu bỏ trống, client dùng
-`VITE_API_URL`.
+Trang Garment 3D gọi `/garment3d/...` qua `VITE_API_URL`, mặc định là
+`http://localhost:8000` trong chế độ dev. Bản production cần đặt `VITE_API_URL`
+đến backend chính đã triển khai.
 
 Trang nhận một đến bốn ảnh của cùng một trang phục và chiều dài thật tùy chọn.
 Chiều dài giúp quy đổi pixel sang centimet; nếu thiếu, GLB vẫn xem được nhưng

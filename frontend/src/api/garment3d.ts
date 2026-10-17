@@ -1,7 +1,6 @@
 import { API_BASE_URL } from './config';
 
-const GARMENT3D_API_BASE_URL = import.meta.env.VITE_GARMENT3D_API_URL
-  || (import.meta.env.DEV ? 'http://localhost:8001' : API_BASE_URL);
+const GARMENT3D_API_BASE_URL = API_BASE_URL;
 
 export type GarmentView = 'front' | 'left' | 'back' | 'right';
 export type GarmentImageSet = Partial<Record<GarmentView, File>> & { front: File };

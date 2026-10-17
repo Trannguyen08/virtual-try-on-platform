@@ -283,3 +283,12 @@ trả 404:
   `frontend/src/api/types.ts` cho envelope; không xây client, hooks hay giao diện.
 - Thay từng provider không đổi field/schema frontend. Thay đổi phá vỡ contract
   cần version mới; không lén đổi đơn vị, nghĩa score, hay enum.
+
+## Garment 3D trên backend chính
+
+`backend.main:app` phục vụ thêm các route `/garment3d/...` trên cùng origin với
+`/api/...`. Client tạo trang phục gọi `POST /garment3d/generations`, poll
+`GET /garment3d/jobs/{job_id}`, rồi lấy generation và asset theo URL trả về.
+Garment 3D là sub-app với contract response riêng; envelope `data/error` ở các
+route `/api/...` phía trên không áp dụng cho namespace này. Xem
+`backend/garment3d/README.md` và Swagger UI tại `/garment3d/docs`.
