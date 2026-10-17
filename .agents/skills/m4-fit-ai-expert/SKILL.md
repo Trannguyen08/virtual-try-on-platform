@@ -48,7 +48,7 @@ Module M4 không thay thế toàn bộ toán hình học bằng AI, mà áp dụ
 - **Chiến lược dữ liệu:**
   - *Giai đoạn 1 (Synthetic v1):* Sinh dữ liệu số đo người theo phân phối chuẩn Gaussian kết hợp bảng Size Chart để huấn luyện sớm Size Recommender.
   - *Giai đoạn 2 (Simulation v2):* Thu thập đặc trưng từ batch simulation thật để tinh chỉnh Fit Predictor.
-- **Chiến lược Mô hình hóa:** Bắt đầu từ các mô hình dạng bảng (Tabular) giải thích được: Random Forest $\rightarrow$ XGBoost $\rightarrow$ Multi-Layer Perceptron (MLP). Tuyệt đối không phức tạp hóa bằng Deep Learning cồng kềnh khi dữ liệu chưa đủ lớn.
+- **Chiến lược Mô hình hóa:** Bắt đầu từ các mô hình dạng bảng (Tabular) giải thích được: Random Forest → XGBoost → Multi-Layer Perceptron (MLP). Tuyệt đối không phức tạp hóa bằng Deep Learning cồng kềnh khi dữ liệu chưa đủ lớn.
 
 ---
 
