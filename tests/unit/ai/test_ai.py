@@ -244,6 +244,29 @@ def test_unified_size_recommender_emergency_fallback_empty():
     assert result["method"] == "emergency_default"
 
 
+@pytest.mark.fast
+def test_unified_size_recommender_with_garment_specs():
+    """Kiểm tra AI đề xuất size tối ưu khi kết hợp thông số đo cơ thể và thông số sản phẩm thực tế."""
+    recommender = SizeRecommender()
+    size_chart = {
+        "S": {"bust": 90.0, "length": 68.0, "shoulder": 41.0, "waist": 82.0},
+        "M": {"bust": 98.0, "length": 70.0, "shoulder": 44.0, "waist": 90.0},
+        "L": {"bust": 106.0, "length": 72.0, "shoulder": 47.0, "waist": 98.0},
+        "XL": {"bust": 114.0, "length": 74.0, "shoulder": 50.0, "waist": 106.0},
+    }
+
+    # Người dùng có ngực 92.0 cm: Size S (90cm) chật, Size M (98cm) Ease +6cm tối ưu
+    res = recommender.recommend_single(
+        measurements={"body_bust": 92.0, "body_height": 170.0},
+        size_chart=size_chart,
+    )
+
+    assert res["recommended_size"] == "M"
+    assert res["garment_specs"]["bust"] == 98.0
+    assert res["ease_cm"] == 6.0
+    assert "98.0" in res["reason"]
+
+
 # ==============================================================================
 # 5. TC-AI-03: FIT LABELING & SCORE TESTS
 # ==============================================================================
