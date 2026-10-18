@@ -266,3 +266,30 @@ class SizeRecommender:
                 "method": "exception_fallback",
                 "fallback_used": True,
             }
+
+    def advise_dynamic(
+        self,
+        height_cm: float = 170.0,
+        weight_kg: float = 65.0,
+        gender: str = "unisex",
+        body_shape: str = "balanced",
+        body_measurements: Optional[Dict[str, float]] = None,
+        size_chart: Optional[Dict[str, Dict[str, float]]] = None,
+        fit_preference: str = "regular",
+        garment_category: str = "tshirt",
+    ) -> Dict[str, Any]:
+        """Tư vấn kích cỡ động đa tầng (Cold-start Chiều cao/Cân nặng + Bảng size động bất kỳ)."""
+        from ai.models.dynamic_size_advisor import DynamicSizeAdvisor
+        advisor = DynamicSizeAdvisor()
+        return advisor.advise(
+            height_cm=height_cm,
+            weight_kg=weight_kg,
+            gender=gender,
+            body_shape=body_shape,
+            body_measurements=body_measurements,
+            size_chart=size_chart,
+            fit_preference=fit_preference,
+            garment_category=garment_category,
+        )
+
+
