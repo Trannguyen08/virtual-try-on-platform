@@ -86,6 +86,8 @@ class DomainGuardrail:
 
         return True, None
 
+    validate_query = is_query_allowed
+
 
 # ==============================================================================
 # 2. BỘ ĐỆM PHẢN HỒI THÔNG MINH (LRU RESPONSE CACHE)

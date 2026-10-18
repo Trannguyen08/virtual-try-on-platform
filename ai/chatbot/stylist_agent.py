@@ -269,16 +269,26 @@ class FitStylistChatbot:
         fit_preference: str = "regular",
     ) -> Dict[str, Any]:
         """Tư vấn kích cỡ và form dáng đồng bộ (Synchronous Wrapper)."""
-        return asyncio.run(
-            self.ask_async(
-                user_query=user_query,
-                height_cm=height_cm,
-                weight_kg=weight_kg,
-                body_measurements=body_measurements,
-                size_chart=size_chart,
-                current_trial_specs=current_trial_specs,
-                fit_diagnostics=fit_diagnostics,
-                garment_category=garment_category,
-                fit_preference=fit_preference,
-            )
+        coro = self.ask_async(
+            user_query=user_query,
+            height_cm=height_cm,
+            weight_kg=weight_kg,
+            body_measurements=body_measurements,
+            size_chart=size_chart,
+            current_trial_specs=current_trial_specs,
+            fit_diagnostics=fit_diagnostics,
+            garment_category=garment_category,
+            fit_preference=fit_preference,
         )
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                return executor.submit(asyncio.run, coro).result()
+        else:
+            return asyncio.run(coro)
