@@ -19,6 +19,11 @@ from backend.services.assets import ASSET_NAMES, resolve_asset
 from scripts.generate_mock_glb import BODY, SHIRT, build_glb
 
 
+@pytest.fixture(autouse=True)
+def database_for_backend_tests(isolated_main_database):
+    """Use one isolated database for each backend API test."""
+
+
 def assert_error(response, status, code):
     assert response.status_code == status
     error = ErrorResponse.model_validate(response.json())
@@ -167,7 +172,8 @@ def test_failed_background_job_is_pollable_and_sanitized(app, client, body, monk
     assert "private" not in response.text
 
 
-def test_job_state_transitions_and_independent_stores(app, client, body):
+def test_job_state_transitions_tc_api_03(app, client, body):
+    """Test Case ID: TC-API-03. Job transitions remain valid across app instances."""
     service = app.state.orchestrator
     request = FitRequest(body_id=body["body_id"], garment_id="demo-tshirt", size="M")
     job = service.jobs.create(request, "mock")
@@ -184,8 +190,10 @@ def test_job_state_transitions_and_independent_stores(app, client, body):
     # A duplicate dispatch must not rerun a terminal job.
     service.jobs.run(job.job_id, lambda: pytest.fail("Duplicate execution"))
     with TestClient(create_app()) as restarted:
-        assert_error(restarted.get(f"/api/jobs/{job.job_id}"), 404, "JOB_NOT_FOUND")
-        assert_error(restarted.post("/api/tryon/fit", json=request.model_dump()), 404, "BODY_NOT_FOUND")
+        persisted = restarted.get(f"/api/jobs/{job.job_id}")
+        assert persisted.status_code == 200
+        assert persisted.json()["data"]["status"] == "completed"
+        assert restarted.post("/api/tryon/fit", json=request.model_dump()).status_code == 202
 
 
 @pytest.mark.parametrize("state", ["pending", "running", "completed", "failed"])
