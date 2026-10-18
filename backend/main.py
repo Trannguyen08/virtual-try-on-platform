@@ -33,6 +33,8 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         try:
+            from backend.db.models import Base
+            Base.metadata.create_all(engine)
             storage.seed_fixtures()
             async with garment_app.router.lifespan_context(garment_app):
                 yield

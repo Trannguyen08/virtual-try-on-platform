@@ -81,3 +81,5 @@ ai/models/weights/
 *.parquet
 *.h5
 
+# Agent memory & active context
+.agents/memory/

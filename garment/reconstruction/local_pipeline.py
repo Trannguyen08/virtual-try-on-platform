@@ -346,22 +346,16 @@ class LocalGarmentReconstructor:
         shoulder_right = (center_x + shoulder_half, shoulder_y)
         chest_left = (center_x - chest_half, chest_y)
         chest_right = (center_x + chest_half, chest_y)
-        neck_half = min(width * 0.09, torso_width * 0.22)
-        neck_center_y = top
-        center_column = min(max(int(round(center_x)), 0), mask.shape[1] - 1)
-        neck_search_end = min(int(top + height * 0.12) + 1, mask.shape[0])
-        for candidate_y in range(int(top), neck_search_end):
-            if mask[candidate_y, center_column]:
-                neck_center_y = float(candidate_y)
-                break
+        neck_half = min(width * 0.11, torso_width * 0.20)
+        neck_center_y = top + height * 0.038
         points = np.column_stack((xs, ys))
         upper = points[points[:, 1] <= top + height * 0.48]
         sleeve_left = tuple(map(float, upper[np.argmin(upper[:, 0])]))
         sleeve_right = tuple(map(float, upper[np.argmax(upper[:, 0])]))
         return {
             "neck_center": (center_x, neck_center_y),
-            "neck_left": (center_x - neck_half, top + height * 0.04),
-            "neck_right": (center_x + neck_half, top + height * 0.04),
+            "neck_left": (center_x - neck_half, top + height * 0.015),
+            "neck_right": (center_x + neck_half, top + height * 0.015),
             "left_shoulder": shoulder_left,
             "right_shoulder": shoulder_right,
             "left_armpit": chest_left,
@@ -535,29 +529,194 @@ class LocalGarmentReconstructor:
         grid_x = np.linspace(x0, x1, nx + 1)
         grid_y = np.linspace(y0, y1, ny + 1)
 
-        # Neck opening cutout: leaves an open hole so the viewer sees the white
-        # canvas background through the collar instead of a dark cap.
-        neck_half = min(box_width * 0.12, box_width * 0.22)
-        if "neck_left" in landmarks and "neck_right" in landmarks:
-            neck_half = max(
-                1.0,
-                abs(landmarks["neck_right"][0] - landmarks["neck_left"][0]) / 2.0,
-            )
-        neck_drop_y = y0 + box_height * 0.08
-        if "neck_center" in landmarks and landmarks["neck_center"][1] > y0:
-            neck_drop_y = max(neck_drop_y, landmarks["neck_center"][1])
-        neck_opening = (center_x, y0, neck_half, neck_drop_y, box_height)
+        def row_extent(pixel_y: float) -> tuple[float, float]:
+            target = min(max(int(round(pixel_y)), 0), mesh_mask.shape[0] - 1)
+            for offset in range(0, max(3, int(box_height * 0.04))):
+                for candidate in (target + offset, target - offset):
+                    if 0 <= candidate < mesh_mask.shape[0]:
+                        values = np.flatnonzero(mesh_mask[candidate])
+                        if len(values) >= 2:
+                            return float(values.min()), float(values.max())
+            return x0, x1
+
+        def col_extent(pixel_x: float) -> tuple[float, float]:
+            target = min(max(int(round(pixel_x)), 0), mesh_mask.shape[1] - 1)
+            for offset in range(0, max(3, int(box_width * 0.04))):
+                for candidate in (target + offset, target - offset):
+                    if 0 <= candidate < mesh_mask.shape[1]:
+                        values = np.flatnonzero(mesh_mask[:, candidate])
+                        if len(values) >= 2:
+                            return float(values.min()), float(values.max())
+            return y0, y1
+
+        is_top = garment_type in {"tshirt", "shirt", "jacket", "dress"}
+        crotch_y = landmarks.get("crotch_center", (center_x, y0 + box_height * 0.45))[1]
+
+        if garment_type in {"pants", "skirt"}:
+            hip_l = landmarks.get("hip_left", (x0 + box_width * 0.25, y0 + box_height * 0.25))
+            hip_r = landmarks.get("hip_right", (x1 - box_width * 0.25, y0 + box_height * 0.25))
+            torso_w_px = max(1.0, abs(hip_r[0] - hip_l[0]))
+            torso_w_m = torso_w_px * meters_per_pixel
+            base_depth = max(0.055, min(0.12, torso_w_m * 0.24))
+            left_armpit_x = x0
+            right_armpit_x = x1
+            sleeve_span_left = 1.0
+            sleeve_span_right = 1.0
+            z_shoulder = base_depth
+            z_cuff = base_depth
+        else:
+            armpit_l = landmarks.get("left_armpit", (center_x - box_width * 0.26, y0 + box_height * 0.38))
+            armpit_r = landmarks.get("right_armpit", (center_x + box_width * 0.26, y0 + box_height * 0.38))
+            waist_l = landmarks.get("waist_left", (center_x - box_width * 0.24, y0 + box_height * 0.70))
+            waist_r = landmarks.get("waist_right", (center_x + box_width * 0.24, y0 + box_height * 0.70))
+            chest_w_px = abs(armpit_r[0] - armpit_l[0])
+            waist_w_px = abs(waist_r[0] - waist_l[0])
+            torso_w_px = max(1.0, max(chest_w_px, waist_w_px))
+            torso_w_m = torso_w_px * meters_per_pixel
+            # Tailored slim depth: ~5.6-6.4 cm total thickness (half-depth ~2.8-3.2 cm)
+            # User requirement: "giảm độ rộng của áo xuống đáng kể", "form hiện tại khá đẹp rồi đừng chỉnh thêm gì nữa"
+            body_depth = max(0.026, min(0.034, torso_w_m * 0.068))
+            base_depth = body_depth
+            # Shoulder apex ridge: ~1 cm total thickness (half-depth 0.005 m = 0.5 cm)
+            z_apex = 0.005
+            # Edge thickness at silhouette seams: 1.2 mm (total thickness 2.4 mm)
+            # Continuous elliptical curve all the way to 1.2 mm so edges are softly rounded without flat 90-degree step walls
+            z_edge = 0.0012
+            left_armpit_x = armpit_l[0]
+            right_armpit_x = armpit_r[0]
+            armpit_y = min(armpit_l[1], armpit_r[1])
+            sleeve_span_left = max(1.0, left_armpit_x - x0)
+            sleeve_span_right = max(1.0, x1 - right_armpit_x)
+            z_shoulder = body_depth * 0.60
+            z_cuff = body_depth * 0.40
+
+        def get_depth_factor(v: float) -> float:
+            if garment_type in {"pants", "skirt"}:
+                if v < 0.15:
+                    return 0.70 + 0.30 * (v / 0.15)
+                elif v < 0.45:
+                    return 1.0
+                else:
+                    return 1.0 - 0.40 * ((v - 0.45) / 0.55)
+            else:
+                if v < 0.14:
+                    return 0.28 + 0.20 * (v / 0.14)
+                elif v < 0.42:
+                    t = (v - 0.14) / 0.28
+                    return 0.48 + 0.52 * math.sin(t * (math.pi / 2.0))
+                elif v < 0.72:
+                    t = (v - 0.42) / 0.30
+                    return 1.0 - 0.12 * t
+                else:
+                    t = (v - 0.72) / 0.28
+                    return 0.88 - 0.08 * t
+
+        # ── Collar Opening Dimensions & Parameters ───────────────────────────
+        # Crew-neck collar: shallow & raised high (~2.6-3.0 cm on a 70 cm shirt)
+        collar_half_w_px = max(1.0, min(box_width * 0.12, torso_w_px * 0.20))
+        collar_drop_y_px = max(4.0, box_height * 0.038)
+        collar_radius_x_m = max(0.068, min(0.085, collar_half_w_px * meters_per_pixel))
+        neck_opening = (center_x, y0, collar_half_w_px, collar_drop_y_px, box_height)
 
         def is_in_neck_opening(test_px: float, test_py: float) -> bool:
-            if garment_type not in {"tshirt", "shirt", "jacket", "dress"}:
+            if not is_top:
                 return False
-            rel_x = abs(test_px - center_x) / max(1.0, neck_half)
-            if rel_x >= 1.0:
+            dx = abs(test_px - center_x)
+            if dx >= collar_half_w_px:
                 return False
-            scoop_y = y0 + (neck_drop_y - y0 + box_height * 0.015) * math.sqrt(
-                max(0.0, 1.0 - rel_x**2)
-            )
-            return test_py < scoop_y
+            u = dx / collar_half_w_px
+            y_cut = y0 + collar_drop_y_px * math.sqrt(max(0.0, 1.0 - u * u))
+            return test_py < y_cut
+
+        def get_z_at(test_px: float, test_py: float) -> float:
+            if not is_top:
+                rel_y = max(0.0, min(1.0, (test_py - y0) / box_height))
+                depth_factor = get_depth_factor(rel_y)
+                peak_z = base_depth * depth_factor
+                edge_z = max(0.005, min(0.012, peak_z * 0.12))
+                if garment_type == "pants" and test_py > crotch_y:
+                    row_l, row_r = row_extent(test_py)
+                    if test_px < center_x:
+                        leg_center = (row_l + center_x) / 2.0
+                        leg_half_w = max((center_x - row_l) / 2.0, 1.0)
+                    else:
+                        leg_center = (center_x + row_r) / 2.0
+                        leg_half_w = max((row_r - center_x) / 2.0, 1.0)
+                    norm_x = max(-1.0, min(1.0, (test_px - leg_center) / leg_half_w))
+                    curvature = math.sqrt(max(0.0, 1.0 - norm_x**2))
+                    return edge_z + (peak_z - edge_z) * curvature
+                col_top, col_bot = col_extent(test_px)
+                col_h = max(col_bot - col_top, 1.0)
+                col_cy = (col_top + col_bot) / 2.0
+                norm_y = max(-1.0, min(1.0, (test_py - col_cy) / (col_h / 2.0)))
+                curvature = math.sqrt(max(0.0, 1.0 - norm_y**2))
+                return edge_z + (peak_z - edge_z) * curvature
+
+            # ── TOPS: Organic Curvature, Rounded Elliptical Edges & Soft Drape ───
+            # User requirement: "cạnh của thân áo và tay áo cong cong 1 tí như cạnh hình elip"
+            # Eliminates boxy 90-degree step walls by tapering horizontally & vertically to z_edge = 1.2 mm
+            if test_py >= armpit_y:
+                # ── Lower Torso: Exact Horizontal Ellipse Across Silhouette ────────
+                # At any height below armpits down to hem, row_extent(test_py) gives the
+                # actual left and right silhouette boundaries (row_l, row_r).
+                row_l, row_r = row_extent(test_py)
+                row_w = max(1.0, row_r - row_l)
+                row_cx = (row_l + row_r) / 2.0
+                u = min(1.0, max(0.0, abs(test_px - row_cx) / (row_w / 2.0)))
+                curve_x = math.sqrt(max(0.0, 1.0 - u * u))
+                horiz_z = z_edge + (body_depth - z_edge) * curve_x
+
+                # Straight vertical drape below chest with soft natural micro-ripples
+                rel_y = max(0.0, min(1.0, (test_py - armpit_y) / max(1.0, y1 - armpit_y)))
+                drape = 1.0 - 0.03 * math.sin(rel_y * math.pi) + 0.015 * math.sin(u * math.pi * 3.0) * rel_y
+                return max(z_edge, horiz_z * drape)
+
+            # Above armpit_y: Upper Torso (Chest/Shoulders) and Sleeves
+            frac_y = max(0.0, min(1.0, (test_py - y0) / max(1.0, armpit_y - y0)))
+            shoulder_half = torso_w_px * 0.37
+            armhole_l = (center_x - shoulder_half) * (1.0 - frac_y) + left_armpit_x * frac_y
+            armhole_r = (center_x + shoulder_half) * (1.0 - frac_y) + right_armpit_x * frac_y
+
+            if armhole_l <= test_px <= armhole_r:
+                # ── Upper Torso: Smooth Chest Ellipse & Shoulder Cone Slope ────────
+                torso_half = max(1.0, (armhole_r - armhole_l) / 2.0)
+                torso_cx = (armhole_l + armhole_r) / 2.0
+                u = min(1.0, max(0.0, abs(test_px - torso_cx) / torso_half))
+                curve_x = math.sqrt(max(0.0, 1.0 - u * u))
+                # Smooth transition: center has body_depth, armholes blend to z_shoulder
+                torso_peak_z = z_shoulder + (body_depth - z_shoulder) * curve_x
+                # Shoulder cone slope: slopes up to 1 cm apex at y0 (no collar bulge)
+                vert_factor = 0.35 + 0.65 * math.sin(frac_y * (math.pi / 2.0))
+                return max(z_apex, torso_peak_z * vert_factor)
+            else:
+                # ── Sleeves: Rounded 3D Elliptical Tubes with Elliptical Cuff ──────
+                if test_px < armhole_l:
+                    span = max(1.0, armhole_l - x0)
+                    u_sleeve = min(1.0, max(0.0, (armhole_l - test_px) / span))
+                else:
+                    span = max(1.0, x1 - armhole_r)
+                    u_sleeve = min(1.0, max(0.0, (test_px - armhole_r) / span))
+
+                # Vertical elliptical curvature across the arm tube (norm_y = ±1 at top/bottom seams)
+                col_top, col_bot = col_extent(test_px)
+                col_h = max(col_bot - col_top, 1.0)
+                col_cy = (col_top + col_bot) / 2.0
+                norm_y = max(-1.0, min(1.0, (test_py - col_cy) / (col_h / 2.0)))
+                tube_curve = math.sqrt(max(0.0, 1.0 - norm_y * norm_y))
+
+                # Base depth along sleeve: gently tapers from shoulder to cuff
+                sleeve_base_z = z_shoulder - u_sleeve * (z_shoulder - z_cuff)
+
+                # Elliptical cuff rounding in X: curves softly down to z_edge at the cuff edge
+                # for the distal 65% of the sleeve, eliminating boxy vertical flat ends
+                if u_sleeve <= 0.30:
+                    cuff_round = 1.0
+                else:
+                    w = (u_sleeve - 0.30) / 0.70
+                    cuff_round = math.sqrt(max(0.0, 1.0 - w * w))
+
+                peak_sleeve_z = z_edge + (sleeve_base_z - z_edge) * cuff_round
+                return max(z_edge, z_edge + (peak_sleeve_z - z_edge) * tube_curve)
 
         cell_faces: list[tuple[int, int, tuple[tuple[int, int], ...]]] = []
         for row in range(ny):
@@ -593,44 +752,6 @@ class LocalGarmentReconstructor:
             }
         )
         node_index = {node: index for index, node in enumerate(nodes)}
-
-        # Depth profile along vertical axis: collar/neck stays slender from side view,
-        # while the chest/torso is the fullest, widest part of the garment.
-        # Increased base_depth gives realistic 3D volume so the garment does not look flat.
-        base_depth = max(0.045, box_width * meters_per_pixel * 0.26)
-
-        def get_depth_factor(v: float) -> float:
-            if garment_type in {"pants", "skirt"}:
-                if v < 0.15:
-                    return 0.70 + 0.30 * (v / 0.15)
-                elif v < 0.45:
-                    return 1.0
-                else:
-                    return 1.0 - 0.40 * ((v - 0.45) / 0.55)
-            else:
-                # Tops: tshirt, shirt, jacket, dress
-                # Collar (v < 0.14) is narrowest; chest (v ~0.40) is fullest; tapers gently below.
-                if v < 0.14:
-                    return 0.28 + 0.20 * (v / 0.14)
-                elif v < 0.42:
-                    t = (v - 0.14) / 0.28
-                    return 0.48 + 0.52 * math.sin(t * (math.pi / 2.0))
-                elif v < 0.72:
-                    t = (v - 0.42) / 0.30
-                    return 1.0 - 0.12 * t
-                else:
-                    t = (v - 0.72) / 0.28
-                    return 0.88 - 0.08 * t
-
-        def row_extent(pixel_y: float) -> tuple[float, float]:
-            target = min(max(int(round(pixel_y)), 0), mesh_mask.shape[0] - 1)
-            for offset in range(0, max(3, int(box_height * 0.04))):
-                for candidate in (target + offset, target - offset):
-                    if 0 <= candidate < mesh_mask.shape[0]:
-                        values = np.flatnonzero(mesh_mask[candidate])
-                        if len(values) >= 2:
-                            return float(values.min()), float(values.max())
-            return x0, x1
 
         front_faces: list[tuple[int, int, int]] = []
         back_faces: list[tuple[int, int, int]] = []
@@ -668,20 +789,7 @@ class LocalGarmentReconstructor:
         uvs = []
         for index, (row, column) in enumerate(nodes):
             px, py = node_pixels[index]
-            rel_y = max(0.0, min(1.0, (py - y0) / box_height))
-            depth_factor = get_depth_factor(rel_y)
-            local_depth = base_depth * depth_factor
-
-            row_left, row_right = row_extent(py)
-            half_width = max((row_right - row_left) / 2.0, 1.0)
-            row_center = (row_left + row_right) / 2.0
-            normalized_x = max(-1.0, min(1.0, (px - row_center) / half_width))
-            curvature = math.sqrt(max(0.0, 1.0 - normalized_x**2))
-
-            # Substantial seam-edge thickness: 12–26 mm half-depth = 2.4–5.2 cm total wall.
-            edge_z = max(0.012, min(0.026, local_depth * 0.22))
-            z = edge_z + (local_depth - edge_z) * curvature
-
+            z = get_z_at(px, py)
             x = (px - center_x) * meters_per_pixel
             y = (center_y - py) * meters_per_pixel
             front_vertices.append((x, y, z))
@@ -734,9 +842,12 @@ class LocalGarmentReconstructor:
             )
             if opening:
                 opening_vertices.setdefault(opening, set()).update((first, second))
-                # Neck, cuffs, and hem remain open — viewer sees through to canvas background.
-                continue
-            # Bridge every closed silhouette edge with a continuous fabric wall.
+                # Collar opening and bottom hem are left COMPLETELY HOLLOW and unbridged!
+                # Looking down through the collar from above, the user sees through
+                # the inside of the shirt to the white canvas background (white ellipse)!
+                if opening in {"neck", "hem", "waist", "left_hem", "right_hem"}:
+                    continue
+            # Bridge every closed silhouette edge (including cuffs and shoulders) with a continuous fabric wall.
             base = len(seam_vertices)
             seam_vertices.extend(
                 (
@@ -761,6 +872,7 @@ class LocalGarmentReconstructor:
             faces=np.asarray(front_faces),
             process=False,
         )
+        _ = front_mesh.vertex_normals
 
         # Defringe: wipe white background bleed / white side-border lines with fabric_color.
         # Central artwork region (e.g. "DAVIES" graphic) is preserved.
@@ -776,10 +888,10 @@ class LocalGarmentReconstructor:
 
         # Clean collar cutout area: wipe out any neck tags, inner collar ribbing or white fringes
         if garment_type in {"tshirt", "shirt", "jacket", "dress"}:
-            neck_y_max = int(round(neck_drop_y + box_height * 0.06))
+            neck_y_max = int(round(y0 + collar_drop_y_px + box_height * 0.04))
             for ny_idx in range(int(round(y0)), min(neck_y_max, mask.shape[0])):
-                for nx_idx in range(max(0, int(center_x - neck_half * 1.35)), min(mask.shape[1], int(center_x + neck_half * 1.35))):
-                    if is_in_neck_opening(float(nx_idx), float(ny_idx) + 14.0):
+                for nx_idx in range(max(0, int(center_x - collar_half_w_px * 1.25)), min(mask.shape[1], int(center_x + collar_half_w_px * 1.25))):
+                    if is_in_neck_opening(float(nx_idx), float(ny_idx) + 8.0):
                         clean_front_rgb[ny_idx, nx_idx] = fabric_color
 
         # Outside the central artwork zone, kill any remaining bright lines/specs
@@ -816,6 +928,7 @@ class LocalGarmentReconstructor:
             faces=np.asarray(back_faces),
             process=False,
         )
+        _ = back_mesh.vertex_normals
         if back_rgb is not None:
             clean_back = back_rgb.copy()
             clean_back[~mask] = fabric_color
@@ -848,6 +961,7 @@ class LocalGarmentReconstructor:
                 faces=np.asarray(seam_faces),
                 process=False,
             )
+            _ = seam_mesh.vertex_normals
             # 16×16 solid fabric_color tile — Three.js renders seams identical to fabric panels.
             seam_color_img = np.zeros((16, 16, 3), dtype=np.uint8)
             seam_color_img[:] = fabric_color
@@ -943,14 +1057,13 @@ class LocalGarmentReconstructor:
             return None
 
         # Tops (tshirt, shirt, jacket, dress):
-        # 1. Neck opening: stays completely hollow and unbridged
-        center_x, top_y, neck_half, neck_drop_y, box_h = neck_opening
-        relative_x = abs(point[0] - center_x) / max(1.0, neck_half * 1.15)
-        if relative_x < 1.0:
-            curve_y = top_y + (neck_drop_y - top_y + box_h * 0.02) * math.sqrt(
-                max(0.0, 1.0 - relative_x**2)
-            )
-            if point[1] <= curve_y + max(5.0, width * 0.015):
+        # 1. Neck opening
+        center_x, top_y, collar_half_w, collar_drop_y, box_h = neck_opening
+        dx = abs(point[0] - center_x)
+        if dx < collar_half_w * 1.08:
+            u = min(1.0, dx / collar_half_w)
+            y_cut = top_y + collar_drop_y * math.sqrt(max(0.0, 1.0 - u * u))
+            if point[1] <= y_cut + max(6.0, width * 0.02):
                 return "neck"
 
         # 2. Sleeve cuff openings ─────────────────────────────────────────────
