@@ -1,5 +1,7 @@
 import { API_BASE_URL } from './config';
 
+const GARMENT3D_API_BASE_URL = API_BASE_URL;
+
 export type GarmentView = 'front' | 'left' | 'back' | 'right';
 export type GarmentImageSet = Partial<Record<GarmentView, File>> & { front: File };
 export type GarmentType = 'tshirt' | 'shirt' | 'jacket' | 'pants' | 'skirt' | 'dress';
@@ -110,7 +112,7 @@ export async function createGarmentGeneration(
     form.append('reference_measurement', options.referenceMeasurement);
     form.append('reference_value_cm', String(options.referenceValueCm));
   }
-  const response = await fetch(`${API_BASE_URL}/garment3d/generations`, {
+  const response = await fetch(`${GARMENT3D_API_BASE_URL}/garment3d/generations`, {
     method: 'POST',
     body: form,
     signal,
@@ -119,7 +121,7 @@ export async function createGarmentGeneration(
 }
 
 export async function getGarmentJob(jobId: string, signal?: AbortSignal): Promise<Garment3DJob> {
-  const response = await fetch(`${API_BASE_URL}/garment3d/jobs/${encodeURIComponent(jobId)}`, { signal });
+  const response = await fetch(`${GARMENT3D_API_BASE_URL}/garment3d/jobs/${encodeURIComponent(jobId)}`, { signal });
   return parseResponse<Garment3DJob>(response);
 }
 
@@ -128,22 +130,22 @@ export async function getGarmentGeneration(
   signal?: AbortSignal,
 ): Promise<Garment3DGeneration> {
   const response = await fetch(
-    `${API_BASE_URL}/garment3d/generations/${encodeURIComponent(generationId)}`,
+    `${GARMENT3D_API_BASE_URL}/garment3d/generations/${encodeURIComponent(generationId)}`,
     { signal },
   );
   const generation = await parseResponse<Garment3DGeneration>(response);
   if (generation.assets) {
-    generation.assets.glb_url = new URL(generation.assets.glb_url, API_BASE_URL).toString();
+    generation.assets.glb_url = new URL(generation.assets.glb_url, GARMENT3D_API_BASE_URL).toString();
     if (generation.assets.thumbnail_url) {
       generation.assets.thumbnail_url = new URL(
         generation.assets.thumbnail_url,
-        API_BASE_URL,
+        GARMENT3D_API_BASE_URL,
       ).toString();
     }
     if (generation.assets.metadata_url) {
       generation.assets.metadata_url = new URL(
         generation.assets.metadata_url,
-        API_BASE_URL,
+        GARMENT3D_API_BASE_URL,
       ).toString();
     }
   }

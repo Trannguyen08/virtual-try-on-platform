@@ -26,7 +26,7 @@ from .schemas import (
 from .service import Garment3DService
 from .uploads import save_upload
 
-router = APIRouter(prefix="/garment3d", tags=["garment3d"])
+router = APIRouter(tags=["garment3d"])
 
 
 def service_from(request: Request) -> Garment3DService:

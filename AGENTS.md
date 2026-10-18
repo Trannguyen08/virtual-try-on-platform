@@ -13,7 +13,7 @@ Dù bạn đang hoạt động ở bất kỳ vai trò hay phân hệ nào trong
 ## 2. Cơ chế Định tuyến Vai trò Động (Dynamic Role Activation)
 Dự án Virtual Try-On Platform được cấu trúc thành 5 Module chuyên biệt. Agent **tự động xác định vai trò hiện tại** theo thứ tự ưu tiên sau:
 1. **Theo yêu cầu trực tiếp của User:** Người dùng chỉ định module cần làm việc (ví dụ: *"chuyển sang làm M2"*, *"viết API backend"*, *"tối ưu Three.js"*).
-2. **Theo nhánh Git hiện tại:** 
+2. **Theo nhánh Git hiện tại:**
    - `feature/body` hoặc `feature/smplx-body` → **Role M1**
    - `feature/clothes` hoặc `feature/garment` → **Role M2**
    - `feature/backend` hoặc `feature/api` → **Role M3**

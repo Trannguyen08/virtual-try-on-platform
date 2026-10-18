@@ -49,7 +49,7 @@
 
 ## 3. Trạng thái Kiểm thử (Verification & Testing)
 - **Lệnh kiểm thử liên quan:** `pytest tests/unit/ai/test_ai.py -v`
-- **Kết quả thực tế:** 
+- **Kết quả thực tế:**
   - [x] Đã chạy trên máy User trước đợt chỉnh sửa: `23 passed in 2.00s (100%)`.
   - [x] Đợt thay đổi này chỉ tác động đến cấu hình Markdown của Agent (`.agents/`, `AGENTS.md`, `docs/`), không ảnh hưởng mã nguồn Python đang chạy.
 

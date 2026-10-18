@@ -23,7 +23,11 @@ from .service import Garment3DService
 from .settings import Garment3DSettings
 
 
-def create_app(settings: Garment3DSettings | None = None) -> FastAPI:
+def create_app(
+    settings: Garment3DSettings | None = None,
+    route_prefix: str = "/garment3d",
+    use_cors: bool = True,
+) -> FastAPI:
     active_settings = settings or Garment3DSettings.from_environment()
     active_settings.validate()
     get_preset(active_settings.preset)
@@ -76,18 +80,19 @@ def create_app(settings: Garment3DSettings | None = None) -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
-    application.add_middleware(
-        CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-        ],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    application.include_router(router)
+    if use_cors:
+        application.add_middleware(
+            CORSMiddleware,
+            allow_origins=[
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+            ],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    application.include_router(router, prefix=route_prefix)
 
     @application.get("/health")
     def health() -> dict[str, str]:

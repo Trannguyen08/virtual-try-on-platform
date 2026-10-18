@@ -46,10 +46,10 @@ export const Garment3DPage: React.FC = () => {
   ];
 
   return (
-    <main className="g3d-app">
+    <div className="g3d-app">
       <header className="g3d-hero">
         <div>
-          <span className="g3d-hero__pill">AI Garment Studio</span>
+          <span className="g3d-hero__pill">Garment 3D Studio</span>
           <h1>Biến ảnh trang phục thành mô hình 3D</h1>
           <p>
             Tải lên từ một đến bốn góc ảnh. Hệ thống sẽ tự chuẩn hóa và tạo mesh có thể xem
@@ -204,6 +204,8 @@ export const Garment3DPage: React.FC = () => {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 };
+
+export default Garment3DPage;

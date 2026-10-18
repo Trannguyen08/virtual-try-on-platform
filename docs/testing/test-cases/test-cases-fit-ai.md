@@ -40,7 +40,6 @@ Khi thực hiện kiểm thử cho bất kỳ task nào, copy cấu trúc bảng
 > **[evidence-04]** — Kết quả chạy `pytest tests/unit/ai/test_ai.py -v` (23/23 tests PASS) và `python ai/training/train_rf.py` trên 4.500 mẫu Test Set độc lập với 15 đặc trưng nhân trắc học. Hồi quy MAE = 0.042 điểm, Phân loại Acc = 99.93%, Macro-F1 = 0.9994. Xuất weight `fit_predictor_rf.joblib`. Ngày: 2026-10-15.  
 > **[evidence-05]** — Kết quả chạy `pytest tests/unit/fit/test_fit.py -v` (7/7 tests PASS trong 0.95s). Động cơ hình học 3D Zero-Dependency Proximity Engine đạt chuẩn giải tích, kiểm định hoàn tất TC-FIT-01 đến TC-FIT-06 và luồng End-to-End GeometryFitEvaluator. Ngày: 2026-10-17.
 
-
 ---
 
 ### 👤 Module M1 — Body & Measurements (Owner: M1)
@@ -71,9 +70,9 @@ Khi thực hiện kiểm thử cho bất kỳ task nào, copy cấu trúc bảng
 
 | Mã Test Case | Task liên quan | Cấp độ | Dữ liệu đầu vào (Input) | Kết quả kỳ vọng (Expected Output) | Kết quả thực tế | Trạng thái | Link Evidence | Người test | Ngày |
 | :--- | :--- | :---: | :--- | :--- | :--- | :---: | :--- | :---: | :---: |
-| **TC-API-01** | API-01 | API | Gửi Request hợp lệ tới toàn bộ Endpoint FastAPI (chế độ Mock). | Trả về HTTP 200/202, cấu trúc JSON response khớp $100\%$ với Pydantic Schema đã quy định. | *Chờ thực hiện* | *Chưa chạy* | - | M3 | - |
-| **TC-API-02** | API-02 | API | Gửi dữ liệu sai: thiếu field, file rỗng, sai định dạng size. | Trả về mã lỗi chính xác: HTTP 400/404/422 kèm mã lỗi nội bộ (`error_code`). | *Chờ thực hiện* | *Chưa chạy* | - | M3 | - |
-| **TC-API-03** | API-03 | Module | Tạo Job mô phỏng bất đồng bộ qua `/api/tryon/fit`. | Trạng thái chuyển đổi tuần tự: `pending` $\rightarrow$ `running` $\rightarrow$ `completed` (hoặc `failed`). | *Chờ thực hiện* | *Chưa chạy* | - | M3 | - |
+| **TC-API-01** | API-01 | API | Gửi Request hợp lệ tới toàn bộ Endpoint FastAPI (chế độ Mock). | HTTP 200/202, response khớp Pydantic; GLB tải được và có source mock. | Đúng schema, đủ S/M/L/XL; GLB parse bằng Three.js thành công. | PASS | [M3 evidence](../../report/evidence/backend/mock-api-validation.md) | M3 | 2026-09-28 |
+| **TC-API-02** | API-02 | API | Thiếu field, file rỗng/hỏng/quá lớn, MIME sai, ID/size sai, asset traversal. | HTTP 400/404/413/415/422 và `error.code` theo contract M3. | Đúng status/code; không lộ nội bộ, không đọc asset ngoài allowlist. | PASS | [M3 evidence](../../report/evidence/backend/mock-api-validation.md) | M3 | 2026-09-28 |
+| **TC-API-03** | API-03 | Module | Tạo Job qua `/api/tryon/fit`; gây lỗi provider trong test. | `pending` -> `running` -> `completed` hoặc `failed`; GET đúng job, kể cả sau restart nếu đã hoàn tất. | Lifecycle, lỗi `PROCESSING_FAILED` và đọc job sau tạo lại app pass trên SQLite tạm. PostgreSQL thật chưa kiểm tra. | PASS một phần | [Tổng kết M3](../../report/backend-postgresql-persistence-summary.md) | M3 | 2026-10-18 |
 | **TC-API-07** | API-07 | Integration | Chuyển đổi cờ cấu hình `APP_MODE = mock` sang `APP_MODE = real`. | Pipeline hoạt động mượt mà ở cả chế độ Mock toàn bộ và chế độ chạy thật từng phần mà không cần sửa code. | *Chờ thực hiện* | *Chưa chạy* | - | M3 | - |
 
 ---

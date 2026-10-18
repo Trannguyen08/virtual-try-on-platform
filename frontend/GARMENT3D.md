@@ -1,25 +1,31 @@
-# Garment 3D standalone page
+# Tạo trang phục 3D trong ứng dụng chính
 
-This additive entrypoint avoids changing the shared frontend router or app shell.
+Trang **Tạo trang phục 3D** nằm trong menu của ứng dụng tại `/garment-3d`.
+Đường dẫn cũ `/garment3d.html` chuyển tiếp đến trang này. Giao diện dùng chung
+header và footer với các trang còn lại.
 
-```powershell
-cd frontend
-npm install
-$env:VITE_API_URL = "http://localhost:8000"
-npm run dev
-```
-
-Open `http://localhost:5173/garment3d.html`.
-
-The form asks for garment type and an optional real garment length. Supplying
-the length enables centimetre measurements and marks the result as ready for
-body-size integration. Completed results expose both the GLB and its body-ready
-metadata JSON for download.
-
-Build only this isolated entrypoint with:
+Backend chính phục vụ Garment 3D cùng trên cổng 8000. Đặt
+`GARMENT3D_PROVIDER=local` trong `.env` ở gốc repo nếu muốn ghi rõ provider mặc định,
+cài dependency theo `backend/requirements-dev.txt`, rồi chạy:
 
 ```powershell
-npx vite build --config vite.garment3d.config.ts
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --env-file .env --reload --host 127.0.0.1 --port 8000
 ```
 
-When the shared router stabilizes, import `Garment3DPage` into it and keep this page as an isolated demo.
+Chạy frontend từ `frontend/`:
+
+```powershell
+npm.cmd run dev
+```
+
+Trang Garment 3D gọi `/garment3d/...` qua `VITE_API_URL`, mặc định là
+`http://localhost:8000` trong chế độ dev. Bản production cần đặt `VITE_API_URL`
+đến backend chính đã triển khai.
+
+Trang nhận một đến bốn ảnh của cùng một trang phục và chiều dài thật tùy chọn.
+Chiều dài giúp quy đổi pixel sang centimet; nếu thiếu, GLB vẫn xem được nhưng
+metadata không đánh dấu `fit_ready`. Bảng size trên trang là tham khảo. Kết quả
+hiện chỉ tạo/xem/tải garment GLB; API thử đồ của body chưa nhận GLB này làm
+trang phục để mặc lên body.
+
+`npm.cmd run build` tạo một ứng dụng Vite với trang Garment 3D trong cùng luồng.

@@ -1,76 +1,37 @@
 ---
 name: m1-body-expert
-description: Chuyên môn kỹ thuật về Thị giác máy tính, SMPL-X 3D Body Parametric Model và Trích xuất số đo nhân trắc học cho Module M1 trong Virtual Try-On Platform.
+description: Hướng dẫn agent phụ trách ảnh đầu vào, ước lượng body 3D và số đo M1 theo contract tích hợp của Virtual Try-On Platform.
 ---
 
-# M1 BODY & MEASUREMENTS EXPERT SKILL
+# M1 BODY EXPERT
 
-## 1. Bản chất Kiến trúc M1 (From 2D Image to 3D Measured Avatar)
-Module M1 có nhiệm vụ chuyển đổi ảnh chân dung người dùng (2D) thành mô hình cơ thể 3D hình học chính xác (SMPL-X) và trích xuất bộ thông số nhân trắc học:
+## Điều kiện kích hoạt
 
-```text
-┌────────────────────────┐
-│  Ảnh người dùng (2D)   │
-└───────────┬────────────┘
-            │
-            ▼
-┌────────────────────────┐
-│  Tiền xử lý ảnh        │ (Resize, Crop, rembg background removal)
-└───────────┬────────────┘
-            │
-            ▼
-┌────────────────────────┐
-│  MediaPipe Pose        │ (33 Keypoints 2D + Confidence)
-└───────────┬────────────┘
-            │
-            ▼
-┌────────────────────────┐
-│  SMPL-X Optimizer      │ (Khớp Shape β và Pose θ với Keypoints + Chiều cao)
-└───────────┬────────────┘
-            │
-            ├──────────────────────────────────────────┐
-            ▼                                          ▼
-┌────────────────────────┐                 ┌────────────────────────┐
-│  Xuất 3D Mesh          │                 │  Mesh Slicing Engine   │
-│  (10.475 đỉnh, Y-up)   │                 │  (Cắt lớp tính số đo)  │
-└───────────┬────────────┘                 └───────────┬────────────┘
-            │ body.glb                                 │
-            ▼                                          ▼
-     [Cung cấp M2, M5]                    5 Số đo: Height, Chest,
-                                          Waist, Hip, Shoulder (cm)
-                                          [Cung cấp M3, M4]
-```
+Dùng khi nhiệm vụ giao rõ M1 hoặc đụng tới body/preprocessing/, body/estimation/, body/measurement/ hay đầu ra body cho M3. Đọc Rule 01–02, Rule 06 và Rule 10 trước khi đề xuất sửa file. Khi nhiệm vụ chỉ sửa API hoặc viewer, chuyển cho owner M3/M5 thay vì nhận quyền sửa của họ.
 
----
+## Hiện trạng đã đối chiếu
 
-## 2. Phương pháp luận Kỹ thuật Cốt lõi
+Tại nhánh feature/backend-tryon-flow, cấu trúc M1 đã có nhưng các file chức năng được xem còn rỗng. API analyze hiện nhận ảnh và height_cm, kiểm tra dữ liệu ảnh rồi MockProvider tạo bốn số đo synthetic cố định và GLB hình khối. Chưa thấy pipeline MediaPipe, SMPL-X, body reconstruction hay đo cơ thể từ ảnh được nối vào API. Không gọi kết quả mock là phép đo thật.
 
-### 2.1. Khớp mô hình tham số SMPL-X
-- **Mô hình SMPL-X:** Sử dụng 10.475 đỉnh (vertices), tham số hình dạng $\beta \in \mathbb{R}^{10}$ (Shape parameters) và tư thế $\theta$ (Pose parameters).
-- **Hàm mất mát tối ưu (Optimization Loss):**
-  $$L_{total} = w_{kp} L_{keypoints} + w_{prior} L_{shape\_prior} + w_{height} L_{height}$$
-- **Hệ trục tọa độ xuất file:** Bắt buộc chuẩn hóa về **Y-up, +Z forward**, đơn vị **Mét (m)**, không chứa tọa độ `NaN` hay `Inf`.
+## Input và output
 
-### 2.2. Trích xuất số đo qua Cắt lớp Mesh (Mesh Slicing)
-- Tuyệt đối không dùng bounding box thô sơ để tính số đo.
-- Sử dụng mặt phẳng cắt song song với mặt phẳng XZ (mặt phẳng nằm ngang) tại các mốc giải phẫu xác định:
-  - **Chest/Bust:** Đi qua mốc nách/ngực (khoảng $y \approx 0.72 \times \text{Chiều cao}$).
-  - **Waist:** Điểm thắt hẹp nhất ở phần bụng (khoảng $y \approx 0.58 \times \text{Chiều cao}$).
-  - **Hip:** Điểm lồi rộng nhất ở xương chậu (khoảng $y \approx 0.50 \times \text{Chiều cao}$).
-- **Chu vi lát cắt:** Tìm giao tuyến giữa mặt phẳng cắt và các tam giác mesh, sắp xếp các đoạn thẳng thành đa giác kín (Convex Hull hoặc Spline) và tính tổng độ dài chu vi.
-- Sai số cho phép: lệch <= 1.0 cm so với tính toán giải tích chuẩn.
+- Input API hiện tại: ảnh PNG/JPEG hợp lệ, tối đa 5 MiB và 16 triệu pixel; height_cm hữu hạn trong [140, 210]. M3 xử lý upload và validation HTTP; M1 xác định yêu cầu kỹ thuật ảnh cho thuật toán thật cùng M3.
+- Output cần bàn giao: số đo height_cm, chest_cm, waist_cm, hip_cm, shoulder_width_cm bằng cm; body mesh GLB mét, tay phải, Y-up, +Z forward, gốc giữa hai bàn chân tại sàn; provenance source/method/notes và confidence nếu có căn cứ.
+- Contract đang chạy nằm ở backend/schemas/body.py và docs/api/api-contract.md. Reference M4 data-contract.md có tên trường/hình dạng khác; không tự đổi contract nào.
 
----
+## Quy trình làm việc
 
-## 3. Xử lý Trường hợp Ngoại lệ (Edge Cases)
-1. **Ảnh mất chân / mất đầu:** Bộ tiền xử lý phải trả về lỗi `INVALID_IMAGE` có kiểm soát, không được ném Exception làm sập luồng.
-2. **Ảnh phong cảnh không có người:** MediaPipe không tìm thấy người phải trả về mã lỗi `NO_PERSON`.
-3. **Người có dáng quá gầy hoặc quá béo:** Giới hạn khoảng giá trị nhân trắc học hợp lệ (Height: 140–210 cm, Chest: 60–140 cm, Waist: 50–130 cm, Hip: 70–150 cm). Nếu vượt ngưỡng, đưa ra cảnh báo độ tin cậy thấp và cho phép người dùng điều chỉnh tay.
+1. Đọc body/** liên quan, schema M3, contract API và test hiện có. Ghi rõ phần rỗng, mock và phần thật.
+2. Làm rõ yêu cầu về ảnh, tư thế, số đo và đầu ra nếu contract chưa quyết định. Trình thiết kế trước, chỉ ghi file sau phê duyệt theo Rule 01.
+3. Thiết kế từng bước validation ảnh, preprocessing, landmarks, body estimation và đo đạc. Chỉ ghi nhận bước là đã triển khai khi có mã và bằng chứng.
+4. Giữ phép đo nội bộ và phép đổi đơn vị nhất quán; khai báo vị trí đổi m/cm. Không âm thầm suy số đo từ height hoặc ảnh nếu chưa có thuật toán được kiểm chứng.
+5. Thỏa thuận adapter với M3 qua TryOnProvider, asset registry và backend/schemas/body.py. Trao đổi với M4 về body mesh/số đo cần cho Fit; không tự sửa phần M3/M4.
+6. Sau đợt sửa, gọi change-impact-log; ghi thiếu dữ liệu, tác động và người nhận bàn giao.
 
----
+## Kiểm thử và bàn giao
 
-## 4. Tài liệu Tham khảo Chuyên sâu (References)
-Khi giải quyết các vấn đề kỹ thuật cụ thể, hãy tra cứu các tài liệu trong `references/`:
-- [landmarks-and-slicing.md](references/landmarks-and-slicing.md): Chi tiết 33 keypoints MediaPipe và tọa độ cắt lớp 5 số đo.
-- [smplx-specs.md](references/smplx-specs.md): Thông số kỹ thuật mô hình 10.475 đỉnh SMPL-X và tham số shape/pose.
-- [edge-cases.md](references/edge-cases.md): Cẩm nang xử lý các ảnh lỗi, che khuất hoặc tư thế bất thường.
+Đề xuất cho user chạy unit test ở tests/unit/body/ với ảnh hợp lệ, ảnh hỏng, ảnh không có người, số đo biên và mesh sai đơn vị; kiểm thử INT-02 với M3 khi adapter có thật. Đối chiếu output với schema M3 và đo mesh theo khung tọa độ đã chốt. Agent không tự chạy test hoặc Git theo Rule 01–02; ghi kết quả do user cung cấp, nếu thiếu ghi chưa chạy. Bàn giao model/phụ thuộc, giới hạn độ chính xác, schema, asset, test và evidence cho M3/M4.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [landmarks-and-slicing.md](references/landmarks-and-slicing.md), [smplx-specs.md](references/smplx-specs.md) và [edge-cases.md](references/edge-cases.md) khi thiết kế M1; đối chiếu với contract đang chạy trước khi áp dụng.

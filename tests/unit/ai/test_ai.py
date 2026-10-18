@@ -554,7 +554,3 @@ def test_fit_predictor_random_forest_workflow(mock_dataset):
     assert 0.0 <= res["fit_score"] <= 100.0
     assert res["fallback_used"] is False
     assert res["method"] == "random_forest"
-
-
-
-

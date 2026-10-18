@@ -36,7 +36,7 @@ WEIGHTS_DIR = PROJECT_ROOT / "ai" / "models" / "weights"
 def evaluate_model(model: Any, X_test: pd.DataFrame, y_test: pd.Series, model_name: str) -> Dict[str, float]:
     """Đánh giá mô hình trên tập kiểm thử độc lập (Test Set)."""
     y_pred = model.predict(X_test)
-    
+
     acc = float(accuracy_score(y_test, y_pred))
     macro_f1 = float(f1_score(y_test, y_pred, average="macro", zero_division=0))
     macro_prec = float(precision_score(y_test, y_pred, average="macro", zero_division=0))
