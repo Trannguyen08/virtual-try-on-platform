@@ -31,3 +31,7 @@ Trên feature/backend-tryon-flow, file garment/size_chart/charts/shirt.json có 
 ## Kiểm thử và bàn giao
 
 Đề xuất unit test tests/unit/garment/ cho chart thiếu/sai, kích thước mesh, sai hệ trục và export GLB; INT-03 với M3 cho asset và simulator. Test mô phỏng nặng chỉ do user chạy theo Rule 01, có bằng chứng riêng. Nếu chưa chạy, ghi đúng trạng thái trong log. Bàn giao chart, GLB, quy ước đơn vị, cách tái tạo, giới hạn mô phỏng và tác động tới M1/M3/M4/M5.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [size-chart-specs.md](references/size-chart-specs.md), [blender-simulation-config.md](references/blender-simulation-config.md) và [edge-cases.md](references/edge-cases.md) khi thiết kế M2; đối chiếu với contract đang chạy trước khi áp dụng.

@@ -65,3 +65,18 @@ docs/plan/
 # Blender / 3D temp files
 *.blend1
 *.blend2
+
+# AI datasets, caches, model weights and numerical arrays
+tmp/
+ai/models/weights/
+*.joblib
+*.pkl
+*.pt
+*.pth
+*.bin
+*.onnx
+*.safetensors
+*.npy
+*.npz
+*.parquet
+*.h5

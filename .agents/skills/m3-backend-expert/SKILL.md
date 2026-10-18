@@ -32,3 +32,7 @@ Nhánh feature/backend-tryon-flow có FastAPI create_app, route health/catalog/a
 ## Kiểm thử và bàn giao
 
 Đề xuất user chạy test backend về schema, validate ảnh, state machine, lỗi và asset; test e2e mock chỉ xác minh HTTP, không phải viewer. Tích hợp module thật cần các INT tương ứng và kiểm tra API contract. Theo Rule 01, agent không tự chạy lệnh; ghi chưa chạy khi thiếu log. Bàn giao OpenAPI/field thay đổi, tác động M5, migration database nếu có, trạng thái mock/real và việc cần owner khác xác nhận.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [api-endpoints-and-schemas.md](references/api-endpoints-and-schemas.md), [async-job-flow.md](references/async-job-flow.md) và [error-codes.md](references/error-codes.md) khi thiết kế M3; đối chiếu với API đang chạy trước khi áp dụng.

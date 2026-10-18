@@ -7,7 +7,7 @@ description: Ghi lại thay đổi và ảnh hưởng sau mỗi đợt agent s�
 
 ## Điều kiện kích hoạt
 
-Rule 10 yêu cầu dùng skill này một lần sau mỗi đợt agent sửa code, cấu hình hoặc contract, trước khi báo hoàn thành. Không theo dõi mọi thao tác của con người. Không kích hoạt khi chỉ đọc hoặc đề xuất mà chưa sửa; việc tạo log không tự kích hoạt một log khác.
+Rule 05 chung yêu cầu dùng skill này một lần sau mỗi đợt agent sửa code, cấu hình hoặc contract, trước khi báo hoàn thành. Không theo dõi mọi thao tác của con người. Không kích hoạt khi chỉ đọc hoặc đề xuất mà chưa sửa; việc tạo log không tự kích hoạt một log khác.
 
 ## Quyền hạn
 
@@ -26,7 +26,7 @@ Giữ nguyên Rule 01–02: không chạy terminal/shell, test hoặc Git; khôn
 2. Kiểm tra từng file và mô tả trước → sau ở mức thay đổi cụ thể, kèm tên hàm, class, trường hoặc mục tài liệu. File mới: trước là chưa tồn tại; file xóa: sau là không còn. Phân biệt thay đổi code thực tế với quy định trong tài liệu.
 3. Đánh giá lần lượt API, schema, đơn vị, database, asset, các module khác. “Không ảnh hưởng” chỉ dùng khi đã kiểm tra đủ căn cứ; còn thiếu thì ghi “chưa kiểm tra” và nêu việc cần kiểm tra. Nêu riêng xung đột đã xác nhận và nguy cơ.
 4. Ghi test đã chạy và kết quả kèm nguồn log; nếu user chưa chạy hoặc chưa gửi kết quả, ghi “chưa chạy”. Không gọi kế hoạch test là kết quả test.
-5. Tạo file UTF-8 mới theo docs/change-logs/YYYYMMDD-HHMMSS-Mx-ten-thay-doi.md, với giờ Asia/Saigon và x là vai trò thực hiện. Với thay đổi liên vai trò do M4 điều phối, dùng M4 và liệt kê tất cả owner chịu ảnh hưởng trong nội dung. Dùng slug khác khi trùng cùng giây; không ghi đè log cũ.
+5. Tạo file UTF-8 mới theo docs/change-logs/YYYYMMDD_HHMMSS_Mx_ten_thay_doi.md, với giờ Asia/Saigon và x là vai trò thực hiện. Với thay đổi liên vai trò, ghi rõ tất cả owner chịu ảnh hưởng trong nội dung. Dùng slug khác khi trùng cùng giây; không ghi đè log cũ.
 6. Đọc lại nội dung trước khi báo hoàn thành để loại token, password, đường dẫn bí mật, ảnh cá nhân hoặc dữ liệu nhạy cảm. Không tạo log thứ hai chỉ vì file log vừa xuất hiện.
 
 ## Nội dung bắt buộc

@@ -31,3 +31,7 @@ Tại nhánh feature/backend-tryon-flow, cấu trúc M1 đã có nhưng các fil
 ## Kiểm thử và bàn giao
 
 Đề xuất cho user chạy unit test ở tests/unit/body/ với ảnh hợp lệ, ảnh hỏng, ảnh không có người, số đo biên và mesh sai đơn vị; kiểm thử INT-02 với M3 khi adapter có thật. Đối chiếu output với schema M3 và đo mesh theo khung tọa độ đã chốt. Agent không tự chạy test hoặc Git theo Rule 01–02; ghi kết quả do user cung cấp, nếu thiếu ghi chưa chạy. Bàn giao model/phụ thuộc, giới hạn độ chính xác, schema, asset, test và evidence cho M3/M4.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [landmarks-and-slicing.md](references/landmarks-and-slicing.md), [smplx-specs.md](references/smplx-specs.md) và [edge-cases.md](references/edge-cases.md) khi thiết kế M1; đối chiếu với contract đang chạy trước khi áp dụng.

@@ -30,3 +30,7 @@ Nhánh feature/backend-tryon-flow có TryOnPage theo bước upload/chọn áo/p
 ## Kiểm thử và bàn giao
 
 Đề xuất user chạy build/test frontend theo Rule 01, kiểm tra upload hợp lệ/lỗi, polling completed/failed/timeout, null/source và viewer khi asset thiếu. Kiểm tra e2e với API M3 khi có môi trường; test HTTP backend không thay thế test browser. Nếu chưa có log chạy, ghi chưa chạy. Bàn giao component, trường API cần M3 xác nhận, giới hạn mock/asset/heatmap và ảnh bằng chứng UI.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [threejs-viewer-setup.md](references/threejs-viewer-setup.md), [heatmap-colormap.md](references/heatmap-colormap.md) và [ux-flows-and-states.md](references/ux-flows-and-states.md) khi thiết kế M5; đối chiếu với API và viewer đang chạy trước khi áp dụng.
