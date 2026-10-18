@@ -130,7 +130,7 @@ Response 200 (ID trong ví dụ chỉ minh họa; dùng ID thực khi gọi fit)
 
 `height_cm` chỉ echo giá trị do người dùng khai báo. Bốn số đo còn lại cố định cho
 mọi ảnh/chiều cao; chúng **không được tính từ ảnh hoặc suy ra từ chiều cao**.
-Mỗi analyze thành công tạo body ID mới, lưu process-local.
+Mỗi analyze thành công tạo body ID mới; metadata body mock được lưu trong PostgreSQL.
 
 ### Fit và job
 
@@ -141,14 +141,14 @@ Request JSON:
 ```
 
 Size phân biệt hoa/thường, nhận S/M/L/XL và phải tồn tại trong chart garment.
-Body phải được tạo bởi analyze trên cùng server process. Sai input không tạo job.
+Body phải được tạo bởi analyze và còn trong PostgreSQL. Sai input không tạo job.
 Response 202:
 
 ```json
 {
   "data": {
     "source": "mock", "method": "in_process_job",
-    "notes": ["In-memory job; discarded on server restart."],
+    "notes": ["Job state is persisted; execution uses in-process BackgroundTasks."],
     "job_id": "job_example", "status": "pending",
     "request": {"body_id":"body_example","garment_id":"demo-tshirt","size":"M"},
     "result": null, "error": null
@@ -157,7 +157,10 @@ Response 202:
 }
 ```
 
-State machine: `pending -> running -> completed | failed`. Không sleep giả,
+State machine: `pending -> running -> completed | failed`. Trạng thái, kết quả, lỗi,
+thời điểm tạo/bắt đầu/kết thúc và step log được lưu trong PostgreSQL. Job đã hoàn tất
+tra cứu được sau restart; tác vụ đang chạy không tự tiếp tục sau khi tiến trình chết.
+Không sleep giả,
 không retry/cancel/progress phần trăm; POST lặp tạo job mới. `BackgroundTasks`
 chạy sau khi trả response. Mock nhanh nên có thể không quan sát được running
 khi poll; `pending` trong response tạo job là snapshot không thay đổi.
@@ -217,7 +220,7 @@ Failed response (test thay provider để gây lỗi; không có endpoint cố t
 {
   "data": {
     "source": "mock", "method": "in_process_job",
-    "notes": ["In-memory job; discarded on server restart."],
+    "notes": ["Job state is persisted; execution uses in-process BackgroundTasks."],
     "job_id": "job_example", "status": "failed",
     "request": {"body_id":"body_example","garment_id":"demo-tshirt","size":"M"},
     "result": null,
@@ -283,3 +286,12 @@ trả 404:
   `frontend/src/api/types.ts` cho envelope; không xây client, hooks hay giao diện.
 - Thay từng provider không đổi field/schema frontend. Thay đổi phá vỡ contract
   cần version mới; không lén đổi đơn vị, nghĩa score, hay enum.
+
+## Garment 3D trên backend chính
+
+`backend.main:app` phục vụ thêm các route `/garment3d/...` trên cùng origin với
+`/api/...`. Client tạo trang phục gọi `POST /garment3d/generations`, poll
+`GET /garment3d/jobs/{job_id}`, rồi lấy generation và asset theo URL trả về.
+Garment 3D là sub-app với contract response riêng; envelope `data/error` ở các
+route `/api/...` phía trên không áp dụng cho namespace này. Xem
+`backend/garment3d/README.md` và Swagger UI tại `/garment3d/docs`.

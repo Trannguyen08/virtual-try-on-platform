@@ -116,7 +116,7 @@ def generate_with_mpfb(params: dict, output_path: str, mpfb_module_name: str = "
 
         muscle = proportions.get("muscle_tone", 0.5)
         human_obj.MPFB_HUM_muscle = muscle
-        
+
         # ─── Apply custom body proportions ──────────────────────────────────
         morph_map = {
             "shoulder_width": "measure-shoulder-dist",

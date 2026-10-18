@@ -35,6 +35,10 @@
   gap: 0.65rem;
   text-decoration: none;
   cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
 }
 
 .vfit-brand-logo-icon {
@@ -63,10 +67,57 @@
   gap: 1.5rem;
 }
 
-@media (max-width: 900px) {
+.vfit-mobile-menu-toggle {
+  display: none;
+  min-height: 2.5rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--vfit-border-subtle, #e6e1e9);
+  border-radius: 0.65rem;
+  background: white;
+  color: var(--vfit-primary-container);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 1199px) {
   .vfit-nav-links {
     display: none;
   }
+
+  .vfit-nav-links.open {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem 1rem;
+    border-bottom: 1px solid rgba(230, 225, 233, 0.9);
+    background: #fff7fc;
+    box-shadow: 0 12px 24px rgba(8, 10, 97, 0.1);
+  }
+
+  .vfit-nav-links.open .vfit-nav-item {
+    text-align: left;
+    padding: 0.75rem;
+  }
+
+  .vfit-mobile-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .vfit-navbar { gap: 0.5rem; padding: 0 0.75rem; }
+  .vfit-nav-brand { flex: 0 0 auto; }
+  .vfit-brand-logo-text { font-size: 0.9rem; white-space: nowrap; }
+  .vfit-navbar .vfit-nav-actions { gap: 0.4rem; }
+  .vfit-nav-actions .vfit-icon-btn,
+  .vfit-nav-actions .vfit-nav-tryon-button { display: none; }
 }
 
 .vfit-nav-item {

@@ -1,50 +1,44 @@
 import React, { useRef, useState } from 'react';
-import { BodyCustomParams, BodyPreset, BODY_PRESETS } from '../../data/bodyPresets';
-import { BodyMorphingPanel } from './BodyMorphingPanel';
 
 interface UploadStepProps {
-  initialCustomParams?: BodyCustomParams;
-  onNext: (
-    photoFile: File | null,
-    photoPreviewUrl: string,
-    heightCm: number,
-    customParams: BodyCustomParams
-  ) => void;
+  onNext: (heightCm: number) => void;
+  onCreateBody: () => void;
 }
 
-const defaultInitialParams: BodyCustomParams = {
-  height: 170,
-  weight: 50,
-  gender: 'female',
-  age: 24,
-  skinTone: 'light',
-  skinColorHex: '#f5d0b5',
-  selectedPresetId: 'slim',
-  glbModelUrl: '/models/body_default.glb',
-  proportions: {
-    shoulder_width: 0.35,
-    waist: 0.28,
-    hips: 0.35,
-    chest: 0.35,
-    belly: 0.05,
-    muscle_tone: 0.2,
-    leg_length: 0.6,
-    arm_length: 0.5,
-    buttocks: 0.4,
-  },
-};
-
-export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onNext }) => {
-  const [customParams, setCustomParams] = useState<BodyCustomParams>(
-    initialCustomParams || defaultInitialParams
-  );
-  const [photoPreview, setPhotoPreview] = useState<string>(
-    BODY_PRESETS[0].img
-  );
+export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) => {
+  const [photoPreview, setPhotoPreview] = useState<string>('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [heightCm, setHeightCm] = useState<number>(customParams.height || 170);
+  const [heightCm, setHeightCm] = useState<number>(170);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Model Presets
+  const presets = [
+    {
+      name: 'Linh Đan (Nữ)',
+      stats: '1m68 • 50kg',
+      height: 168,
+      img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Minh Quân (Nam)',
+      stats: '1m80 • 74kg',
+      height: 180,
+      img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Mai Anh (Nữ)',
+      stats: '1m72 • 52kg',
+      height: 172,
+      img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Thanh Trúc (Curvy)',
+      stats: '1m65 • 68kg',
+      height: 165,
+      img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=80',
+    },
+  ];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -64,38 +58,14 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
     }
   };
 
-  const handleSelectPreset = (preset: BodyPreset) => {
+  const handleSelectPreset = (preset: typeof presets[0]) => {
     setPhotoPreview(preset.img);
     setPhotoFile(null);
     setHeightCm(preset.height);
-    setCustomParams({
-      ...customParams,
-      height: preset.height,
-      weight: preset.weight,
-      gender: preset.gender,
-      selectedPresetId: preset.id,
-      glbModelUrl: preset.glbModelUrl,
-      proportions: { ...preset.proportions },
-    });
-  };
-
-  const handleCustomParamsChange = (newParams: BodyCustomParams) => {
-    setCustomParams(newParams);
-    if (newParams.height !== heightCm) {
-      setHeightCm(newParams.height);
-    }
-  };
-
-  const handleHeightSliderChange = (newHeight: number) => {
-    setHeightCm(newHeight);
-    setCustomParams((prev) => ({
-      ...prev,
-      height: newHeight,
-    }));
   };
 
   const handleContinue = () => {
-    onNext(photoFile, photoPreview, heightCm, customParams);
+    onNext(heightCm);
   };
 
   return (
@@ -111,7 +81,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
             ẢNH CHÂN DUNG CỦA BẠN
           </h2>
           <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 1.5rem 0' }}>
-            Tải ảnh toàn thân rõ nét để AI lập bản đồ 3D vóc dáng và ướm đồ chuẩn xác từng nếp vải.
+            Ảnh chỉ dùng để xem trước. Body 3D được tạo bằng MPFB2 từ thông số mặc định và chiều cao bạn chọn; ảnh chưa được dùng để đo hoặc dựng cơ thể.
           </p>
 
           {/* Interactive Dropzone */}
@@ -142,7 +112,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
                     {photoFile ? photoFile.name : 'Ảnh người mẫu mẫu'}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--vfit-focus-ring)', fontWeight: 600, marginTop: '0.2rem' }}>
-                    ✓ Sẵn sàng quét phân tích 3D
+                    ✓ Sẵn sàng dựng body mẫu bằng Blender
                   </div>
                   <button
                     type="button"
@@ -181,7 +151,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
               min="140"
               max="210"
               value={heightCm}
-              onChange={(e) => handleHeightSliderChange(Number(e.target.value))}
+              onChange={(e) => setHeightCm(Number(e.target.value))}
               style={{ width: '100%', accentColor: 'var(--vfit-primary-container)', cursor: 'pointer' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--vfit-outline)' }}>
@@ -191,12 +161,28 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
             </div>
           </div>
 
-          {/* Biometric Morphing & Preset Panel */}
-          <BodyMorphingPanel
-            customParams={customParams}
-            onChange={handleCustomParamsChange}
-            onSelectPreset={handleSelectPreset}
-          />
+          {/* Quick Select Presets */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--vfit-on-surface)', textTransform: 'uppercase' }}>
+              Hoặc thử giao diện với ảnh người mẫu mẫu:
+            </span>
+            <div className="vfit-preset-grid">
+              {presets.map((preset, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`vfit-preset-card ${photoPreview === preset.img ? 'selected' : ''}`}
+                  onClick={() => handleSelectPreset(preset)}
+                >
+                  <img src={preset.img} alt={preset.name} />
+                  <div className="vfit-preset-overlay">
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{preset.name}</span>
+                    <span style={{ fontSize: '0.65rem', color: '#cbd5e1' }}>{preset.stats}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -204,10 +190,10 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
       <div>
         <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 2px 10px rgba(8,10,97,0.03)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0' }}>
-            TIÊU CHUẨN ĐỂ ĐẠT KẾT QUẢ ĐẸP NHẤT
+            GỢI Ý ẢNH CHO PHIÊN BẢN XỬ LÝ ẢNH SAU NÀY
           </h3>
           <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.875rem', margin: '0 0 1.25rem 0' }}>
-            Độ tương thích trang phục 3D phụ thuộc trực tiếp vào tư thế và ánh sáng trong ảnh gốc.
+            Ảnh hiện chưa tham gia vào quá trình dựng body. Những gợi ý này dành cho tính năng xử lý ảnh sau này.
           </p>
 
           {/* DOs */}
@@ -237,51 +223,20 @@ export const UploadStep: React.FC<UploadStepProps> = ({ initialCustomParams, onN
             </ul>
           </div>
 
-          {/* AI Photo Validation Inspection Check */}
-          <div
-            style={{
-              marginTop: '1.25rem',
-              padding: '1rem',
-              borderRadius: 'var(--vfit-radius-lg)',
-              backgroundColor: 'var(--vfit-surface-container-low)',
-              border: '1px solid rgba(61, 126, 255, 0.2)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--vfit-focus-ring)', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span className="vfit-pulse-dot" />
-                KIỂM TRA ẢNH AI ĐẠT CHUẨN
-              </span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
-                99.2 / 100 Điểm
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem', fontSize: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
-                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Tư thế đứng thẳng (100%)
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
-                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Ánh sáng rõ nét (98%)
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
-                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Toàn thân cân đối (99%)
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--vfit-on-surface)' }}>
-                <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span> Tách phông nền sẵn sàng
-              </div>
-            </div>
-          </div>
-
           {/* Continue CTA */}
-          <div style={{ marginTop: '1.25rem' }}>
+          <div style={{ marginTop: '1.75rem' }}>
+            <button type="button" className="vfit-btn-primary"
+              style={{ width: '100%', justifyContent: 'center', marginBottom: '0.75rem' }}
+              onClick={onCreateBody}>
+              Tạo body bằng Blender từ thông số
+            </button>
             <button
               type="button"
-              className="vfit-btn-primary"
+              className="vfit-btn-secondary"
               style={{ width: '100%', height: '3.25rem', fontSize: '1rem' }}
               onClick={handleContinue}
             >
-              <span>TIẾP TỤC CHỌN ĐỒ</span>
+              <span>TIẾP TỤC VỚI BODY MẪU</span>
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>

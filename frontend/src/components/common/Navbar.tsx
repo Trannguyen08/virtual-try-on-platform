@@ -1,50 +1,64 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
+export type AppTab = 'home' | 'catalog' | 'try-on' | 'garment-3d' | 'history' | 'auth';
+
 interface NavbarProps {
-  currentTab: 'home' | 'catalog' | 'try-on' | 'history' | 'auth';
-  onNavigate: (tab: 'home' | 'catalog' | 'try-on' | 'history' | 'auth') => void;
+  currentTab: AppTab;
+  onNavigate: (tab: AppTab) => void;
   onOpenTryOn: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenTryOn }) => {
   const { user, isAuthenticated, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = (tab: AppTab) => {
+    onNavigate(tab);
+    setMenuOpen(false);
+  };
 
   return (
     <header className="vfit-navbar">
       {/* Brand Logo */}
-      <div className="vfit-nav-brand" onClick={() => onNavigate('home')}>
+      <button type="button" className="vfit-nav-brand" onClick={() => navigate('home')} aria-label="Về trang chủ">
         <div className="vfit-brand-logo-icon">V</div>
         <span className="vfit-brand-logo-text">AI TRY-ON</span>
-      </div>
+      </button>
 
       {/* Nav Menu */}
-      <nav className="vfit-nav-links">
+      <nav id="vfit-primary-nav" className={`vfit-nav-links${menuOpen ? ' open' : ''}`}>
         <button
           type="button"
           className={`vfit-nav-item ${currentTab === 'home' ? 'active' : ''}`}
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('home')}
         >
           Trang chủ
         </button>
         <button
           type="button"
           className={`vfit-nav-item ${currentTab === 'catalog' ? 'active' : ''}`}
-          onClick={() => onNavigate('catalog')}
+          onClick={() => navigate('catalog')}
         >
           Sản phẩm
         </button>
         <button
           type="button"
           className={`vfit-nav-item ${currentTab === 'try-on' ? 'active' : ''}`}
-          onClick={() => onNavigate('try-on')}
+          onClick={() => navigate('try-on')}
         >
           Phòng thử đồ 3D
         </button>
         <button
           type="button"
+          className={`vfit-nav-item ${currentTab === 'garment-3d' ? 'active' : ''}`}
+          onClick={() => navigate('garment-3d')}
+        >
+          Tạo trang phục 3D
+        </button>
+        <button
+          type="button"
           className={`vfit-nav-item ${currentTab === 'history' ? 'active' : ''}`}
-          onClick={() => onNavigate('history')}
+          onClick={() => navigate('history')}
         >
           Lịch sử thử
         </button>
@@ -52,6 +66,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenTr
 
       {/* Actions */}
       <div className="vfit-nav-actions">
+        <button
+          type="button"
+          className="vfit-mobile-menu-toggle"
+          aria-controls="vfit-primary-nav"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          Menu
+        </button>
         {/* Wishlist */}
         <button
           type="button"
@@ -68,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenTr
         {/* Start Try-On Primary Button */}
         <button
           type="button"
-          className="vfit-btn-primary"
+          className="vfit-btn-primary vfit-nav-tryon-button"
           style={{ height: '2.65rem', padding: '0 1.25rem', marginTop: 0, fontSize: '0.85rem' }}
           onClick={onOpenTryOn}
         >
@@ -113,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenTr
             type="button"
             className="vfit-btn-secondary"
             style={{ height: '2.65rem', padding: '0 1rem', fontSize: '0.85rem' }}
-            onClick={() => onNavigate('auth')}
+            onClick={() => navigate('auth')}
           >
             Đăng nhập
           </button>

@@ -1,6 +1,5 @@
 import warnings
 from io import BytesIO
-from threading import RLock
 from typing import Protocol
 
 from fastapi import UploadFile
@@ -8,11 +7,13 @@ from PIL import Image, UnidentifiedImageError
 
 from backend.core.config import Settings
 from backend.core.errors import AppException
+from backend.db.repository import JobRepository
 from backend.schemas.body import BodySchema
 from backend.schemas.common import Source
 from backend.schemas.fit import FitRequest, FitResultSchema
 from backend.schemas.garment import GarmentSchema
 from backend.services.job_manager import JobManager
+from backend.services.storage import StorageService
 
 
 class TryOnProvider(Protocol):
@@ -26,12 +27,12 @@ class TryOnProvider(Protocol):
 
 
 class TryOnOrchestrator:
-    def __init__(self, settings: Settings, provider: TryOnProvider):
+    def __init__(self, settings: Settings, provider: TryOnProvider,
+                 storage: StorageService, jobs: JobRepository):
         self.settings = settings
         self.provider = provider
-        self.jobs = JobManager()
-        self._bodies: dict[str, BodySchema] = {}
-        self._lock = RLock()
+        self.storage = storage
+        self.jobs = JobManager(jobs)
 
     async def analyze(self, image: UploadFile, height_cm: float) -> BodySchema:
         try:
@@ -60,16 +61,13 @@ class TryOnOrchestrator:
         except (UnidentifiedImageError, OSError, ValueError, SyntaxError) as exc:
             raise AppException(400, "INVALID_IMAGE", "Image is empty, corrupt, or mismatches its media type") from exc
         body = self.provider.analyze(content, height_cm)
-        with self._lock:
-            self._bodies[body.body_id] = body.model_copy(deep=True)
+        self.storage.save_mock_body(body)
         return body
 
     def fit_inputs(self, request: FitRequest) -> tuple[BodySchema, GarmentSchema]:
-        with self._lock:
-            body = self._bodies.get(request.body_id)
-            if body is None:
-                raise AppException(404, "BODY_NOT_FOUND", "Body not found; submit analyze again")
-            body = body.model_copy(deep=True)
+        body = self.storage.get_mock_body(request.body_id)
+        if body is None:
+            raise AppException(404, "BODY_NOT_FOUND", "Body not found; submit analyze again")
         garment = next((g for g in self.provider.garments() if g.garment_id == request.garment_id), None)
         if garment is None:
             raise AppException(404, "GARMENT_NOT_FOUND", "Garment not found")

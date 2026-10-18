@@ -6,10 +6,22 @@ from PIL import Image
 
 from backend.core.config import Settings
 from backend.main import create_app
+from backend.db.models import Base
+from backend.db.session import make_engine
 
 
 @pytest.fixture
-def app():
+def isolated_main_database(tmp_path, monkeypatch):
+    """Each test gets a fresh metadata database; production uses PostgreSQL."""
+    url = f"sqlite+pysqlite:///{(tmp_path / 'main.sqlite3').as_posix()}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    engine = make_engine(url)
+    Base.metadata.create_all(engine)
+    engine.dispose()
+
+
+@pytest.fixture
+def app(isolated_main_database):
     # Isolated stores and deterministic CORS regardless of the developer environment.
     return create_app(Settings(cors_origins=("http://localhost:5173",)))
 

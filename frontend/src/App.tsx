@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Footer } from './components/common/Footer';
-import { Navbar } from './components/common/Navbar';
+import { AppTab, Navbar } from './components/common/Navbar';
 import { ProductDetailModal } from './components/catalog/ProductDetailModal';
 import { AuthProvider } from './context/AuthContext';
 import { MOCK_PRODUCTS, Product } from './data/mockProducts';
@@ -16,25 +16,58 @@ import './styles/home.css';
 import './styles/tryon.css';
 import './styles/history.css';
 import './styles/productDetail.css';
+import './styles/garment3d.css';
 
-type AppTab = 'home' | 'catalog' | 'try-on' | 'history' | 'auth';
+const Garment3DPage = React.lazy(() => import('./pages/Garment3DPage'));
+
+const TAB_PATHS: Record<AppTab, string> = {
+  home: '/',
+  catalog: '/catalog',
+  'try-on': '/try-on',
+  'garment-3d': '/garment-3d',
+  history: '/history',
+  auth: '/auth',
+};
+
+const tabFromPath = (): AppTab => {
+  if (window.location.pathname === '/garment3d.html') return 'garment-3d';
+  const entry = (Object.entries(TAB_PATHS) as [AppTab, string][])
+    .find(([, path]) => path === window.location.pathname);
+  return entry?.[0] ?? 'home';
+};
 
 const MainContent: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<AppTab>('home');
+  const [currentTab, setCurrentTab] = useState<AppTab>(tabFromPath);
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
 
+  useEffect(() => {
+    if (window.location.pathname === '/garment3d.html') {
+      window.history.replaceState(null, '', TAB_PATHS['garment-3d']);
+    }
+    const onPopState = () => setCurrentTab(tabFromPath());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const navigate = (tab: AppTab) => {
+    setCurrentTab(tab);
+    const path = TAB_PATHS[tab];
+    if (window.location.pathname !== path) window.history.pushState(null, '', path);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  };
+
   const handleSelectProductForTryOn = (product: Product) => {
     setSelectedProduct(product);
     setModalProduct(null);
-    setCurrentTab('try-on');
+    navigate('try-on');
   };
 
   const handleStartTryOn = () => {
     setSelectedProduct(null);
     setModalProduct(null);
-    setCurrentTab('try-on');
+    navigate('try-on');
   };
 
   const handleView3DFromHistory = (item: TryOnHistoryItem) => {
@@ -52,7 +85,7 @@ const MainContent: React.FC = () => {
       colors: [{ name: item.colorName, hex: item.colorHex }],
     };
     setSelectedProduct(found);
-    setCurrentTab('try-on');
+    navigate('try-on');
   };
 
   // Nếu người dùng chọn vào trang đăng nhập/đăng ký
@@ -63,7 +96,7 @@ const MainContent: React.FC = () => {
         <div style={{ position: 'fixed', top: '1.25rem', left: '1.25rem', zIndex: 100 }}>
           <button
             type="button"
-            onClick={() => setCurrentTab('home')}
+            onClick={() => navigate('home')}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -87,12 +120,12 @@ const MainContent: React.FC = () => {
         {authView === 'login' ? (
           <LoginPage
             onNavigateToRegister={() => setAuthView('register')}
-            onLoginSuccess={() => setCurrentTab('home')}
+            onLoginSuccess={() => navigate('home')}
           />
         ) : (
           <RegisterPage
             onNavigateToLogin={() => setAuthView('login')}
-            onRegisterSuccess={() => setCurrentTab('home')}
+            onRegisterSuccess={() => navigate('home')}
           />
         )}
       </div>
@@ -104,7 +137,7 @@ const MainContent: React.FC = () => {
       {/* Persistent Global Header */}
       <Navbar
         currentTab={currentTab}
-        onNavigate={(tab) => setCurrentTab(tab)}
+        onNavigate={navigate}
         onOpenTryOn={handleStartTryOn}
       />
 
@@ -113,7 +146,7 @@ const MainContent: React.FC = () => {
         {currentTab === 'home' && (
           <HomePage
             onStartTryOn={handleStartTryOn}
-            onExploreCatalog={() => setCurrentTab('catalog')}
+            onExploreCatalog={() => navigate('catalog')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
             onViewProductDetail={(product) => setModalProduct(product)}
           />
@@ -121,7 +154,7 @@ const MainContent: React.FC = () => {
 
         {currentTab === 'catalog' && (
           <CatalogPage
-            onNavigateHome={() => setCurrentTab('home')}
+            onNavigateHome={() => navigate('home')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
             onViewProductDetail={(product) => setModalProduct(product)}
           />
@@ -131,9 +164,16 @@ const MainContent: React.FC = () => {
           <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
             <TryOnPage
               initialGarment={selectedProduct}
-              onNavigateCatalog={() => setCurrentTab('catalog')}
-              onNavigateHistory={() => setCurrentTab('history')}
+              onNavigateCatalog={() => navigate('catalog')}
             />
+          </div>
+        )}
+
+        {currentTab === 'garment-3d' && (
+          <div className="vfit-garment-page">
+            <Suspense fallback={<p className="vfit-garment-loading" role="status">Đang mở trang tạo trang phục 3D…</p>}>
+              <Garment3DPage />
+            </Suspense>
           </div>
         )}
 

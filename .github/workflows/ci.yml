@@ -30,6 +30,7 @@ jobs:
           cache-dependency-path: |
             backend/requirements.txt
             backend/requirements-dev.txt
+            backend/garment3d/requirements.txt
 
       - name: Install dependencies
         run: |
@@ -44,7 +45,7 @@ jobs:
       - name: Run Fast Unit Tests (Skip Slow & GPU)
         run: |
           # Chạy toàn bộ unit test nhanh, bỏ qua bài test nặng mô phỏng / GPU
-          python -m pytest tests/unit/ tests/e2e/mock/ -m "not slow and not gpu" --verbose
+          python -m pytest tests/unit/ tests/e2e/mock/ tests/integration/garment_3d/test_main_api.py -m "not slow and not gpu" --verbose
 
   # ==========================================
   # 2. FRONTEND WEB & 3D VIEWER

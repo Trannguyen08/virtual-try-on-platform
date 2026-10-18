@@ -1,133 +1,89 @@
 import React, { useState } from 'react';
-import { BodyData, FitResult, tryonApi } from '../../api/tryonApi';
-import { ConfirmTryOnStep } from '../../components/tryon/ConfirmTryOnStep';
-import { InteractiveViewer3DStep } from '../../components/tryon/InteractiveViewer3DStep';
+import { bodyBuilderApi, BodyBuilderJob, BodyParameters, defaultBodyParameters } from '../../api/bodyBuilderApi';
+import { BodyBuilderStep } from '../../components/tryon/BodyBuilderStep';
+import { GeneratedBodyViewer } from '../../components/tryon/GeneratedBodyViewer';
 import { ProcessingStep } from '../../components/tryon/ProcessingStep';
 import { SelectGarmentStep } from '../../components/tryon/SelectGarmentStep';
 import { UploadStep } from '../../components/tryon/UploadStep';
 import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
-import { BodyCustomParams, BODY_PRESETS } from '../../data/bodyPresets';
 
-type TryOnStep = 'upload' | 'select-garment' | 'confirm' | 'processing' | 'viewer-3d';
+type TryOnStep = 'upload' | 'body-builder' | 'select-garment' | 'processing' | 'viewer-3d';
 
 interface TryOnPageProps {
   initialGarment?: Product | null;
   onNavigateCatalog?: () => void;
-  onNavigateHistory?: () => void;
 }
 
-export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigateCatalog, onNavigateHistory }) => {
+export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
   const [currentStep, setCurrentStep] = useState<TryOnStep>(
-    initialGarment ? 'select-garment' : 'upload'
+    'upload'
   );
 
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string>(
-    BODY_PRESETS[0].img
-  );
   const [heightCm, setHeightCm] = useState<number>(170);
-
-  const [bodyCustomParams, setBodyCustomParams] = useState<BodyCustomParams>({
-    height: 170,
-    weight: 50,
-    gender: 'female',
-    age: 24,
-    skinTone: 'light',
-    skinColorHex: '#f5d0b5',
-    selectedPresetId: 'slim',
-    glbModelUrl: '/models/body_default.glb',
-    proportions: { ...BODY_PRESETS[0].proportions },
-  });
 
   const [selectedGarment, setSelectedGarment] = useState<Product>(
     initialGarment || MOCK_PRODUCTS[0]
   );
   const [selectedSize, setSelectedSize] = useState<string>('M');
 
-  const [bodyData, setBodyData] = useState<BodyData | null>(null);
-  const [fitResult, setFitResult] = useState<FitResult | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string>('');
+  const [manualParams, setManualParams] = useState<BodyParameters | null>(null);
+  const [manualBodyJob, setManualBodyJob] = useState<BodyBuilderJob | null>(null);
+  const [manualClothingJob, setManualClothingJob] = useState<BodyBuilderJob | null>(null);
+  const [error, setError] = useState('');
 
-  // 1. Sau khi upload ảnh và nhập chiều cao ở Bước 1
-  const handleUploadComplete = async (
-    file: File | null,
-    previewUrl: string,
-    height: number,
-    customParams: BodyCustomParams
-  ) => {
-    setPhotoFile(file);
-    setPhotoPreview(previewUrl);
+  // Ảnh chỉ được xem trước; body 3D dùng thông số MPFB, không suy từ ảnh.
+  const handleUploadComplete = (height: number) => {
     setHeightCm(height);
-    setBodyCustomParams(customParams);
+    setManualParams(null);
+    setManualBodyJob(null);
+    setManualClothingJob(null);
+    setError('');
     setCurrentStep('select-garment');
   };
 
-  // 2. Sau khi chọn trang phục ở Bước 2 -> Chuyển sang Bước xác nhận (Confirm)
-  const handleGarmentSelected = (garment: Product, size: string) => {
+  // Cả hai lối vào đều dùng cùng một GLB MPFB do Blender xuất.
+  const handleConfirmGarment = async (garment: Product, size: string) => {
     setSelectedGarment(garment);
     setSelectedSize(size);
-    setCurrentStep('confirm');
-  };
-
-  // 3. Sau khi người dùng xác nhận ở Bước 3 -> Chạy AI Processing
-  const handleStartProcessing = async () => {
+    setError('');
     setCurrentStep('processing');
-    setProcessingStatus('Đang gửi dữ liệu ảnh và quét vóc dáng...');
+    setProcessingStatus('Đang xử lý mô hình...');
 
     try {
-      // Step A: Blender MPFB 3D Generation / Preset fallback
-      setProcessingStatus('Đang đồng bộ tham số MPFB và chuẩn bị lưới 3D...');
-      const blenderJob = await tryonApi.generateBodyWithBlender(bodyCustomParams, (msg) => {
-        setProcessingStatus(msg);
-      });
-
-      const updatedParams: BodyCustomParams = {
-        ...bodyCustomParams,
-        glbModelUrl: blenderJob.glbUrl,
-      };
-      setBodyCustomParams(updatedParams);
-
-      // Step B: Phân tích ảnh hoặc dùng mock
-      let bodyRes = bodyData;
-      if (!bodyRes) {
-        setProcessingStatus('AI đang phân tích tỷ lệ cơ thể và dựng body mesh...');
-        const blobOrFile = photoFile || new Blob(['mock'], { type: 'image/jpeg' });
-        bodyRes = await tryonApi.analyze(blobOrFile, heightCm, updatedParams);
-        setBodyData(bodyRes);
+      setProcessingStatus('Blender đang dựng body MPFB 3D...');
+      const bodyJob = manualBodyJob?.method === 'blender_mpfb'
+        ? manualBodyJob
+        : await bodyBuilderApi.generate(manualParams || defaultBodyParameters(heightCm));
+      setManualBodyJob(bodyJob);
+      setProcessingStatus('Blender đang tạo hình minh họa trang phục...');
+      try {
+        const clothingJob = await bodyBuilderApi.clothing(bodyJob.job_id, garment.id, garment.category,
+          garment.colors[0]?.hex || '#ffffff', size);
+        setManualClothingJob(clothingJob);
+      } catch (cause) {
+        setManualClothingJob(null);
+        setError(cause instanceof Error ? cause.message : 'Không thể tạo trang phục');
       }
-
-      // Step C: Tạo fit job và chờ kết quả
-      setProcessingStatus('Đang thực hiện draping trang phục và tính toán độ căng vải...');
-      const fitRes = await tryonApi.fitAndPoll(
-        bodyRes.body_id,
-        selectedGarment.id,
-        selectedSize,
-        (msg) => setProcessingStatus(msg)
-      );
-
-      setFitResult(fitRes);
       setCurrentStep('viewer-3d');
-    } catch {
-      // Trường hợp có lỗi, vẫn cho phép xem mô phỏng để trải nghiệm không bị gián đoạn
-      setCurrentStep('viewer-3d');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Không thể tạo mô hình');
+      setCurrentStep('select-garment');
     }
   };
 
-  // Khởi động lại luồng từ đầu
+  // 3. Khởi động lại luồng từ đầu
   const handleRestart = () => {
     setCurrentStep('upload');
-    setFitResult(null);
+    setManualParams(null);
+    setManualBodyJob(null);
+    setManualClothingJob(null);
+    setError('');
   };
 
   // Determine active step index for Stepper Bar
   const stepIndex =
-    currentStep === 'upload'
-      ? 1
-      : currentStep === 'select-garment'
-      ? 2
-      : currentStep === 'confirm'
-      ? 3
-      : 4;
+    currentStep === 'upload' || currentStep === 'body-builder' ? 1 : currentStep === 'select-garment' ? 2 : 3;
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 0 4rem 0' }}>
@@ -147,7 +103,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
               >
                 {stepIndex > 1 ? '✓' : '1'}
               </div>
-              <span className="vfit-step-label">Tải ảnh chân dung</span>
+              <span className="vfit-step-label">Body Blender</span>
               <span className="vfit-step-sublabel">
                 {stepIndex === 1 ? 'Đang thực hiện' : 'Hoàn tất'}
               </span>
@@ -162,7 +118,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
             <div
               className="vfit-step-item"
               onClick={() =>
-                (currentStep === 'viewer-3d' || currentStep === 'confirm' || photoPreview) &&
+                (currentStep === 'viewer-3d' || currentStep === 'select-garment' || manualParams) &&
                 setCurrentStep('select-garment')
               }
             >
@@ -173,7 +129,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
               >
                 {stepIndex > 2 ? '✓' : '2'}
               </div>
-              <span className="vfit-step-label">Chọn trang phục</span>
+              <span className="vfit-step-label">Chọn trang phục & Size</span>
               <span className="vfit-step-sublabel">
                 {stepIndex === 2
                   ? 'Đang thực hiện'
@@ -188,45 +144,16 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
               className={`vfit-step-connector ${stepIndex >= 3 ? 'filled' : ''}`}
             />
 
-            {/* Step 3: Xác nhận */}
-            <div
-              className="vfit-step-item"
-              onClick={() =>
-                currentStep === 'viewer-3d' && setCurrentStep('confirm')
-              }
-            >
-              <div
-                className={`vfit-step-circle ${
-                  stepIndex === 3 ? 'active' : stepIndex > 3 ? 'completed' : ''
-                }`}
-              >
-                {stepIndex > 3 ? '✓' : '3'}
-              </div>
-              <span className="vfit-step-label">Xác nhận cấu hình</span>
-              <span className="vfit-step-sublabel">
-                {stepIndex === 3
-                  ? 'Đang thực hiện'
-                  : stepIndex > 3
-                  ? 'Hoàn tất'
-                  : 'Bước kế tiếp'}
-              </span>
-            </div>
-
-            {/* Connector 3-4 */}
-            <div
-              className={`vfit-step-connector ${stepIndex >= 4 ? 'filled' : ''}`}
-            />
-
-            {/* Step 4: Kết quả */}
+            {/* Step 3 */}
             <div className="vfit-step-item">
               <div
-                className={`vfit-step-circle ${stepIndex === 4 ? 'active' : ''}`}
+                className={`vfit-step-circle ${stepIndex === 3 ? 'active' : ''}`}
               >
-                4
+                3
               </div>
-              <span className="vfit-step-label">Kết quả 3D & AI 4K</span>
+              <span className="vfit-step-label">Kết quả 3D tương tác</span>
               <span className="vfit-step-sublabel">
-                {stepIndex === 4 ? 'Đang hiển thị' : 'Chờ xử lý'}
+                {stepIndex === 3 ? 'Đang hiển thị' : 'Chờ xử lý'}
               </span>
             </div>
           </div>
@@ -235,52 +162,38 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment, onNavigate
 
       {/* Step Content */}
       {currentStep === 'upload' && (
-        <UploadStep
-          initialCustomParams={bodyCustomParams}
-          onNext={handleUploadComplete}
-        />
+        <UploadStep onNext={handleUploadComplete} onCreateBody={() => setCurrentStep('body-builder')} />
+      )}
+
+      {currentStep === 'body-builder' && (
+        <BodyBuilderStep initialParams={manualParams} onBack={() => setCurrentStep('upload')} onNext={(params) => {
+          setManualParams(params);
+          setManualBodyJob(null);
+          setManualClothingJob(null);
+          setError('');
+          setCurrentStep('select-garment');
+        }} />
       )}
 
       {currentStep === 'select-garment' && (
+        <>{error && <p role="alert" className="vfit-builder-error">{error}</p>}
         <SelectGarmentStep
           initialGarment={selectedGarment}
-          onBack={() => setCurrentStep('upload')}
-          onConfirm={handleGarmentSelected}
-        />
-      )}
-
-      {currentStep === 'confirm' && (
-        <ConfirmTryOnStep
-          photoPreview={photoPreview}
-          heightCm={heightCm}
-          garment={selectedGarment}
-          selectedSize={selectedSize}
-          customParams={bodyCustomParams}
-          onBack={() => setCurrentStep('select-garment')}
-          onChangeModel={() => setCurrentStep('upload')}
-          onChangeGarment={() => setCurrentStep('select-garment')}
-          onConfirmStart={handleStartProcessing}
-        />
+          onBack={() => setCurrentStep(manualParams ? 'body-builder' : 'upload')}
+          onConfirm={handleConfirmGarment}
+        /></>
       )}
 
       {currentStep === 'processing' && (
         <ProcessingStep statusMessage={processingStatus} />
       )}
 
-      {currentStep === 'viewer-3d' && (
-        <InteractiveViewer3DStep
-          garment={selectedGarment}
-          selectedSize={selectedSize}
-          bodyData={bodyData}
-          fitResult={fitResult}
-          customParams={bodyCustomParams}
-          onTryAnotherSize={() => setCurrentStep('select-garment')}
-          onRestart={handleRestart}
-          onNavigateHistory={onNavigateHistory}
-        />
+      {currentStep === 'viewer-3d' && manualBodyJob && (
+        <GeneratedBodyViewer bodyJob={manualBodyJob} initialClothingJob={manualClothingJob}
+          garment={selectedGarment} selectedSize={selectedSize} initialError={error}
+          onTryAnotherSize={() => setCurrentStep('select-garment')} onRestart={handleRestart} />
       )}
+
     </div>
   );
 };
-
-export default TryOnPage;
