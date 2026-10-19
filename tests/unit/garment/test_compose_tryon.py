@@ -52,12 +52,12 @@ def test_missing_torso_reports_error_tc_gar_05() -> None:
         )
 
 
-def test_undersized_pants_are_rejected_tc_gar_05() -> None:
-    """TC-GAR-05: excessive warping cannot pass as a fitted garment."""
+def test_large_deformations_are_rejected_tc_gar_05() -> None:
+    """TC-GAR-05: many corrections above 6 cm cannot pass as fitted."""
     with pytest.raises(ValueError, match="SEVERE_MESH_PENETRATION"):
-        validate_surface_adjustment(29298, 54016)
+        validate_surface_adjustment(3811, 53972)
 
 
 def test_compatible_pants_pass_adjustment_check_tc_gar_05() -> None:
-    """TC-GAR-05: modest clearance corrections remain valid."""
-    validate_surface_adjustment(4209, 54016)
+    """TC-GAR-05: many small corrections remain valid."""
+    validate_surface_adjustment(204, 54016)

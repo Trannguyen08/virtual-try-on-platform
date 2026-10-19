@@ -102,6 +102,7 @@ def fit_to_body(trees, garment_objects):
     max_displacement = 0.12
     moved = 0
     too_deep = 0
+    large_adjustments = 0
     for obj in garment_objects:
         inverse = obj.matrix_world.inverted()
         for vertex in obj.data.vertices:
@@ -114,20 +115,22 @@ def fit_to_body(trees, garment_objects):
             if signed >= 0.01:
                 continue
             displacement = 0.01 - signed
+            if displacement > 0.06:
+                large_adjustments += 1
             if displacement > max_displacement:
                 too_deep += 1
                 displacement = max_displacement
             vertex.co = inverse @ (point + normal * displacement)
             moved += 1
         obj.data.update()
-    return moved, too_deep
+    return moved, too_deep, large_adjustments
 
 
-def validate_surface_adjustment(moved, vertex_count):
+def validate_surface_adjustment(large_adjustments, vertex_count):
     """Reject a garment that would need large-scale warping to cover the body."""
-    if vertex_count <= 0 or moved > vertex_count * 0.35:
+    if vertex_count <= 0 or large_adjustments > vertex_count * 0.05:
         raise ValueError(
-            "SEVERE_MESH_PENETRATION: garment is too small for this body"
+            "SEVERE_MESH_PENETRATION: garment requires excessive surface deformation"
         )
 
 
@@ -207,9 +210,9 @@ def main():
         obj.matrix_world.translation += Vector(translation)
     bpy.context.view_layer.update()
     surfaces = body_surfaces(body)
-    moved, too_deep = fit_to_body(surfaces, garment)
+    moved, too_deep, large_adjustments = fit_to_body(surfaces, garment)
     garment_vertex_count = sum(len(obj.data.vertices) for obj in garment)
-    validate_surface_adjustment(moved, garment_vertex_count)
+    validate_surface_adjustment(large_adjustments, garment_vertex_count)
     bpy.context.view_layer.update()
     inside, severe = penetration_fraction(surfaces, garment)
     if severe > 0.10 or too_deep > garment_vertex_count * 0.20:
@@ -224,6 +227,7 @@ def main():
         "placement": "body_height_anchor_and_surface_clearance",
         "translation_m_blender_frame": translation,
         "clearance_adjusted_vertices": moved,
+        "large_adjustment_vertices": large_adjustments,
         "deep_vertices": too_deep,
         "penetration_fraction": round(inside, 6),
         "severe_penetration_fraction": round(severe, 6),
