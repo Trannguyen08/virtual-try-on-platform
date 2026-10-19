@@ -1,0 +1,38 @@
+{
+  "category": "t_shirt",
+  "name": "Standard Regular Fit T-Shirt",
+  "sizes": {
+    "S": {
+      "chest_cm": 92.0,
+      "waist_cm": 88.0,
+      "hem_cm": 92.0,
+      "shoulder_width_cm": 42.0,
+      "length_cm": 66.0,
+      "sleeve_length_cm": 20.0
+    },
+    "M": {
+      "chest_cm": 100.0,
+      "waist_cm": 96.0,
+      "hem_cm": 100.0,
+      "shoulder_width_cm": 44.0,
+      "length_cm": 69.0,
+      "sleeve_length_cm": 21.0
+    },
+    "L": {
+      "chest_cm": 108.0,
+      "waist_cm": 104.0,
+      "hem_cm": 108.0,
+      "shoulder_width_cm": 46.0,
+      "length_cm": 72.0,
+      "sleeve_length_cm": 22.0
+    },
+    "XL": {
+      "chest_cm": 116.0,
+      "waist_cm": 112.0,
+      "hem_cm": 116.0,
+      "shoulder_width_cm": 48.0,
+      "length_cm": 75.0,
+      "sleeve_length_cm": 23.0
+    }
+  }
+}

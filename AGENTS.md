@@ -1,13 +1,19 @@
 # AGENT DIRECTIVE — VIRTUAL TRY-ON PLATFORM (DYNAMIC ROLE ROUTER)
 
-## 1. Nguyên tắc Khởi động Nền tảng (Mandatory Common Rules)
-Dù bạn đang hoạt động ở bất kỳ vai trò hay phân hệ nào trong dự án, bạn **BẮT BUỘC** phải tuân thủ 5 quy tắc nền tảng chung được định nghĩa trong `.agents/rules/common/`:
+## 0. Bộ nhớ Ngữ cảnh Hoạt động (Agent Active Memory)
+> [!IMPORTANT]
+> **BẮT BUỘC ĐỌC VÀ CẬP NHẬT MEMORY:** 
+> - Trước khi bắt đầu code hoặc đưa ra bất kỳ đề xuất nào, Agent **BẮT BUỘC PHẢI ĐỌC** file [.agents/memory/ACTIVE_CONTEXT.md](.agents/memory/ACTIVE_CONTEXT.md) để nắm bắt chính xác ngữ cảnh làm việc gần nhất, lịch sử merge và các ràng buộc hiện tại.
+> - Sau mỗi đợt hoàn thành nhiệm vụ, sửa code hoặc thay đổi trạng thái nhánh, Agent **BẮT BUỘC CẬP NHẬT LẠI** file này.
 
-1. [01_agent_behavior.md](.agents/rules/common/01_agent_behavior.md) — Giới hạn quyền hạn (chỉ Đọc/Ghi file, không tự chạy lệnh terminal/git), chu trình thảo luận trước khi code.
+## 1. Nguyên tắc Khởi động Nền tảng (Mandatory Common Rules)
+Dù bạn đang hoạt động ở bất kỳ vai trò hay phân hệ nào trong dự án, bạn **BẮT BUỘC** phải tuân thủ 4 quy tắc nền tảng chung được định nghĩa trong `.agents/rules/common/`:
+
+1. [01_agent_behavior.md](.agents/rules/common/01_agent_behavior.md) — Giới hạn quyền hạn (chỉ Đọc/Ghi file, không tự chạy lệnh terminal/git), chu trình thảo luận trước khi code, bắt buộc đọc/cập nhật memory.
 2. [02_git_workflow.md](.agents/rules/common/02_git_workflow.md) — Quy chuẩn Git, làm việc trên feature branch, bảo vệ tài nguyên nặng (> 50MB, model weights, cache).
 3. [03_testing_and_qa.md](.agents/rules/common/03_testing_and_qa.md) — Quy chuẩn viết test, gắn mã ID truy vết (`TC-xxx`), `pytest.approx`, cố định random seed và cơ chế Zero-Crash Fallback.
 4. [04_contract_and_units.md](.agents/rules/common/04_contract_and_units.md) — Nguyên tắc Contract First, chuẩn hóa Đơn vị (**Mét** nội bộ, **Centimet** ngoại vi) và Hệ trục tọa độ (**Y-up, +Z forward**), cấm Silent Fix.
-5. [05_change_impact_log.md](.agents/rules/common/05_change_impact_log.md) — Bắt buộc tạo Change Impact Log sau mỗi đợt sửa đổi code/config/contract trước khi báo hoàn thành.
+
 
 ---
 

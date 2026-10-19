@@ -40,8 +40,9 @@ class Garment3DSettings:
         data_dir = Path(
             os.getenv("GARMENT3D_DATA_DIR", str(WORKSPACE_ROOT / "data"))
         ).resolve()
+        provider = os.getenv("GARMENT3D_PROVIDER", "local").lower()
         return cls(
-            provider=os.getenv("GARMENT3D_PROVIDER", "local").lower(),
+            provider=provider,
             preset=os.getenv("GARMENT3D_PRESET", "balanced").lower(),
             output_dir=Path(
                 os.getenv(

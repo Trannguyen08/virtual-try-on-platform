@@ -80,3 +80,6 @@ ai/models/weights/
 *.npz
 *.parquet
 *.h5
+
+# Agent memory & active context
+.agents/memory/

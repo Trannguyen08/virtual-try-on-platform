@@ -8,36 +8,41 @@ import { GarmentSize, getGarmentSizeProfile, SizeRegion } from '../data/sizeChar
 import { Garment360Viewer } from '../viewer/Garment360Viewer';
 import { buildGarmentAnnotations } from '../viewer/garmentAnnotations';
 
+const GARMENT_TYPE_LABELS: Record<string, string> = {
+  tshirt: 'Áo thun (T-shirt)',
+  shirt: 'Áo sơ mi (Shirt)',
+  jacket: 'Áo khoác (Jacket)',
+  pants: 'Quần dài (Pants)',
+  skirt: 'Chân váy (Skirt)',
+  dress: 'Đầm/Váy liền (Dress)',
+};
+
 export const Garment3DPage: React.FC = () => {
   const [files, setFiles] = useState<GarmentFiles>({});
-  const [garmentType, setGarmentType] = useState<GarmentType>('tshirt');
   const [sizeRegion, setSizeRegion] = useState<SizeRegion>('asia');
   const [selectedSize, setSelectedSize] = useState<GarmentSize>('M');
-  const [referenceValue, setReferenceValue] = useState('');
   const { job, generation, error, submitting, submit, reset } = useGarmentGeneration();
+
+  const resolvedGarmentType: GarmentType =
+    (generation?.garment?.garment_type as GarmentType) || 'tshirt';
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!files.front) return;
-    const parsedReference = Number(referenceValue);
     void submit(files as GarmentImageSet, {
-      garmentType,
-      referenceMeasurement: parsedReference > 0 ? 'garment_length' : undefined,
-      referenceValueCm: parsedReference > 0 ? parsedReference : undefined,
+      garmentType: 'auto',
     });
   };
 
   const startAgain = () => {
     reset();
     setFiles({});
-    setGarmentType('tshirt');
     setSizeRegion('asia');
     setSelectedSize('M');
-    setReferenceValue('');
   };
 
-  const sizeProfiles = getGarmentSizeProfile(garmentType, sizeRegion);
-  const selectedProfile = sizeProfiles[selectedSize];
+  const sizeProfiles = getGarmentSizeProfile(resolvedGarmentType, sizeRegion);
+  const selectedProfile = sizeProfiles[selectedSize] ?? sizeProfiles.M;
   const mediumProfile = sizeProfiles.M;
   const sizeScale: [number, number, number] = [
     selectedProfile.widthCm / mediumProfile.widthCm,
@@ -52,70 +57,27 @@ export const Garment3DPage: React.FC = () => {
           <span className="g3d-hero__pill">Garment 3D Studio</span>
           <h1>Biến ảnh trang phục thành mô hình 3D</h1>
           <p>
-            Tải lên từ một đến bốn góc ảnh. Hệ thống sẽ tự chuẩn hóa và tạo mesh có thể xem
-            360° ngay trên trình duyệt.
+            Tải lên từ một đến bốn góc ảnh. Hệ thống tự động tách nền, nhận diện loại trang phục
+            và tạo mesh 3D có thể xem 360° ngay trên trình duyệt.
           </p>
         </div>
         <div className="g3d-hero__orb" aria-hidden="true">360°</div>
       </header>
 
       <form className="g3d-form" onSubmit={onSubmit}>
-          <GarmentImageInputs files={files} onChange={setFiles} disabled={submitting || !!job} />
-          <section className="g3d-panel g3d-calibration" aria-labelledby="garment-scale-title">
-            <div className="g3d-section-heading">
-              <div>
-                <span className="g3d-eyebrow">Bước 2</span>
-                <h2 id="garment-scale-title">Loại đồ và kích thước thật</h2>
-              </div>
-            </div>
-            <div className="g3d-field-grid">
-              <label className="g3d-field">
-                <span>Loại trang phục</span>
-                <select
-                  value={garmentType}
-                  disabled={submitting || !!job}
-                  onChange={(event) => setGarmentType(event.target.value as GarmentType)}
-                >
-                  <option value="tshirt">Áo thun</option>
-                  <option value="shirt">Áo sơ mi</option>
-                  <option value="jacket">Áo khoác</option>
-                  <option value="pants">Quần dài</option>
-                  <option value="skirt">Chân váy</option>
-                  <option value="dress">Váy liền</option>
-                </select>
-              </label>
-              <label className="g3d-field">
-                <span>Chiều dài trang phục thực tế (cm)</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="300"
-                  step="0.1"
-                  inputMode="decimal"
-                  value={referenceValue}
-                  disabled={submitting || !!job}
-                  placeholder="Ví dụ: 68"
-                  onChange={(event) => setReferenceValue(event.target.value)}
-                />
-              </label>
-            </div>
-            <p className="g3d-section-copy">
-              Số đo này dùng để đổi pixel sang centimet. Nếu bỏ trống, mô hình vẫn xem được
-              nhưng chưa đủ tin cậy để ghép theo kích thước body.
-            </p>
-          </section>
-          {!job && (
-            <div className="g3d-submit-row">
-              <p>Ảnh mặt trước càng rõ, kết quả càng chính xác.</p>
-              <button
-                className="g3d-button g3d-button--primary"
-                type="submit"
-                disabled={!files.front || submitting}
-              >
-                {submitting ? 'Đang tải ảnh…' : 'Tạo mô hình 3D'}
-              </button>
-            </div>
-          )}
+        <GarmentImageInputs files={files} onChange={setFiles} disabled={submitting || !!job} />
+        {!job && (
+          <div className="g3d-submit-row">
+            <p>Hệ thống tự động tách nền, nhận diện loại trang phục và tạo mesh 3D.</p>
+            <button
+              className="g3d-button g3d-button--primary"
+              type="submit"
+              disabled={!files.front || submitting}
+            >
+              {submitting ? 'Đang phân tích & tải ảnh…' : 'Tạo mô hình 3D (Tự động nhận diện)'}
+            </button>
+          </div>
+        )}
       </form>
 
       {job && !generation && <GarmentGenerationProgress job={job} />}
@@ -131,7 +93,9 @@ export const Garment3DPage: React.FC = () => {
         <section className="g3d-panel g3d-result">
           <div className="g3d-section-heading">
             <div>
-              <span className="g3d-eyebrow">Hoàn tất</span>
+              <span className="g3d-eyebrow">
+                Tự động nhận diện: {GARMENT_TYPE_LABELS[resolvedGarmentType] || resolvedGarmentType}
+              </span>
               <h2>Mô hình 3D của bạn</h2>
             </div>
           </div>
@@ -146,12 +110,12 @@ export const Garment3DPage: React.FC = () => {
             thumbnailUrl={generation.assets.thumbnail_url}
             scale={sizeScale}
             annotations={buildGarmentAnnotations(
-              garmentType,
+              resolvedGarmentType,
               generation.garment?.landmarks,
             )}
           />
           <SizeChartPanel
-            garmentType={garmentType}
+            garmentType={resolvedGarmentType}
             region={sizeRegion}
             size={selectedSize}
             onRegionChange={setSizeRegion}
@@ -162,7 +126,7 @@ export const Garment3DPage: React.FC = () => {
               <div className="g3d-section-heading">
                 <div>
                   <span className="g3d-eyebrow">
-                    {generation.garment.fit_ready ? 'Sẵn sàng ghép body' : 'Chưa hiệu chỉnh cm'}
+                    {generation.garment.fit_ready ? 'Sẵn sàng ghép body' : 'Kích thước tham chiếu'}
                   </span>
                   <h3 id="garment-measurements-title">Thông số trang phục</h3>
                 </div>

@@ -4,10 +4,10 @@ const GARMENT3D_API_BASE_URL = API_BASE_URL;
 
 export type GarmentView = 'front' | 'left' | 'back' | 'right';
 export type GarmentImageSet = Partial<Record<GarmentView, File>> & { front: File };
-export type GarmentType = 'tshirt' | 'shirt' | 'jacket' | 'pants' | 'skirt' | 'dress';
+export type GarmentType = 'auto' | 'tshirt' | 'shirt' | 'jacket' | 'pants' | 'skirt' | 'dress';
 
 export interface GarmentGenerationOptions {
-  garmentType: GarmentType;
+  garmentType?: GarmentType;
   referenceMeasurement?: string;
   referenceValueCm?: number;
 }
@@ -107,7 +107,7 @@ export async function createGarmentGeneration(
     const file = images[view];
     if (file) form.append(view, file);
   });
-  form.append('garment_type', options.garmentType);
+  form.append('garment_type', options.garmentType || 'auto');
   if (options.referenceMeasurement && options.referenceValueCm) {
     form.append('reference_measurement', options.referenceMeasurement);
     form.append('reference_value_cm', String(options.referenceValueCm));

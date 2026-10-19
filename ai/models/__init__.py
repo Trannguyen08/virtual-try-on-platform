@@ -14,6 +14,12 @@ from ai.models.fit_predictor import (
     MLFitPredictor,
     RuleBasedFitPredictor,
 )
+from ai.models.dynamic_size_advisor import (
+    AnthropometricEstimator,
+    GarmentDimensionPredictor,
+    DynamicSizeMatcher,
+    DynamicSizeAdvisor,
+)
 
 __all__ = [
     "FEATURE_COLUMNS",
@@ -26,4 +32,8 @@ __all__ = [
     "DummyFitPredictor",
     "MLFitPredictor",
     "FitPredictor",
+    "AnthropometricEstimator",
+    "GarmentDimensionPredictor",
+    "DynamicSizeMatcher",
+    "DynamicSizeAdvisor",
 ]
