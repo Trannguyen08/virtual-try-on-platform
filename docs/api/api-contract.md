@@ -295,3 +295,38 @@ trả 404:
 Garment 3D là sub-app với contract response riêng; envelope `data/error` ở các
 route `/api/...` phía trên không áp dụng cho namespace này. Xem
 `backend/garment3d/README.md` và Swagger UI tại `/garment3d/docs`.
+
+## Body-builder: mốc A, native MPFB refit
+
+Phạm vi bổ sung: `/api/body-builder`, không đổi contract `/api/tryon` mock.
+Các thay đổi dưới đã có code; chưa chạy acceptance với Blender/assets thật.
+
+- `GET /api/body-builder/garments`: envelope `data: list`, `error: null`;
+  mỗi item có `id`, `name`, `category`, `sizes`, `assets`, `license`, `source`,
+  `available`, `error_code`, `mode: "body_refit"`, `size_chart_verified: false`;
+  `gender` là metadata tùy chọn. Không trả đường dẫn disk. Availability chỉ
+  kiểm tra dependency, chưa xác nhận geometry hoặc chất liệu đã render đúng.
+- `POST /api/body-builder/generate`: body mới xuất GLB và lưu thêm `.blend`
+  MPFB gốc phía server trước bake/mask. Không phát URL native scene.
+- `POST /api/body-builder/clothing`: request giữ nguyên
+  `{body_job_id, garment_id, category, color_hex, size}`. Nếu `garment_id`
+  nằm trong catalog MHCLO, dùng native body để refit và giữ material gốc;
+  `color_hex` vẫn validate nhưng không tint texture ở chế độ này.
+- `GET /api/body-builder/jobs/{job_id}`: giữ các trường/trạng thái cũ;
+  thành công native refit có `method: "blender_mpfb_refit"`, `source: "module"`
+  (hoặc mixed nếu body nguồn mock). Đây là provenance module thực thi, không
+  phải bằng chứng chất lượng hoặc độ vừa. URL vẫn trỏ GLB cảnh cuối.
+- Mẫu catalog mặc định: `mpfb-tshirt`, `mpfb-pants`, `mpfb-outfit`, size M;
+  M là nhãn thử nghiệm, chưa có chart thực và không scale asset theo size.
+- Lỗi kiểm tra trước job, HTTP 422: `MHCLO_CATALOG_INVALID`,
+  `MHCLO_ASSET_INVALID`, `MHCLO_ASSET_MISSING`, `MHCLO_ASSET_AMBIGUOUS`,
+  `MHCLO_CATEGORY_MISMATCH`, `SIZE_NOT_AVAILABLE`, `BODY_REFIT_DATA_MISSING`.
+  Body/job ID không tồn tại tiếp tục dùng lỗi hiện hữu.
+- Lỗi Blender, topology, phiên bản native hoặc export xảy ra sau enqueue:
+  job chuyển `failed`, API không crash, thông báo chung phía client và
+  exception summary phía server. Không tự rơi về hình hộp khi MHCLO lỗi.
+- Job body-builder vẫn trong RAM, restart mất ID. Scene/report lưu trên disk
+  không có nghĩa job đã được phục hồi. Chưa có worker queue bền vững ở luồng này.
+
+Chi tiết cài asset, vận hành, thêm sản phẩm và ma trận kiểm thử:
+[mpfb-refit-milestone-a.md](../development/mpfb-refit-milestone-a.md).

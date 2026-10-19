@@ -5,8 +5,10 @@ the glTF exporter converts the scene to the platform's Y-up GLB convention.
 """
 
 import argparse
+import hashlib
 import importlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -42,10 +44,9 @@ def ellipsoid(name, location, scale, mat):
     return obj
 
 
-def mpfb_body(params, skin):
-    """Create the installed MPFB human, matching its From scratch defaults."""
+def load_mpfb_services():
+    """Enable the installed MPFB version before creating/loading native bodies."""
     import addon_utils
-    import bpy
 
     services = None
     for addon in ("bl_ext.blender_org.mpfb", "bl_ext.user_default.mpfb", "mpfb"):
@@ -57,6 +58,37 @@ def mpfb_body(params, skin):
             continue
     if services is None:
         raise RuntimeError("MPFB_UNAVAILABLE: install and enable MPFB2 in the Blender used by the backend")
+    return services
+
+
+def mpfb_version(services):
+    manifest = Path(services.__file__).resolve().parents[1] / "blender_manifest.toml"
+    if manifest.is_file():
+        match = re.search(r'^version\s*=\s*"([^"]+)"', manifest.read_text(encoding="utf-8"), re.MULTILINE)
+        if match:
+            return match.group(1)
+    package = importlib.import_module(services.__name__.rsplit(".", 1)[0])
+    return str(getattr(package, "bl_info", {}).get("version", "unknown"))
+
+
+def prepare_body_export(human, services):
+    """Bake only the export copy in memory, after its native scene was saved."""
+    import bpy
+
+    services.TargetService.bake_targets(human)
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = human
+    human.select_set(True)
+    for modifier in list(human.modifiers):
+        if modifier.type == "MASK":
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
+def mpfb_body(params, skin, preserve=False):
+    """Create the installed MPFB human, retaining topology for native fitting."""
+    import bpy
+
+    services = load_mpfb_services()
 
     HumanService = services.HumanService
     TargetService = services.TargetService
@@ -92,34 +124,74 @@ def mpfb_body(params, skin):
                                "value": abs(value - 0.5) * 2})
     if morphs:
         TargetService.bulk_load_targets(human, morphs)
-    TargetService.bake_targets(human)
-    bpy.context.view_layer.objects.active = human
-    human.select_set(True)
-    for modifier in list(human.modifiers):
-        if modifier.type == "MASK":
-            bpy.ops.object.modifier_apply(modifier=modifier.name)
+    if not preserve:
+        prepare_body_export(human, services)
     # Scale from actual bounds instead of assuming a fixed MPFB height.
     bpy.context.view_layer.update()
     from mathutils import Vector
-    corners = [human.matrix_world @ Vector(corner) for corner in human.bound_box]
+    evaluated = human.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    corners = [evaluated.matrix_world @ Vector(corner) for corner in evaluated.bound_box]
     height = max(v.z for v in corners) - min(v.z for v in corners)
     if height <= 0:
         raise ValueError("MPFB returned an empty human")
     factor = params["height_cm"] / 100 / height
     human.scale = tuple(axis * factor for axis in human.scale)
     bpy.context.view_layer.update()
-    corners = [human.matrix_world @ Vector(corner) for corner in human.bound_box]
+    evaluated = human.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    corners = [evaluated.matrix_world @ Vector(corner) for corner in evaluated.bound_box]
     human.location.z -= min(v.z for v in corners)
     human.data.materials.clear()
     human.data.materials.append(skin)
+    return human, services
 
 
-def make_body(params):
+def make_body(params, native_output=None):
     import bpy
 
     skin = material("Skin", params["skin_color"])
-    mpfb_body(params, skin)
+    human, services = mpfb_body(params, skin, preserve=native_output is not None)
+    if native_output is not None:
+        human["vto_native_body"] = True
+        bpy.context.scene["vto_native_version"] = 1
+        bpy.context.scene["vto_body_parameters"] = json.dumps(params, sort_keys=True)
+        bpy.context.scene["vto_blender_version"] = bpy.app.version_string
+        bpy.context.scene["vto_mpfb_services"] = services.__name__
+        bpy.context.scene["vto_mpfb_version"] = mpfb_version(services)
+        bpy.context.scene["vto_body_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        Path(native_output).parent.mkdir(parents=True, exist_ok=True)
+        bpy.ops.wm.save_as_mainfile(filepath=str(native_output), check_existing=False, compress=True)
+        prepare_body_export(human, services)
     print("BODY_METHOD=mpfb")
+
+
+def make_native_clothing(params, source, entry):
+    """Fit MHCLO onto the original MPFB topology instead of reimported GLB."""
+    import bpy
+    from garment.mpfb.blender_fitting import fit_native_garments
+
+    native = Path(source).with_suffix(".blend")
+    if not native.is_file():
+        raise ValueError("BODY_REFIT_DATA_MISSING: create a new body with native MPFB data")
+    services = load_mpfb_services()
+    bpy.ops.wm.open_mainfile(filepath=str(native), load_ui=False, use_scripts=False)
+    services = load_mpfb_services()
+    if (bpy.context.scene.get("vto_native_version") != 1
+            or bpy.context.scene.get("vto_blender_version") != bpy.app.version_string
+            or bpy.context.scene.get("vto_mpfb_services") != services.__name__
+            or bpy.context.scene.get("vto_mpfb_version") != mpfb_version(services)):
+        raise ValueError("BODY_REFIT_VERSION_MISMATCH: create a new body with this Blender/MPFB")
+    humans = [obj for obj in bpy.context.scene.objects
+              if obj.type == "MESH" and obj.get("vto_native_body")]
+    if len(humans) != 1 or not humans[0].data.shape_keys:
+        raise ValueError("BODY_REFIT_DATA_INVALID: expected one unbaked MPFB basemesh")
+    human = humans[0]
+    report = fit_native_garments(human, services, entry, params)
+    report["body_job_id"] = Path(source).stem
+    report["body_scene_sha256"] = hashlib.sha256(native.read_bytes()).hexdigest()
+    report["body_generator_sha256"] = bpy.context.scene.get("vto_body_script_sha256")
+    prepare_body_export(human, services)
+    print("CLOTHING_METHOD=mpfb_refit")
+    return report
 
 
 def make_clothing(params, source):
@@ -127,6 +199,18 @@ def make_clothing(params, source):
 
     if not source or not Path(source).is_file():
         raise ValueError("Body source GLB is missing")
+    repo_root = str(Path(__file__).resolve().parents[2])
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+    from garment.mpfb.catalog import load_catalog
+
+    entry = load_catalog().get(params["garment_id"])
+    if entry is not None:
+        if entry.get("engine") == "gltf_reference":
+            from garment.external.alignment import make_reference_clothing
+
+            return make_reference_clothing(params, source, entry)
+        return make_native_clothing(params, source, entry)
     bpy.ops.import_scene.gltf(filepath=source)
     body_objects = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     if not body_objects:
@@ -157,6 +241,18 @@ def make_clothing(params, source):
     category = params["category"]
     if loaded_asset:
         print("CLOTHING_METHOD=asset")
+    elif category == "t_shirt":
+        # Blender executes this file directly, so expose the repository package.
+        repo_root = str(Path(__file__).resolve().parents[2])
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        from garment.mesh.blender_tshirt import create_tshirt
+
+        cloth.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.85
+        create_tshirt(body_objects, cloth, params["size"])
+        # Remains illustrative in the API: no real draping or measured fit.
+        print("CLOTHING_METHOD=synthetic_tshirt")
+        return
     elif category == "pants":
         for side in (-1, 1):
             ellipsoid(f"Clothing_Pants_{side}", (side * 0.12 * factor, 0, 0.42 * factor),
@@ -183,8 +279,10 @@ def make_clothing(params, source):
                 obj.location = tuple(value * factor for value in obj.location)
     for obj in bpy.context.scene.objects:
         if obj.name not in clothing_start and obj.type == "MESH":
-            obj.data.materials.clear()
-            obj.data.materials.append(cloth)
+            # Keep authored textures/materials on imported garment assets.
+            if not loaded_asset or not obj.data.materials:
+                obj.data.materials.clear()
+                obj.data.materials.append(cloth)
             obj.scale.x *= size_scale
             obj.scale.y *= size_scale
 
@@ -196,13 +294,18 @@ def main():
     params = json.loads(args.params)
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete()
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    report = None
     if args.action == "body":
-        make_body(params)
+        make_body(params, native_output=output.with_suffix(".blend"))
     else:
-        make_clothing(params, args.source)
-    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        report = make_clothing(params, args.source)
     bpy.ops.export_scene.gltf(filepath=args.output, export_format="GLB",
-                              export_apply=True, export_yup=True)
+                              export_apply=True, export_yup=True, export_morph=False)
+    if report is not None:
+        output.with_suffix(".refit.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

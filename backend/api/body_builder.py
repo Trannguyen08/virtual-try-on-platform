@@ -8,6 +8,8 @@ from pydantic import Field
 
 from backend.schemas.common import ContractModel, SuccessResponse
 from backend.services.blender_body import body_jobs
+from garment.mpfb.catalog import GarmentConfigError, catalog_status
+from backend.core.errors import AppException
 
 router = APIRouter(prefix="/body-builder", tags=["body-builder"])
 
@@ -39,6 +41,15 @@ class ClothingParameters(ContractModel):
     category: Literal["t_shirt", "shirt", "dress", "jacket", "pants"]
     color_hex: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
     size: Literal["XS", "S", "M", "L", "XL", "XXL"] = "M"
+
+
+@router.get("/garments")
+def get_refit_garments() -> SuccessResponse[list[dict]]:
+    """Operator catalog/status; no filesystem paths or automatic downloads."""
+    try:
+        return SuccessResponse(data=catalog_status())
+    except GarmentConfigError as exc:
+        raise AppException(422, exc.code, str(exc)) from exc
 
 
 @router.post("/generate", status_code=202)

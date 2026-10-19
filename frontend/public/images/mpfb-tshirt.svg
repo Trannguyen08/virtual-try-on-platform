@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#eef2f5"/>
+  <path d="M145 85 85 110 40 180 105 215 130 180 130 320 270 320 270 180 295 215 360 180 315 110 255 85Q200 130 145 85Z" fill="#5e7b8d" stroke="#2c4658" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M165 95Q200 135 235 95" fill="none" stroke="#c9d9df" stroke-width="8"/>
+  <text x="200" y="365" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#2c4658">MPFB · Refit</text>
+</svg>

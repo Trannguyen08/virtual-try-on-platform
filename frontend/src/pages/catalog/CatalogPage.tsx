@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
+import { Product } from '../../data/mockProducts';
+import { useGarmentProducts } from '../../hooks/useGarmentProducts';
 
 interface CatalogPageProps {
   onSelectProductForTryOn: (product: Product) => void;
@@ -10,6 +11,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
   onSelectProductForTryOn,
   onNavigateHome,
 }) => {
+  const { products, refitStatus } = useGarmentProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedGender, setSelectedGender] = useState<string>('all');
   const [selectedSize, setSelectedSize] = useState<string>('all');
@@ -25,6 +27,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
     { key: 'shirt', label: 'Áo sơ mi' },
     { key: 'dress', label: 'Váy đầm' },
     { key: 'jacket', label: 'Áo khoác' },
+    { key: 'pants', label: 'Quần' },
   ];
 
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -51,7 +54,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
   // Filter and Sort Logic
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       // Category filter
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
         return false;
@@ -88,10 +91,11 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
       if (sortBy === 'newest') return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
       return (b.tryCount || 0) - (a.tryCount || 0);
     });
-  }, [selectedCategory, selectedGender, selectedSize, selectedColor, maxPrice, searchQuery, sortBy]);
+  }, [products, selectedCategory, selectedGender, selectedSize, selectedColor, maxPrice, searchQuery, sortBy]);
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#fdfcfe', paddingTop: '5.5rem' }}>
+      <p role="status" style={{ padding: '0 2rem', color: 'var(--vfit-secondary)' }}>{refitStatus}</p>
       {/* Top Editorial Breadcrumbs & Header */}
       <section style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 2rem 1rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--vfit-secondary)' }}>
@@ -157,8 +161,8 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               {categories.map((cat) => {
                 const count =
                   cat.key === 'all'
-                    ? MOCK_PRODUCTS.length
-                    : MOCK_PRODUCTS.filter((p) => p.category === cat.key).length;
+                    ? products.length
+                    : products.filter((p) => p.category === cat.key).length;
                 const isSelected = selectedCategory === cat.key;
                 return (
                   <div

@@ -56,7 +56,9 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
         ? manualBodyJob
         : await bodyBuilderApi.generate(manualParams || defaultBodyParameters(heightCm));
       setManualBodyJob(bodyJob);
-      setProcessingStatus('Blender đang tạo hình minh họa trang phục...');
+      setProcessingStatus(garment.fittingMode === 'body_refit'
+        ? 'Blender đang refit quần áo theo body MPFB...'
+        : 'Blender đang tạo hình minh họa trang phục...');
       try {
         const clothingJob = await bodyBuilderApi.clothing(bodyJob.job_id, garment.id, garment.category,
           garment.colors[0]?.hex || '#ffffff', size);

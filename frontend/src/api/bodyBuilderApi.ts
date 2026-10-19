@@ -44,6 +44,19 @@ export interface BodyBuilderJob {
   source: 'mock' | 'module' | 'mixed';
 }
 
+export interface RefitGarment {
+  id: string;
+  name: string;
+  category: ProductCategory;
+  gender?: 'menswear' | 'womenswear' | 'unisex';
+  sizes: ('XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL')[];
+  available: boolean;
+  error_code: string | null;
+  mode: 'body_refit' | 'reference_alignment';
+}
+
+type ProductCategory = 't_shirt' | 'shirt' | 'dress' | 'jacket' | 'pants';
+
 async function request<T>(path: string, body?: object): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: body ? 'POST' : 'GET',
@@ -68,6 +81,7 @@ async function waitForJob(jobId: string): Promise<BodyBuilderJob> {
 }
 
 export const bodyBuilderApi = {
+  garments: () => request<RefitGarment[]>('/api/body-builder/garments'),
   assetUrl: (job: BodyBuilderJob) => job.asset_url ? `${API_BASE_URL}${job.asset_url}` : '',
   async generate(parameters: BodyParameters): Promise<BodyBuilderJob> {
     const job = await request<BodyBuilderJob>('/api/body-builder/generate', parameters);

@@ -14,6 +14,7 @@ export interface Product {
   isHot?: boolean;
   isNew?: boolean;
   tryCount?: number;
+  fittingMode?: 'body_refit' | 'reference_alignment';
 }
 
 export const MOCK_PRODUCTS: Product[] = [
