@@ -35,6 +35,7 @@ export const defaultBodyParameters = (heightCm = 170): BodyParameters => ({
 
 export interface BodyBuilderJob {
   job_id: string;
+  body_id?: string | null;
   action: 'body' | 'clothing';
   status: 'pending' | 'running' | 'completed' | 'failed';
   source_id: string | null;
@@ -68,7 +69,8 @@ async function waitForJob(jobId: string): Promise<BodyBuilderJob> {
 }
 
 export const bodyBuilderApi = {
-  assetUrl: (job: BodyBuilderJob) => job.asset_url ? `${API_BASE_URL}${job.asset_url}` : '',
+  assetUrl: (job: BodyBuilderJob) => job.asset_url ? new URL(job.asset_url, API_BASE_URL).href : '',
+  getBody: (bodyId: string) => request<BodyBuilderJob>(`/api/body-builder/bodies/${encodeURIComponent(bodyId)}`),
   async generate(parameters: BodyParameters): Promise<BodyBuilderJob> {
     const job = await request<BodyBuilderJob>('/api/body-builder/generate', parameters);
     return waitForJob(job.job_id);

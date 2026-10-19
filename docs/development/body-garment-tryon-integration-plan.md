@@ -1,6 +1,6 @@
 # Kế hoạch xử lý ảnh quần áo thành cảnh thử đồ 3D
 
-> **Trạng thái:** Quy trình mục tiêu cần triển khai. Tài liệu này chưa thay đổi [API contract hiện hành](../api/api-contract.md). API mock hiện chỉ nhận PNG/JPEG ở `/api/tryon/analyze`, không lưu ảnh và dùng job trong bộ nhớ thay vì queue. Hỗ trợ WebP, lưu ảnh, queue và xử lý thật dưới đây cần contract và triển khai riêng.
+> **Trạng thái:** Đã thêm luồng mã v0.2 ở [API contract](../api/api-contract.md); chưa nghiệm thu với PostgreSQL và Blender thật. `/api/tryon/analyze` mock vẫn chỉ nhận PNG/JPEG. Luồng mới `/api/tryon/image-jobs` nhận ảnh trang phục JPG/PNG/WebP và body MPFB đã tạo.
 
 ## Mục tiêu và điều kiện đầu vào
 
@@ -79,3 +79,21 @@ M4 chỉ tham gia nếu bổ sung đánh giá độ vừa/size bằng chỉ số
 - [ ] Blender import đúng body/áo, fit và rig theo contract, kiểm tra xuyên mesh; trạng thái mô phỏng vải được ghi rõ.
 - [ ] GLB cuối chứa body, áo, material và rig nếu có; Three.js tải từ URL backend và hiển thị đúng tỉ lệ, màu/họa tiết.
 - [ ] Ảnh sai định dạng, thiếu body, xử lý thất bại hoặc GLB lỗi trả trạng thái/lỗi rõ ràng; job và asset hoàn tất vẫn tra cứu được sau khi API khởi động lại.
+
+## Triển khai v0.2 và giới hạn đã công bố
+
+- Body MPFB mới tạo được đăng ký vào PostgreSQL và kho `data/assets/`; `body_id`
+  là ID job tạo body. Body hoàn tất có thể tra lại bằng
+  `GET /api/body-builder/bodies/{body_id}` sau khi API khởi động lại.
+- Ảnh áo và job được lưu cùng giao dịch metadata; worker PostgreSQL riêng dùng
+  pipeline local parametric của M2 và Blender để ghép cảnh tĩnh. Mô phỏng vải
+  chưa được hiệu chuẩn; nếu yêu cầu bật, job trả `SIMULATION_UNAVAILABLE`.
+- Bước ghép dùng chiều dài áo thật để chuẩn tỉ lệ, đặt áo theo mốc chiều cao
+  body, điều chỉnh khoảng hở bề mặt 1 cm và kiểm tra xuyên mesh. Đây là kết
+  quả xem trước hình học, không phải đánh giá fit hoặc gợi ý size.
+- Frontend route `/try-on` hiện gọi luồng mới, không tự thay kết quả API lỗi bằng
+  mock. Viewer tải một GLB tổng hợp. Các ô nghiệm thu trên chỉ đánh dấu sau khi
+  người dùng chạy thử với PostgreSQL, Blender/MPFB2 và ảnh thực tế.
+- v0.2 dùng loại trang phục do người dùng chọn, chưa tự phân loại từ ảnh;
+  `result.reconstruction` lưu phương pháp tách nền, cách chuẩn tỉ lệ và thông tin
+  mesh để truy vết. GLB là tư thế tĩnh, chưa có rig hay mô phỏng vải.

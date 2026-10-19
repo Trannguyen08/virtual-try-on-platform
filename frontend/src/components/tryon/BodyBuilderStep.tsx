@@ -5,6 +5,7 @@ interface Props {
   onBack: () => void;
   onNext: (params: BodyParameters) => void;
   initialParams?: BodyParameters | null;
+  disabled?: boolean;
 }
 
 const defaults = defaultBodyParameters();
@@ -17,7 +18,7 @@ const sliders: { key: keyof BodyParameters['proportions']; label: string }[] = [
   { key: 'buttocks', label: 'Mông' },
 ];
 
-export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams }) => {
+export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams, disabled = false }) => {
   const [params, setParams] = useState<BodyParameters>(initialParams || defaults);
   const setNumber = (key: 'height_cm' | 'weight_kg' | 'age', value: number) =>
     setParams((current) => ({ ...current, [key]: value }));
@@ -58,10 +59,10 @@ export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams
             proportions: { ...defaults.proportions, hips: 0.7, waist: 0.65 } })}>Đầy đặn</button>
         </div>
         <div className="vfit-builder-actions">
-          <button className="vfit-btn-secondary" type="button" onClick={onBack}>← Quay lại ảnh</button>
+          <button className="vfit-btn-secondary" type="button" disabled={disabled} onClick={onBack}>← Quay lại</button>
           <button className="vfit-btn-primary" type="button"
-            disabled={params.height_cm < 140 || params.height_cm > 210 || params.weight_kg < 35 || params.weight_kg > 150 || params.age < 10 || params.age > 80}
-            onClick={() => onNext(params)}>Tiếp tục chọn đồ →</button>
+            disabled={disabled || params.height_cm < 140 || params.height_cm > 210 || params.weight_kg < 35 || params.weight_kg > 150 || params.age < 10 || params.age > 80}
+            onClick={() => onNext(params)}>Tạo body MPFB →</button>
         </div>
       </section>
       <section className="vfit-builder-card">

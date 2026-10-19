@@ -7,7 +7,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { CatalogPage } from './pages/catalog/CatalogPage';
 import { HomePage } from './pages/home/HomePage';
-import { TryOnPage } from './pages/tryon/TryOnPage';
+import { ImageTryOnPage } from './pages/tryon/ImageTryOnPage';
 import './styles/auth.css';
 import './styles/home.css';
 import './styles/tryon.css';
@@ -135,7 +135,7 @@ const MainContent: React.FC = () => {
 
         {currentTab === 'try-on' && (
           <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
-            <TryOnPage
+            <ImageTryOnPage
               initialGarment={selectedProduct}
               onNavigateCatalog={() => navigate('catalog')}
             />

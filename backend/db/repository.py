@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import select, update
 from sqlalchemy.orm import sessionmaker
 
-from backend.db.models import AssetRecord, BodyRecord, JobRecord, JobStepRecord, utc_now
+from backend.db.models import (
+    AssetRecord, BodyRecord, ImageTryOnRecord, JobRecord, JobStepRecord, utc_now,
+)
 from backend.schemas.body import BodySchema
+from backend.schemas.image_tryon import ImageTryOnJob
 from backend.schemas.job import JobSchema
 
 
@@ -107,6 +110,96 @@ class AssetRepository:
                 status=status, updated_at=utc_now(),
             ))
             return result.rowcount == 1
+
+
+class ImageTryOnRepository:
+    """PostgreSQL rows act as the durable queue; assets and enqueue commit together."""
+
+    def __init__(self, sessions: sessionmaker):
+        self.sessions = sessions
+
+    @staticmethod
+    def _public(record: ImageTryOnRecord) -> ImageTryOnJob:
+        return ImageTryOnJob.model_validate({
+            "job_id": record.job_id, "status": record.status,
+            "request": {key: value for key, value in record.request_json.items()
+                        if key != "views"},
+            "result": record.result_json, "error": record.error_json,
+            "attempt_count": record.attempt_count,
+        })
+
+    def enqueue(self, job_id: str, body_id: str, request: dict,
+                images: list[dict]) -> ImageTryOnJob:
+        now = utc_now()
+        with self.sessions.begin() as session:
+            record = ImageTryOnRecord(
+                job_id=job_id, body_id=body_id, status="pending",
+                request_json=request, attempt_count=0,
+                created_at=now, updated_at=now,
+            )
+            session.add(record)
+            for image in images:
+                session.add(AssetRecord(
+                    asset_id=f"asset_{uuid4().hex}", kind="original_image",
+                    status="available", storage_scope="managed",
+                    storage_key=image["key"], public_name=None,
+                    media_type=image["media_type"], byte_size=image["byte_size"],
+                    sha256=image["sha256"], body_id=body_id,
+                    metadata_json={"image_tryon_job_id": job_id, "view": image["view"]},
+                    created_at=now, updated_at=now,
+                ))
+        return self._public(record)
+
+    def get(self, job_id: str) -> ImageTryOnJob | None:
+        with self.sessions() as session:
+            record = session.get(ImageTryOnRecord, job_id)
+            return self._public(record) if record else None
+
+    def claim(self, *, lease_seconds: int = 600, max_attempts: int = 2
+              ) -> tuple[str, int, dict] | None:
+        now = utc_now()
+        with self.sessions.begin() as session:
+            expired = session.scalars(select(ImageTryOnRecord).where(
+                ImageTryOnRecord.status == "running",
+                ImageTryOnRecord.leased_until < now,
+            ).with_for_update(skip_locked=True)).all()
+            for record in expired:
+                if record.attempt_count >= max_attempts:
+                    record.status = "failed"
+                    record.error_json = {
+                        "code": "PROCESSING_TIMEOUT",
+                        "message": "Try-on processing timed out", "details": [],
+                    }
+                else:
+                    record.status = "pending"
+                record.leased_until = None
+                record.updated_at = now
+            record = session.scalar(select(ImageTryOnRecord).where(
+                ImageTryOnRecord.status == "pending",
+            ).order_by(ImageTryOnRecord.created_at).limit(1).with_for_update(skip_locked=True))
+            if record is None:
+                return None
+            record.status = "running"
+            record.attempt_count += 1
+            record.leased_until = now + timedelta(seconds=lease_seconds)
+            record.updated_at = now
+            return record.job_id, record.attempt_count, dict(record.request_json)
+
+    def finish(self, job_id: str, attempt_count: int, *, result: dict | None = None,
+               error: dict | None = None) -> bool:
+        if (result is None) == (error is None):
+            raise ValueError("Exactly one of result or error is required")
+        with self.sessions.begin() as session:
+            changed = session.execute(update(ImageTryOnRecord).where(
+                ImageTryOnRecord.job_id == job_id,
+                ImageTryOnRecord.status == "running",
+                ImageTryOnRecord.attempt_count == attempt_count,
+            ).values(
+                status="completed" if result is not None else "failed",
+                result_json=result, error_json=error,
+                leased_until=None, updated_at=utc_now(),
+            ))
+            return changed.rowcount == 1
 
 
 class JobRepository:

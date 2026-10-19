@@ -82,6 +82,16 @@ class StorageService:
         self.bodies.update_status(body_id, "ready")
         return asset
 
+    def mpfb_body_path(self, body_id: str) -> Path:
+        record = self.bodies.get(body_id)
+        if record is None or record.kind != "mpfb" or record.status != "ready":
+            raise AppException(404, "BODY_NOT_FOUND", "MPFB body was not found")
+        name = f"body-{body_id}.glb"
+        try:
+            return self.asset_path(name)
+        except AppException as exc:
+            raise AppException(404, "BODY_ASSET_NOT_FOUND", "MPFB body asset is unavailable") from exc
+
     def asset_path(self, name: str) -> Path:
         if not PUBLIC_GLB_NAME.fullmatch(name):
             raise AppException(404, "ASSET_NOT_FOUND", "Asset not found")

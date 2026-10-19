@@ -2,12 +2,12 @@
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Path
+from fastapi import APIRouter, BackgroundTasks, Path, Request
 from fastapi.responses import FileResponse
 from pydantic import Field
 
 from backend.schemas.common import ContractModel, SuccessResponse
-from backend.services.blender_body import body_jobs
+from backend.services.blender_body import BlenderBodyJobs
 
 router = APIRouter(prefix="/body-builder", tags=["body-builder"])
 
@@ -42,25 +42,46 @@ class ClothingParameters(ContractModel):
 
 
 @router.post("/generate", status_code=202)
-def generate(parameters: BodyParameters, background_tasks: BackgroundTasks) -> SuccessResponse[dict]:
+def generate(parameters: BodyParameters, background_tasks: BackgroundTasks,
+             request: Request) -> SuccessResponse[dict]:
+    body_jobs: BlenderBodyJobs = request.app.state.body_jobs
     job = body_jobs.create("body", parameters.model_dump())
     background_tasks.add_task(body_jobs.run, job["job_id"], parameters.model_dump())
     return SuccessResponse(data=job)
 
 
 @router.post("/clothing", status_code=202)
-def clothing(parameters: ClothingParameters, background_tasks: BackgroundTasks) -> SuccessResponse[dict]:
+def clothing(parameters: ClothingParameters, background_tasks: BackgroundTasks,
+             request: Request) -> SuccessResponse[dict]:
+    body_jobs: BlenderBodyJobs = request.app.state.body_jobs
     job = body_jobs.create("clothing", parameters.model_dump(), parameters.body_job_id)
     background_tasks.add_task(body_jobs.run, job["job_id"], parameters.model_dump())
     return SuccessResponse(data=job)
 
 
 @router.get("/jobs/{job_id}")
-def get_job(job_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")]) -> SuccessResponse[dict]:
+def get_job(job_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")],
+            request: Request) -> SuccessResponse[dict]:
+    body_jobs: BlenderBodyJobs = request.app.state.body_jobs
     return SuccessResponse(data=body_jobs.get(job_id))
 
 
+@router.get("/bodies/{body_id}")
+def get_body(body_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")],
+             request: Request) -> SuccessResponse[dict]:
+    storage = request.app.state.storage
+    storage.mpfb_body_path(body_id)
+    return SuccessResponse(data={
+        "body_id": body_id, "job_id": body_id, "action": "body",
+        "status": "completed", "source_id": None,
+        "asset_url": f"/api/assets/body-{body_id}.glb", "error": None,
+        "method": "blender_mpfb", "source": "module",
+    })
+
+
 @router.get("/assets/{job_id}.glb", response_class=FileResponse)
-def get_asset(job_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")]) -> FileResponse:
+def get_asset(job_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")],
+              request: Request) -> FileResponse:
+    body_jobs: BlenderBodyJobs = request.app.state.body_jobs
     return FileResponse(body_jobs.asset(job_id), media_type="model/gltf-binary",
                         filename=f"body-{job_id}.glb")

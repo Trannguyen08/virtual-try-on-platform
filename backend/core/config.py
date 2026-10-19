@@ -20,6 +20,8 @@ class Settings:
     ))
     max_image_bytes: int = 5 * 1024 * 1024
     max_image_pixels: int = 16_000_000
+    max_garment_image_bytes: int = 10 * 1024 * 1024
+    max_garment_image_pixels: int = 16_000_000
 
     def __post_init__(self) -> None:
         if "*" in self.cors_origins:
