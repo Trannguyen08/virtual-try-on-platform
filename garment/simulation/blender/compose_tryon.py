@@ -10,6 +10,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from statistics import median
 
 
 def arguments():
@@ -32,6 +33,42 @@ def bounds(objects):
         raise ValueError("GLB contains no mesh")
     return ([min(point[axis] for point in points) for axis in range(3)],
             [max(point[axis] for point in points) for axis in range(3)])
+
+
+def torso_depth_center(points, *, center_x, bottom_z, body_height, category):
+    """Find the body's front/back center near the garment, excluding head and arms."""
+    fractions = (0.51, 0.56, 0.61) if category in {"pants", "skirt"} else (0.60, 0.68, 0.74)
+    half_width = max(0.06, min(0.10, body_height * 0.05))
+    half_height = max(0.02, body_height * 0.015)
+    centers = []
+    for fraction in fractions:
+        level = bottom_z + fraction * body_height
+        depths = sorted(point[1] for point in points
+                        if abs(point[0] - center_x) <= half_width
+                        and abs(point[2] - level) <= half_height)
+        if len(depths) < 8:
+            continue
+        lower = depths[int((len(depths) - 1) * 0.05)]
+        upper = depths[int((len(depths) - 1) * 0.95)]
+        centers.append((lower + upper) / 2)
+    if not centers:
+        raise ValueError("BODY_TORSO_MISSING: body has no usable torso cross section")
+    return median(centers)
+
+
+def body_vertices(body_objects):
+    import bpy
+
+    points = []
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    for obj in body_objects:
+        evaluated = obj.evaluated_get(depsgraph)
+        mesh = evaluated.to_mesh()
+        try:
+            points.extend(evaluated.matrix_world @ vertex.co for vertex in mesh.vertices)
+        finally:
+            evaluated.to_mesh_clear()
+    return points
 
 
 def body_surfaces(body_objects):
@@ -84,6 +121,14 @@ def fit_to_body(trees, garment_objects):
             moved += 1
         obj.data.update()
     return moved, too_deep
+
+
+def validate_surface_adjustment(moved, vertex_count):
+    """Reject a garment that would need large-scale warping to cover the body."""
+    if vertex_count <= 0 or moved > vertex_count * 0.35:
+        raise ValueError(
+            "SEVERE_MESH_PENETRATION: garment is too small for this body"
+        )
 
 
 def penetration_fraction(trees, garment_objects):
@@ -143,7 +188,12 @@ def main():
     category = metadata.get("garment_type")
     anchor_fraction = 0.58 if category in {"pants", "skirt"} else 0.84
     body_center_x = (low_body[0] + high_body[0]) / 2
-    body_center_y = (low_body[1] + high_body[1]) / 2
+    # Whole-body depth bounds include the face and buttocks. Centering a thin
+    # garment there places both panels in front of the torso instead of around it.
+    body_center_y = torso_depth_center(
+        body_vertices(body), center_x=body_center_x,
+        bottom_z=low_body[2], body_height=body_height, category=category,
+    )
     garment_center_x = (low_garment[0] + high_garment[0]) / 2
     garment_center_y = (low_garment[1] + high_garment[1]) / 2
     translation = (
@@ -158,9 +208,11 @@ def main():
     bpy.context.view_layer.update()
     surfaces = body_surfaces(body)
     moved, too_deep = fit_to_body(surfaces, garment)
+    garment_vertex_count = sum(len(obj.data.vertices) for obj in garment)
+    validate_surface_adjustment(moved, garment_vertex_count)
     bpy.context.view_layer.update()
     inside, severe = penetration_fraction(surfaces, garment)
-    if severe > 0.10 or too_deep > sum(len(obj.data.vertices) for obj in garment) * 0.20:
+    if severe > 0.10 or too_deep > garment_vertex_count * 0.20:
         raise ValueError("SEVERE_MESH_PENETRATION")
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
