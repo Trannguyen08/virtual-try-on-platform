@@ -8,7 +8,7 @@ from typing import Any, Protocol
 
 
 SUPPORTED_GARMENT_TYPES = frozenset(
-    {"tshirt", "shirt", "jacket", "pants", "skirt", "dress"}
+    {"auto", "tshirt", "shirt", "jacket", "pants", "skirt", "dress"}
 )
 SUPPORTED_REFERENCE_MEASUREMENTS = frozenset(
     {

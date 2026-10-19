@@ -111,7 +111,7 @@ export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled 
   <section className="g3d-panel" aria-labelledby="garment-images-title">
     <div className="g3d-section-heading">
       <div>
-        <span className="g3d-eyebrow">Bước 1</span>
+        <span className="g3d-eyebrow">Tải ảnh trang phục</span>
         <h2 id="garment-images-title">Ảnh cùng một trang phục</h2>
       </div>
       <span className="g3d-view-count">
