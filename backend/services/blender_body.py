@@ -6,6 +6,7 @@ These meshes are visualizations. They do not produce measured dimensions or fit 
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -15,10 +16,23 @@ from uuid import uuid4
 from backend.core.errors import AppException
 from backend.services.storage import StorageService
 from garment.reconstruction.validation import GlbValidator
+from garment.mpfb.catalog import GarmentConfigError, load_catalog, resolve_assets, validate_choice
 
 logger = logging.getLogger(__name__)
 SCRIPT = Path(__file__).resolve().parents[2] / "body" / "estimation" / "blender_body.py"
 OUTPUT = Path(__file__).resolve().parents[2] / "data" / "outputs" / "blender_body"
+
+
+def blender_script_error(stdout: str, stderr: str) -> str:
+    """Extract Python exception summaries without logging user parameters/paths."""
+    errors = []
+    for line in (stdout + "\n" + stderr).splitlines():
+        line = line.strip()
+        if re.match(r"^[\w.]*(?:Error|Exception):", line):
+            line = re.sub(r"[A-Za-z]:[/\\][^\r\n]*", "<local-path>", line)
+            line = re.sub(r"(?<!\w)/(?:[^\s/]+/)+[^\s]*", "<local-path>", line)
+            errors.append(line[:1000])
+    return " | ".join(errors[-3:]) or "No Python exception summary captured"
 
 
 def find_blender_executable() -> str:
@@ -61,6 +75,21 @@ class BlenderBodyJobs:
             source = self.get(source_id)
             if source["status"] != "completed" or source["action"] != "body":
                 raise AppException(422, "BODY_NOT_READY", "Generate a body before adding clothing")
+        if action == "clothing":
+            try:
+                entry = load_catalog().get(parameters.get("garment_id", ""))
+                if entry is not None:
+                    validate_choice(entry, parameters.get("category"), parameters.get("size"))
+                    resolve_assets(entry)
+                    needs_native_body = entry.get("engine", "mhclo") == "mhclo"
+                    native_scene = OUTPUT / f"{source_id}.blend" if source_id else None
+                    if needs_native_body and (native_scene is None or not native_scene.is_file()):
+                        raise AppException(
+                            422, "BODY_REFIT_DATA_MISSING",
+                            "Hãy tạo body mới để có dữ liệu MPFB gốc cho refit.",
+                        )
+            except GarmentConfigError as exc:
+                raise AppException(422, exc.code, str(exc)) from exc
         job_id = uuid4().hex
         job = {"job_id": job_id, "body_id": job_id if action == "body" else None,
                "action": action, "status": "pending",
@@ -97,7 +126,8 @@ class BlenderBodyJobs:
             OUTPUT.mkdir(parents=True, exist_ok=True)
             output = OUTPUT / f"{job_id}.glb"
             source_id = job["source_id"]
-            command = [blender, "--background", "--python", str(SCRIPT), "--",
+            command = [blender, "--background", "--python-exit-code", "1",
+                       "--python", str(SCRIPT), "--",
                        "--action", job["action"], "--output", str(output),
                        "--params", json.dumps(parameters)]
             if source_id:
@@ -110,9 +140,13 @@ class BlenderBodyJobs:
                              job["action"], result.returncode,
                              "MPFB_UNAVAILABLE" in result.stderr or
                              "MPFB_UNAVAILABLE" in result.stdout)
+                logger.error("Blender script error: %s",
+                             blender_script_error(result.stdout, result.stderr))
                 raise RuntimeError("BLENDER_FAILED")
             if job["action"] == "body" and "BODY_METHOD=mpfb" not in result.stdout:
                 raise RuntimeError("MPFB_RESULT_MISSING")
+            if job["action"] == "body" and not output.with_suffix(".blend").is_file():
+                raise RuntimeError("MPFB_NATIVE_RESULT_MISSING")
             if job["action"] == "body" and self.storage is not None:
                 GlbValidator(max_file_bytes=100 * 1024 * 1024).validate(output)
                 body_dir = self.storage.settings.managed_asset_dir / "bodies"
@@ -128,12 +162,29 @@ class BlenderBodyJobs:
                     })
                 finally:
                     temporary.unlink(missing_ok=True)
-            method = ("blender_asset_clothing" if job["action"] == "clothing" and "CLOTHING_METHOD=asset" in result.stdout
+            is_reference = job["action"] == "clothing" and "CLOTHING_METHOD=gltf_reference" in result.stdout
+            if job["action"] == "clothing" and (
+                "CLOTHING_METHOD=mpfb_refit" in result.stdout or is_reference
+            ):
+                report_path = output.with_suffix(".refit.json")
+                if not report_path.is_file():
+                    raise RuntimeError("MPFB_REFIT_REPORT_MISSING")
+                report = json.loads(report_path.read_text(encoding="utf-8"))
+                expected_method = "blender_gltf_reference" if is_reference else "blender_mpfb_refit"
+                expected_mode = "reference_alignment" if is_reference else "body_refit"
+                if (report.get("method") != expected_method
+                        or report.get("garment_id") != parameters.get("garment_id")
+                        or report.get("mode") != expected_mode
+                        or report.get("cloth_simulation") is not False):
+                    raise RuntimeError("MPFB_REFIT_REPORT_INVALID")
+            method = ("blender_gltf_reference" if is_reference
+                      else "blender_mpfb_refit" if job["action"] == "clothing" and "CLOTHING_METHOD=mpfb_refit" in result.stdout
+                      else "blender_asset_clothing" if job["action"] == "clothing" and "CLOTHING_METHOD=asset" in result.stdout
                       else "blender_illustrative_clothing" if job["action"] == "clothing"
                       else "blender_mpfb")
-            source = ("mixed" if method == "blender_asset_clothing" and
+            source = ("mixed" if method in {"blender_asset_clothing", "blender_mpfb_refit", "blender_gltf_reference"} and
                       self.get(source_id)["source"] == "mock" else
-                      "module" if method in {"blender_mpfb", "blender_asset_clothing"} else "mock")
+                      "module" if method in {"blender_mpfb", "blender_asset_clothing", "blender_mpfb_refit", "blender_gltf_reference"} else "mock")
             with self._lock:
                 asset_url = (f"/api/assets/body-{job_id}.glb"
                              if job["action"] == "body" and self.storage is not None

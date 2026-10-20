@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
+import { Product } from '../../data/mockProducts';
+import { useGarmentProducts } from '../../hooks/useGarmentProducts';
 
 interface SelectGarmentStepProps {
   initialGarment: Product | null;
@@ -12,8 +13,9 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
   onBack,
   onConfirm,
 }) => {
+  const { products, refitStatus } = useGarmentProducts();
   const [selectedGarment, setSelectedGarment] = useState<Product>(
-    initialGarment || MOCK_PRODUCTS[0]
+    initialGarment || products[0]
   );
   const [selectedSize, setSelectedSize] = useState<string>(initialGarment?.sizes.includes('M') ? 'M' : initialGarment?.sizes[0] || 'M');
 
@@ -32,6 +34,10 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
         <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.9rem', margin: '0 0 1.5rem 0' }}>
           Chọn món đồ và kích cỡ để xem trên body 3D. Bản mẫu chưa đánh giá độ vừa vặn thực tế.
         </p>
+        <p role="status">{refitStatus}</p>
+        {selectedGarment.fittingMode === 'body_refit' && (
+          <p>Trang phục sẽ refit theo body, giữ chất liệu gốc. M là nhãn thử nghiệm; chưa đánh giá độ vừa theo size.</p>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'start' }}>
           {/* Garment Showcase Card */}
@@ -80,7 +86,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
                 Đổi mẫu khác nhanh:
               </label>
               <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                {MOCK_PRODUCTS.map((g) => (
+                {products.map((g) => (
                   <button
                     key={g.id}
                     type="button"

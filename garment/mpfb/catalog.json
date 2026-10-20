@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "garments": [
+    {
+      "id": "mpfb-aotest-hoodie",
+      "name": "Áo hoodie nữ MPFB — aotest",
+      "category": "jacket",
+      "gender": "womenswear",
+      "sizes": ["M"],
+      "engine": "mhclo",
+      "assets": ["ladieshoodiedown1"],
+      "license": "CC-BY (source header: CC_by; version unspecified); author Elvaerwyn",
+      "source": "User-provided data/external/aotest; ladieshoodiedown1; author Elvaerwyn; basemesh hm08"
+    },
+    {
+      "id": "cgtrader-dg100024",
+      "name": "Áo GLTF DG100024 — căn chỉnh thử",
+      "category": "jacket",
+      "gender": "menswear",
+      "sizes": ["M"],
+      "engine": "gltf_reference",
+      "assets": ["dg100024"],
+      "reference_height_cm": 180,
+      "offset_m": [0, 0, 0],
+      "yaw_degrees": 0,
+      "license": "User-provided asset; exact license not supplied",
+      "source": "GLTF.zip / DG100024 / DigitalFashionWear Read_Me"
+    },
+    {
+      "id": "mpfb-tshirt",
+      "name": "Áo thun MPFB",
+      "category": "t_shirt",
+      "gender": "menswear",
+      "sizes": ["M"],
+      "assets": ["toigo_basic_tucked_t-shirt"],
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html"
+    },
+    {
+      "id": "mpfb-pants",
+      "name": "Quần cargo MPFB",
+      "category": "pants",
+      "gender": "menswear",
+      "sizes": ["M"],
+      "assets": ["cortu_cargo_pants"],
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html"
+    },
+    {
+      "id": "mpfb-outfit",
+      "name": "Bộ áo thun và quần cargo MPFB",
+      "category": "t_shirt",
+      "gender": "menswear",
+      "sizes": ["M"],
+      "assets": ["toigo_basic_tucked_t-shirt", "cortu_cargo_pants"],
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/downloadassets.html"
+    }
+  ]
+}

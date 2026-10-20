@@ -350,3 +350,24 @@ python -m backend.workers.image_tryon
 ```
 
 Luồng này chưa được xác nhận bằng Blender/PostgreSQL thật trong đợt sửa mã này.
+
+## Body-builder: mốc A, native MPFB refit
+
+Phạm vi bổ sung: `/api/body-builder`, không đổi contract `/api/tryon` mock.
+Các thay đổi dưới đã có code; chưa chạy acceptance với Blender/assets thật.
+
+- `GET /api/body-builder/garments`: envelope `data: list`, `error: null`;
+  mỗi item có `id`, `name`, `category`, `sizes`, `assets`, `license`, `source`,
+  `available`, `error_code`, `mode`, `size_chart_verified`; không trả đường dẫn disk.
+- Body mới xuất GLB và lưu thêm scene `.blend` MPFB gốc phía server trước bake/mask.
+  Scene không được cung cấp qua URL.
+- Clothing dùng catalog MHCLO sẽ refit theo body MPFB; hàng reference GLTF chỉ
+  căn chỉnh theo tư thế tham chiếu. `color_hex` không tint chất liệu gốc.
+- Size M trong catalog là nhãn thử nghiệm, chưa có size chart đã xác thực hoặc
+  mô phỏng vải/đánh giá độ vừa. `source` mô tả provenance của pipeline, không
+  chứng minh chất lượng hoặc độ vừa.
+- Job body-builder vẫn lưu trong RAM; restart backend làm mất trạng thái job.
+  Scene/report trên disk không có nghĩa job được phục hồi.
+
+Chi tiết catalog, cài asset và quy trình vận hành:
+[mpfb-refit-milestone-a.md](../development/mpfb-refit-milestone-a.md).

@@ -22,7 +22,7 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
   const controls = useRef<OrbitControls | null>(null);
   const model = useRef<THREE.Group | null>(null);
   const [clothingJob, setClothingJob] = useState(initialClothingJob);
-  const [layer, setLayer] = useState<'body' | 'clothed'>('body');
+  const [layer, setLayer] = useState<'body' | 'clothed'>(initialClothingJob ? 'clothed' : 'body');
   const [wireframe, setWireframe] = useState(false);
   const wireframeRef = useRef(false);
   wireframeRef.current = wireframe;
@@ -32,6 +32,7 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
   const [error, setError] = useState(initialError);
   const [loadError, setLoadError] = useState('');
   const currentJob = layer === 'body' || !clothingJob ? bodyJob : clothingJob;
+  const isMpfbRefit = clothingJob?.method === 'blender_mpfb_refit';
   const url = bodyBuilderApi.assetUrl(currentJob);
 
   useEffect(() => {
@@ -180,20 +181,21 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
           <span className="vfit-builder-eyebrow">Mô hình thử đồ</span>
           <h3>{garment.name}</h3>
           <p>Size đã chọn: <strong>{selectedSize}</strong></p>
-          <p>Mô hình cơ thể được tạo từ thông số đã chọn. {clothingJob?.method === 'blender_asset_clothing' ? 'Trang phục dùng asset GLB/OBJ đã cung cấp.' : clothingJob ? 'Trang phục là khối minh họa theo loại sản phẩm.' : 'Chưa tạo được trang phục.'} Ảnh tải lên chưa được dùng để dựng body. Chưa có mô phỏng vải hoặc đánh giá độ vừa vặn.</p>
+          <p>Mô hình cơ thể được tạo từ thông số đã chọn. {isMpfbRefit ? 'Trang phục MHCLO được refit theo body MPFB và giữ chất liệu gốc.' : clothingJob?.method === 'blender_asset_clothing' ? 'Trang phục dùng asset GLB/OBJ đã cung cấp.' : clothingJob ? 'Trang phục là hình minh họa theo loại sản phẩm.' : 'Chưa tạo được trang phục.'} Ảnh tải lên chưa được dùng để dựng body. Chưa có mô phỏng vải hoặc đánh giá độ vừa vặn.</p>
+          {isMpfbRefit && <p>M là nhãn thử nghiệm cho chế độ refit; áo/quần biến dạng theo body, chưa phải kiểm tra size thực tế.</p>}
           <div className="vfit-builder-presets">
             <span>Màu trang phục</span>
             {garment.colors.map((item) => (
               <button key={item.hex} type="button" title={item.name} aria-label={item.name}
                 aria-pressed={color === item.hex}
                 className={`vfit-builder-swatch ${color === item.hex ? 'active' : ''}`}
-                style={{ backgroundColor: item.hex }} disabled={busy}
+                style={{ backgroundColor: item.hex }} disabled={busy || isMpfbRefit}
                 onClick={() => applyColor(item.hex)} />
             ))}
           </div>
           {busy && <p role="status">Blender đang cập nhật màu trang phục...</p>}
           {error && <p role="alert" className="vfit-builder-error">{error}</p>}
-          <p className="vfit-builder-note">Nguồn body: MPFB2. Nguồn trang phục: {clothingJob?.method === 'blender_asset_clothing' ? 'asset do người dùng cung cấp' : clothingJob ? 'hình minh họa' : 'chưa có'}. Không có số đo ảnh, điểm fit hay gợi ý size được tính từ mô hình này.</p>
+          <p className="vfit-builder-note">Nguồn body: MPFB2. Nguồn trang phục: {isMpfbRefit ? 'asset MHCLO, refit theo body' : clothingJob?.method === 'blender_asset_clothing' ? 'asset do người dùng cung cấp' : clothingJob ? 'hình minh họa' : 'chưa có'}. Không có số đo ảnh, điểm fit hay gợi ý size được tính từ mô hình này.</p>
           <button className="vfit-btn-secondary" type="button" onClick={onTryAnotherSize}>Chọn trang phục hoặc size khác</button>
         </section>
       </div>
