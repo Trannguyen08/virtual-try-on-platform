@@ -3,7 +3,7 @@ import React from 'react';
 export const HowItWorksSection: React.FC = () => {
   return (
     <section className="vfit-section-bg">
-      <div style={{ maxWidth: '1280px', margin: '0 auto', textAlign: 'center' }}>
+      <div className="vfit-how-it-works-content" style={{ maxWidth: '1280px', margin: '0 auto', textAlign: 'center' }}>
         <span
           style={{
             fontSize: '0.75rem',
@@ -30,7 +30,7 @@ export const HowItWorksSection: React.FC = () => {
           CÁCH HOẠT ĐỘNG
         </h2>
         <p style={{ color: 'var(--vfit-secondary)', fontSize: '1rem', maxWidth: '36rem', margin: '0 auto' }}>
-          Chỉ 3 bước trực quan để trải nghiệm và tìm ra bộ trang phục hoàn hảo tôn vinh dáng vẻ của bạn.
+          Tạo body, chọn ảnh trang phục và xem kết quả trong viewer 3D.
         </p>
 
         {/* 3 Steps Bento Grid */}
@@ -43,14 +43,14 @@ export const HowItWorksSection: React.FC = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.4rem 0', color: 'var(--vfit-on-surface)' }}>
-                Upload Ảnh Toàn Thân
+                Thiết lập body 3D
               </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--vfit-secondary)', lineHeight: '1.6', margin: 0 }}>
-                Tải ảnh đứng toàn thân rõ nét hoặc chụp từ camera. Đứng thẳng tự nhiên để AI phân tích chuẩn xác form dáng người và số đo.
+                Nhập chiều cao và số đo cơ thể để tạo hoặc cập nhật mô hình body.
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>🔒 Bảo mật quyền riêng tư 100%</span>
+              <span>↗️ Số đo nhập theo centimet</span>
             </div>
           </div>
 
@@ -62,14 +62,14 @@ export const HowItWorksSection: React.FC = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.4rem 0', color: 'var(--vfit-on-surface)' }}>
-                Chọn Trang Phục & Size
+                Tải ảnh trang phục
               </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--vfit-secondary)', lineHeight: '1.6', margin: 0 }}>
-                Duyệt qua catalog đa dạng áo thun, sơ mi, đầm váy, áo khoác. Chọn kích cỡ S, M, L, XL để xem độ vừa vặn từng phân vùng cơ thể.
+                Chọn ảnh mặt trước; ảnh mặt sau không bắt buộc. Có thể thêm áo và quần trong cùng một lượt.
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>⚡ Đánh giá 4 vùng: ngực, eo, hông, vai</span>
+              <span>↗️ Hỗ trợ ảnh JPG, PNG và WebP</span>
             </div>
           </div>
 
@@ -81,14 +81,14 @@ export const HowItWorksSection: React.FC = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.4rem 0', color: 'var(--vfit-on-surface)' }}>
-                Xem Kết Quả Trong 3s
+                Xem kết quả 3D
               </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--vfit-secondary)', lineHeight: '1.6', margin: 0 }}>
-                AI tạo mô hình 3D tương tác chân thực với ánh sáng studio, nếp gấp vải tự nhiên và hiệu ứng tôn dáng như đứng trước gương phòng thử.
+                Xoay và quan sát cảnh body cùng trang phục đã ghép. Kết quả hiện tại là bản xem trước tĩnh.
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>🌐 Tương tác 3D WebGL xoay 360°</span>
+              <span>🌐 Có thể xoay và phóng to viewer</span>
             </div>
           </div>
         </div>

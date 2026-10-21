@@ -101,6 +101,20 @@ class BlenderBodyJobs:
             self._jobs[job_id] = job
         return job.copy()
 
+    def update_body(self, body_id: str, parameters: dict) -> dict:
+        if self.storage is None:
+            raise AppException(503, "BODY_STORAGE_UNAVAILABLE", "Body storage is unavailable")
+        self.storage.mpfb_body_path(body_id)
+        job_id = uuid4().hex
+        job = {"job_id": job_id, "body_id": body_id, "action": "body_update",
+               "status": "pending", "source_id": body_id, "asset_url": None,
+               "error": None, "method": None, "source": "module"}
+        with self._lock:
+            if sum(item["status"] in {"pending", "running"} for item in self._jobs.values()) >= 2:
+                raise AppException(429, "BLENDER_BUSY", "Blender is busy; try again shortly")
+            self._jobs[job_id] = job
+        return job.copy()
+
     def get(self, job_id: str) -> dict:
         with self._lock:
             job = self._jobs.get(job_id)
@@ -126,11 +140,13 @@ class BlenderBodyJobs:
             OUTPUT.mkdir(parents=True, exist_ok=True)
             output = OUTPUT / f"{job_id}.glb"
             source_id = job["source_id"]
+            is_body_job = job["action"] in {"body", "body_update"}
+            script_action = "body" if job["action"] == "body_update" else job["action"]
             command = [blender, "--background", "--python-exit-code", "1",
                        "--python", str(SCRIPT), "--",
-                       "--action", job["action"], "--output", str(output),
+                       "--action", script_action, "--output", str(output),
                        "--params", json.dumps(parameters)]
-            if source_id:
+            if source_id and not is_body_job:
                 command += ["--source", str(self.asset(source_id))]
             result = subprocess.run(command, capture_output=True, text=True,
                                     encoding="utf-8", errors="replace",
@@ -143,25 +159,37 @@ class BlenderBodyJobs:
                 logger.error("Blender script error: %s",
                              blender_script_error(result.stdout, result.stderr))
                 raise RuntimeError("BLENDER_FAILED")
-            if job["action"] == "body" and "BODY_METHOD=mpfb" not in result.stdout:
+            if is_body_job and "BODY_METHOD=mpfb" not in result.stdout:
                 raise RuntimeError("MPFB_RESULT_MISSING")
-            if job["action"] == "body" and not output.with_suffix(".blend").is_file():
+            if is_body_job and not output.with_suffix(".blend").is_file():
                 raise RuntimeError("MPFB_NATIVE_RESULT_MISSING")
-            if job["action"] == "body" and self.storage is not None:
+            if is_body_job and self.storage is not None:
                 GlbValidator(max_file_bytes=100 * 1024 * 1024).validate(output)
                 body_dir = self.storage.settings.managed_asset_dir / "bodies"
                 body_dir.mkdir(parents=True, exist_ok=True)
-                managed = body_dir / f"{job_id}.glb"
-                temporary = body_dir / f"{job_id}.glb.part"
+                body_id = job["body_id"]
+                managed = body_dir / f"{body_id}.glb"
+                temporary = body_dir / f"{body_id}.glb.part"
+                native_source = output.with_suffix(".blend")
+                native_target = OUTPUT / f"{body_id}.blend"
+                native_temporary = OUTPUT / f"{body_id}.blend.part"
                 try:
                     shutil.copyfile(output, temporary)
+                    shutil.copyfile(native_source, native_temporary)
+                    os.replace(native_temporary, native_target)
                     os.replace(temporary, managed)
-                    self.storage.register_mpfb_body(job_id, managed, metadata={
+                    metadata = {
                         "mesh_unit": "m", "up_axis": "Y", "forward_axis": "+Z",
                         "pose": "mpfb_export", "height_cm": parameters["height_cm"],
-                    })
+                        "parameters": parameters,
+                    }
+                    if job["action"] == "body_update":
+                        self.storage.replace_mpfb_body(body_id, managed, metadata=metadata)
+                    else:
+                        self.storage.register_mpfb_body(body_id, managed, metadata=metadata)
                 finally:
                     temporary.unlink(missing_ok=True)
+                    native_temporary.unlink(missing_ok=True)
             is_reference = job["action"] == "clothing" and "CLOTHING_METHOD=gltf_reference" in result.stdout
             if job["action"] == "clothing" and (
                 "CLOTHING_METHOD=mpfb_refit" in result.stdout or is_reference
@@ -187,9 +215,11 @@ class BlenderBodyJobs:
                       "module" if method in {"blender_mpfb", "blender_asset_clothing", "blender_mpfb_refit", "blender_gltf_reference"} else "mock")
             with self._lock:
                 asset_url = (f"/api/assets/body-{job_id}.glb"
-                             if job["action"] == "body" and self.storage is not None
+                             if is_body_job and self.storage is not None
                              else f"/api/body-builder/assets/{job_id}.glb")
-                job.update(status="completed", asset_url=asset_url,
+                job.update(status="completed", asset_url=(
+                    f"/api/assets/body-{job['body_id']}.glb" if is_body_job and self.storage is not None else asset_url
+                ),
                            method=method, source=source)
         except FileNotFoundError:
             logger.warning("Blender executable was not found for job %s", job_id)
@@ -202,7 +232,7 @@ class BlenderBodyJobs:
             with self._lock:
                 job.update(status="failed", error=(
                     "Không thể tạo body MPFB. Kiểm tra add-on MPFB2 trong Blender và log backend."
-                    if job["action"] == "body" else
+                    if job["action"] in {"body", "body_update"} else
                     "Không thể tạo trang phục trong Blender. Kiểm tra log backend."
                 ))
 

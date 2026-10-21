@@ -82,6 +82,28 @@ class StorageService:
         self.bodies.update_status(body_id, "ready")
         return asset
 
+    def replace_mpfb_body(self, body_id: str, mesh_path: Path, *, metadata: dict) -> None:
+        """Update one body in place after its replacement GLB has been validated."""
+        root = self.settings.managed_asset_dir.resolve()
+        path = mesh_path.resolve()
+        if not path.is_relative_to(root) or not path.is_file():
+            raise ValueError("Replacement body must be inside managed asset storage")
+        record = self.bodies.get(body_id)
+        asset = self.assets.get_by_public_name(f"body-{body_id}.glb")
+        if record is None or record.kind != "mpfb" or asset is None:
+            raise AppException(404, "BODY_NOT_FOUND", "MPFB body is not registered")
+        digest = hashlib.sha256()
+        with path.open("rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(chunk)
+        if not self.assets.update_managed_glb(
+            asset.asset_id, key=path.relative_to(root).as_posix(),
+            byte_size=path.stat().st_size, sha256=digest.hexdigest(),
+        ):
+            raise AppException(500, "BODY_ASSET_UPDATE_FAILED", "Could not update body asset metadata")
+        if not self.bodies.update_mpfb_metadata(body_id, metadata):
+            raise AppException(500, "BODY_UPDATE_FAILED", "Could not update body metadata")
+
     def mpfb_body_path(self, body_id: str) -> Path:
         record = self.bodies.get(body_id)
         if record is None or record.kind != "mpfb" or record.status != "ready":

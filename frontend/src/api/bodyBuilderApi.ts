@@ -7,6 +7,13 @@ export interface BodyParameters {
   age: number;
   gender: 'female' | 'neutral' | 'male';
   skin_color: string;
+  measurements_cm: {
+    shoulder_width_cm: number;
+    chest_cm: number;
+    waist_cm: number;
+    hip_cm: number;
+    inseam_cm: number;
+  };
   proportions: {
     shoulder_width: number;
     waist: number;
@@ -26,6 +33,10 @@ export const defaultBodyParameters = (heightCm = 170): BodyParameters => ({
   age: 25,
   gender: 'neutral',
   skin_color: '#b8b8b8',
+  measurements_cm: {
+    shoulder_width_cm: 42, chest_cm: 90, waist_cm: 76,
+    hip_cm: 95, inseam_cm: 80,
+  },
   proportions: {
     shoulder_width: 0.5, waist: 0.5, hips: 0.5, chest: 0.5,
     leg_length: 0.5, arm_length: 0.5, muscle_tone: 0.5,
@@ -36,13 +47,14 @@ export const defaultBodyParameters = (heightCm = 170): BodyParameters => ({
 export interface BodyBuilderJob {
   job_id: string;
   body_id?: string | null;
-  action: 'body' | 'clothing';
+  action: 'body' | 'body_update' | 'clothing';
   status: 'pending' | 'running' | 'completed' | 'failed';
   source_id: string | null;
   asset_url: string | null;
   error: string | null;
   method: string | null;
   source: 'mock' | 'module' | 'mixed';
+  parameters?: BodyParameters | null;
 }
 
 export interface RefitGarment {
@@ -58,9 +70,9 @@ export interface RefitGarment {
 
 type ProductCategory = 't_shirt' | 'shirt' | 'dress' | 'jacket' | 'pants';
 
-async function request<T>(path: string, body?: object): Promise<T> {
+async function request<T>(path: string, body?: object, method?: 'POST' | 'PUT'): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: body ? 'POST' : 'GET',
+    method: body ? (method || 'POST') : 'GET',
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -87,6 +99,12 @@ export const bodyBuilderApi = {
   getBody: (bodyId: string) => request<BodyBuilderJob>(`/api/body-builder/bodies/${encodeURIComponent(bodyId)}`),
   async generate(parameters: BodyParameters): Promise<BodyBuilderJob> {
     const job = await request<BodyBuilderJob>('/api/body-builder/generate', parameters);
+    return waitForJob(job.job_id);
+  },
+  async updateBody(bodyId: string, parameters: BodyParameters): Promise<BodyBuilderJob> {
+    const job = await request<BodyBuilderJob>(
+      `/api/body-builder/bodies/${encodeURIComponent(bodyId)}`, parameters, 'PUT',
+    );
     return waitForJob(job.job_id);
   },
   async clothing(bodyJobId: string, garmentId: string, category: string, colorHex: string, size: string): Promise<BodyBuilderJob> {

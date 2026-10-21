@@ -26,6 +26,14 @@ class Proportions(ContractModel):
     buttocks: float = Field(default=0.5, ge=0, le=1)
 
 
+class BodyMeasurementsCm(ContractModel):
+    shoulder_width_cm: float = Field(default=42, ge=30, le=65)
+    chest_cm: float = Field(default=90, ge=55, le=160)
+    waist_cm: float = Field(default=76, ge=45, le=150)
+    hip_cm: float = Field(default=95, ge=60, le=170)
+    inseam_cm: float = Field(default=80, ge=50, le=115)
+
+
 class BodyParameters(ContractModel):
     height_cm: float = Field(default=170, ge=140, le=210)
     weight_kg: float = Field(default=65, ge=35, le=150)
@@ -33,6 +41,7 @@ class BodyParameters(ContractModel):
     gender: Literal["female", "neutral", "male"] = "neutral"
     skin_color: str = Field(default="#b8b8b8", pattern=r"^#[0-9a-fA-F]{6}$")
     proportions: Proportions = Field(default_factory=Proportions)
+    measurements_cm: BodyMeasurementsCm = Field(default_factory=BodyMeasurementsCm)
 
 
 class ClothingParameters(ContractModel):
@@ -57,6 +66,16 @@ def generate(parameters: BodyParameters, background_tasks: BackgroundTasks,
              request: Request) -> SuccessResponse[dict]:
     body_jobs: BlenderBodyJobs = request.app.state.body_jobs
     job = body_jobs.create("body", parameters.model_dump())
+    background_tasks.add_task(body_jobs.run, job["job_id"], parameters.model_dump())
+    return SuccessResponse(data=job)
+
+
+@router.put("/bodies/{body_id}", status_code=202)
+def update_body(body_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")],
+                parameters: BodyParameters, background_tasks: BackgroundTasks,
+                request: Request) -> SuccessResponse[dict]:
+    body_jobs: BlenderBodyJobs = request.app.state.body_jobs
+    job = body_jobs.update_body(body_id, parameters.model_dump())
     background_tasks.add_task(body_jobs.run, job["job_id"], parameters.model_dump())
     return SuccessResponse(data=job)
 
@@ -87,6 +106,7 @@ def get_body(body_id: Annotated[str, Path(pattern=r"^[a-f0-9]{32}$")],
         "status": "completed", "source_id": None,
         "asset_url": f"/api/assets/body-{body_id}.glb", "error": None,
         "method": "blender_mpfb", "source": "module",
+        "parameters": storage.bodies.get(body_id).metadata_json.get("parameters"),
     })
 
 
