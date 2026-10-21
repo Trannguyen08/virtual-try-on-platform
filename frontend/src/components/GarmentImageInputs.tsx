@@ -7,6 +7,7 @@ interface Props {
   files: GarmentFiles;
   onChange: (next: GarmentFiles) => void;
   disabled?: boolean;
+  tryOnImagesOnly?: boolean;
 }
 
 const SLOTS: Array<{ view: GarmentView; label: string; required?: boolean }> = [
@@ -22,6 +23,7 @@ function ViewSlot({
   required,
   file,
   disabled,
+  tryOnImagesOnly,
   onFile,
 }: {
   view: GarmentView;
@@ -29,6 +31,7 @@ function ViewSlot({
   required?: boolean;
   file?: File;
   disabled?: boolean;
+  tryOnImagesOnly?: boolean;
   onFile: (file?: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,7 +78,7 @@ function ViewSlot({
           <div className="g3d-upload-card__empty">
             <span className="g3d-upload-card__icon" aria-hidden="true">+</span>
             <strong>Chọn hoặc kéo ảnh {label.toLowerCase()} vào đây</strong>
-            <small>JPEG, PNG, WebP hoặc BMP</small>
+            <small>{tryOnImagesOnly ? 'JPEG, PNG hoặc WebP' : 'JPEG, PNG, WebP hoặc BMP'}</small>
           </div>
         )}
       </label>
@@ -84,7 +87,9 @@ function ViewSlot({
         id={`garment-${view}`}
         className="g3d-visually-hidden"
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp"
+        accept={tryOnImagesOnly
+          ? 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+          : 'image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp'}
         disabled={disabled}
         onChange={select}
       />
@@ -107,11 +112,11 @@ function ViewSlot({
   );
 }
 
-export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled }) => (
+export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled, tryOnImagesOnly }) => (
   <section className="g3d-panel" aria-labelledby="garment-images-title">
     <div className="g3d-section-heading">
       <div>
-        <span className="g3d-eyebrow">Bước 1</span>
+        <span className="g3d-eyebrow">Tải ảnh trang phục</span>
         <h2 id="garment-images-title">Ảnh cùng một trang phục</h2>
       </div>
       <span className="g3d-view-count">
@@ -123,9 +128,9 @@ export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled 
     </p>
     <div className="g3d-notice">
       <span aria-hidden="true">✓</span>
-      <p>
-        Bạn có thể tải ảnh với kích thước bất kỳ. Hệ thống tự giữ nguyên tỉ lệ, căn giữa và
-        chuẩn hóa thành 1024×1024 trước khi phân tích.
+      <p>{tryOnImagesOnly
+        ? 'Mỗi ảnh tối đa 10 MiB và 16 triệu pixel. Hệ thống kiểm tra nội dung ảnh trước khi tạo job.'
+        : 'Hệ thống giữ nguyên tỉ lệ, căn giữa và chuẩn hóa ảnh thành 1024×1024 trước khi phân tích.'}
       </p>
     </div>
     <div className="g3d-upload-grid">
@@ -135,6 +140,7 @@ export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled 
           {...slot}
           file={files[slot.view]}
           disabled={disabled}
+          tryOnImagesOnly={tryOnImagesOnly}
           onFile={(file) => onChange({ ...files, [slot.view]: file })}
         />
       ))}

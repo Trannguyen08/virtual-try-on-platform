@@ -13,6 +13,8 @@ from threading import RLock
 from uuid import uuid4
 
 from backend.core.errors import AppException
+from backend.services.storage import StorageService
+from garment.reconstruction.validation import GlbValidator
 
 logger = logging.getLogger(__name__)
 SCRIPT = Path(__file__).resolve().parents[2] / "body" / "estimation" / "blender_body.py"
@@ -49,9 +51,10 @@ def find_blender_executable() -> str:
 
 
 class BlenderBodyJobs:
-    def __init__(self) -> None:
+    def __init__(self, storage: StorageService | None = None) -> None:
         self._jobs: dict[str, dict] = {}
         self._lock = RLock()
+        self.storage = storage
 
     def create(self, action: str, parameters: dict, source_id: str | None = None) -> dict:
         if source_id is not None:
@@ -59,7 +62,8 @@ class BlenderBodyJobs:
             if source["status"] != "completed" or source["action"] != "body":
                 raise AppException(422, "BODY_NOT_READY", "Generate a body before adding clothing")
         job_id = uuid4().hex
-        job = {"job_id": job_id, "action": action, "status": "pending",
+        job = {"job_id": job_id, "body_id": job_id if action == "body" else None,
+               "action": action, "status": "pending",
                "source_id": source_id, "asset_url": None, "error": None,
                "method": None, "source": "mock"}
         with self._lock:
@@ -109,6 +113,21 @@ class BlenderBodyJobs:
                 raise RuntimeError("BLENDER_FAILED")
             if job["action"] == "body" and "BODY_METHOD=mpfb" not in result.stdout:
                 raise RuntimeError("MPFB_RESULT_MISSING")
+            if job["action"] == "body" and self.storage is not None:
+                GlbValidator(max_file_bytes=100 * 1024 * 1024).validate(output)
+                body_dir = self.storage.settings.managed_asset_dir / "bodies"
+                body_dir.mkdir(parents=True, exist_ok=True)
+                managed = body_dir / f"{job_id}.glb"
+                temporary = body_dir / f"{job_id}.glb.part"
+                try:
+                    shutil.copyfile(output, temporary)
+                    os.replace(temporary, managed)
+                    self.storage.register_mpfb_body(job_id, managed, metadata={
+                        "mesh_unit": "m", "up_axis": "Y", "forward_axis": "+Z",
+                        "pose": "mpfb_export", "height_cm": parameters["height_cm"],
+                    })
+                finally:
+                    temporary.unlink(missing_ok=True)
             method = ("blender_asset_clothing" if job["action"] == "clothing" and "CLOTHING_METHOD=asset" in result.stdout
                       else "blender_illustrative_clothing" if job["action"] == "clothing"
                       else "blender_mpfb")
@@ -116,7 +135,10 @@ class BlenderBodyJobs:
                       self.get(source_id)["source"] == "mock" else
                       "module" if method in {"blender_mpfb", "blender_asset_clothing"} else "mock")
             with self._lock:
-                job.update(status="completed", asset_url=f"/api/body-builder/assets/{job_id}.glb",
+                asset_url = (f"/api/assets/body-{job_id}.glb"
+                             if job["action"] == "body" and self.storage is not None
+                             else f"/api/body-builder/assets/{job_id}.glb")
+                job.update(status="completed", asset_url=asset_url,
                            method=method, source=source)
         except FileNotFoundError:
             logger.warning("Blender executable was not found for job %s", job_id)
@@ -133,5 +155,3 @@ class BlenderBodyJobs:
                     "Không thể tạo trang phục trong Blender. Kiểm tra log backend."
                 ))
 
-
-body_jobs = BlenderBodyJobs()

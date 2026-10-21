@@ -16,10 +16,12 @@ class Settings:
     asset_dir: Path = Path(__file__).resolve().parents[1] / "fixtures" / "assets"
     managed_asset_dir: Path = Path(__file__).resolve().parents[2] / "data" / "assets"
     database_url: str = field(default_factory=lambda: os.getenv(
-        "DATABASE_URL", "postgresql+psycopg://tryon:tryon@localhost:5432/tryon",
+        "DATABASE_URL", "sqlite+pysqlite:///./data/tryon.sqlite3",
     ))
     max_image_bytes: int = 5 * 1024 * 1024
     max_image_pixels: int = 16_000_000
+    max_garment_image_bytes: int = 10 * 1024 * 1024
+    max_garment_image_pixels: int = 16_000_000
 
     def __post_init__(self) -> None:
         if "*" in self.cors_origins:

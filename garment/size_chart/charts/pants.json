@@ -1,4 +1,46 @@
 {
   "category": "pants",
-  "sizes": {}
+  "name": "Standard Regular Fit Pants",
+  "sizes": {
+    "S": {
+      "waist_cm": 74.0,
+      "hip_cm": 92.0,
+      "length_cm": 98.0,
+      "inseam_cm": 72.0,
+      "thigh_cm": 54.0,
+      "hem_cm": 34.0,
+      "shoulder_width_cm": 42.0,
+      "chest_cm": 92.0
+    },
+    "M": {
+      "waist_cm": 80.0,
+      "hip_cm": 98.0,
+      "length_cm": 100.0,
+      "inseam_cm": 73.0,
+      "thigh_cm": 58.0,
+      "hem_cm": 36.0,
+      "shoulder_width_cm": 44.0,
+      "chest_cm": 100.0
+    },
+    "L": {
+      "waist_cm": 86.0,
+      "hip_cm": 104.0,
+      "length_cm": 102.0,
+      "inseam_cm": 74.0,
+      "thigh_cm": 62.0,
+      "hem_cm": 38.0,
+      "shoulder_width_cm": 46.0,
+      "chest_cm": 108.0
+    },
+    "XL": {
+      "waist_cm": 92.0,
+      "hip_cm": 110.0,
+      "length_cm": 104.0,
+      "inseam_cm": 75.0,
+      "thigh_cm": 66.0,
+      "hem_cm": 40.0,
+      "shoulder_width_cm": 48.0,
+      "chest_cm": 116.0
+    }
+  }
 }

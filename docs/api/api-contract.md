@@ -295,3 +295,58 @@ trả 404:
 Garment 3D là sub-app với contract response riêng; envelope `data/error` ở các
 route `/api/...` phía trên không áp dụng cho namespace này. Xem
 `backend/garment3d/README.md` và Swagger UI tại `/garment3d/docs`.
+
+## 6. Luồng ảnh trang phục + body MPFB (v0.2, cần nghiệm thu thực tế)
+
+Luồng này tách khỏi `/api/tryon/fit` mock. `POST /api/body-builder/generate`
+tạo body MPFB; khi job hoàn tất, response có `body_id` và GLB được đăng ký tại
+`/api/assets/body-<body_id>.glb`. `GET /api/body-builder/bodies/{body_id}` lấy lại
+body đã tạo sau khi API khởi động lại. Body này là hình học MPFB từ thông số,
+không phải số đo suy từ ảnh người.
+
+`POST /api/tryon/image-jobs` nhận multipart:
+
+| Field | Yêu cầu | Ý nghĩa |
+| --- | --- | --- |
+| `body_id` | bắt buộc | ID của body MPFB đã hoàn tất và còn GLB trong kho quản lý |
+| `front` | bắt buộc | ảnh mặt trước JPG/PNG/WebP |
+| `left`, `back`, `right` | tùy chọn | các góc ảnh khác của cùng trang phục |
+| `garment_type` | mặc định `tshirt` | `tshirt`, `shirt`, `jacket`, `pants`, `skirt`, `dress` |
+| `reference_value_cm` | bắt buộc, 1–300 | chiều dài thật của trang phục, dùng chuẩn tỉ lệ |
+| `simulate_cloth` | mặc định `false` | `true` hiện trả lỗi job `SIMULATION_UNAVAILABLE`; solver chưa hiệu chuẩn |
+
+Mỗi ảnh tối đa 10 MiB và 16 triệu pixel. Backend kiểm tra MIME, định dạng thực,
+khả năng giải mã; BMP không được nhận ở endpoint này. Ảnh gốc được lưu dưới
+`data/assets/image_tryon/<job_id>/inputs/`, không có URL công khai. Body không
+tồn tại hoặc GLB mất trả 404. Ảnh sai định dạng trả 400/415; ảnh quá lớn trả 413.
+Chỉ sau khi file ảnh và bản ghi job/asset đã lưu, API mới trả 202.
+
+Response dùng envelope `data/error` chung. `data` là `ImageTryOnJob` với
+`job_id`, `status`, `attempt_count`, `request`, `result`, `error`. `request` không
+chứa đường dẫn file nội bộ. `GET /api/tryon/image-jobs/{job_id}` cho polling:
+`pending → running → completed | failed`. Kết quả completed có `source`,
+`method`, `notes`, `body_id`, `garment_type`, `tryon_mesh`,
+`simulation_ran`, `penetration_fraction`, `placement`, `warnings`,
+`reconstruction`. Trường `reconstruction` ghi chế độ dựng hình, tách nền,
+chuẩn tỉ lệ và mesh; `garment_type` do người dùng chọn, chưa có bộ phân loại tự động. `tryon_mesh`
+là một `Asset` GLB tại `/api/assets/tryon-<job_id>.glb` và là asset duy nhất
+viewer cần tải cho cảnh kết quả. Job failed giữ `result=null`, `error` có
+`code/message/details`; không phát URL GLB khi chưa có file hợp lệ.
+
+Worker riêng dùng bảng PostgreSQL `image_tryon_jobs` như hàng đợi bền vững,
+claim có lease 15 phút và tối đa 2 lần sau khi worker mất giữa chừng. Nó dùng
+pipeline local parametric hiện có của M2, yêu cầu `fit_ready=true` với kích thước
+thật, sau đó Blender ghép body và áo trong hệ mét, Y-up, +Z forward. Phép ghép
+định vị theo tỉ lệ chiều cao body và đẩy đỉnh áo ra khỏi bề mặt body với khoảng
+hở 1 cm, tối đa 12 cm mỗi đỉnh; vùng xuyên mesh nghiêm trọng làm job fail. Đây
+là cảnh thử tĩnh, chưa có rig động, mô phỏng vải, điểm fit hay gợi ý size.
+Texture và material phải có mặt trong GLB cuối; mất chúng làm job fail. File GLB
+và metadata job còn truy xuất được sau khi API khởi động lại nếu PostgreSQL và
+`data/assets/` vẫn được giữ. Người vận hành phải chạy worker riêng:
+
+```powershell
+# Sau khi PostgreSQL hoạt động, migration đã chạy và BLENDER_PATH trỏ tới Blender có MPFB2:
+python -m backend.workers.image_tryon
+```
+
+Luồng này chưa được xác nhận bằng Blender/PostgreSQL thật trong đợt sửa mã này.

@@ -58,6 +58,27 @@ class JobRecord(Base):
     )
 
 
+class ImageTryOnRecord(Base):
+    """A durable queue entry for image-derived garment try-on."""
+
+    __tablename__ = "image_tryon_jobs"
+    job_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    body_id: Mapped[str] = mapped_column(ForeignKey("bodies.body_id"), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    request_json: Mapped[dict] = mapped_column(JSON, nullable=False)
+    result_json: Mapped[dict | None] = mapped_column(JSON)
+    error_json: Mapped[dict | None] = mapped_column(JSON)
+    attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    leased_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    __table_args__ = (
+        CheckConstraint("status IN ('pending', 'running', 'completed', 'failed')", name="ck_image_tryon_jobs_status"),
+        CheckConstraint("attempt_count >= 0", name="ck_image_tryon_jobs_attempts"),
+        Index("ix_image_tryon_jobs_status_created", "status", "created_at"),
+    )
+
+
 class AssetRecord(Base):
     __tablename__ = "assets"
     asset_id: Mapped[str] = mapped_column(String(100), primary_key=True)

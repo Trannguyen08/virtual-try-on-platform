@@ -40,7 +40,7 @@ async def create_generation(
     left: Annotated[UploadFile | None, File()] = None,
     back: Annotated[UploadFile | None, File()] = None,
     right: Annotated[UploadFile | None, File()] = None,
-    garment_type: Annotated[str, Form()] = "tshirt",
+    garment_type: Annotated[str, Form()] = "auto",
     reference_measurement: Annotated[str | None, Form()] = None,
     reference_value_cm: Annotated[float | None, Form()] = None,
 ) -> CreateGenerationResponse:

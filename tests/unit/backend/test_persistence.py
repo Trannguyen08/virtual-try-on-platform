@@ -22,13 +22,15 @@ from backend.main import create_app
 
 
 def test_schema_migration_tc_api_08(tmp_path, monkeypatch):
-    """Test Case ID: TC-API-08. Alembic creates the four metadata tables."""
+    """Test Case ID: TC-API-08. Alembic creates five metadata tables."""
     url = f"sqlite+pysqlite:///{(tmp_path / 'migration.sqlite3').as_posix()}"
     monkeypatch.setenv("DATABASE_URL", url)
     config = Config(str(Path(__file__).resolve().parents[3] / "alembic.ini"))
     command.upgrade(config, "head")
     engine = make_engine(url)
-    assert {"bodies", "assets", "tryon_jobs", "job_steps"} <= set(inspect(engine).get_table_names())
+    assert {"bodies", "assets", "tryon_jobs", "job_steps", "image_tryon_jobs"} <= set(
+        inspect(engine).get_table_names()
+    )
     with engine.connect() as connection:
         assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
     engine.dispose()

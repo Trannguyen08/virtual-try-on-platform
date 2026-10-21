@@ -10,7 +10,7 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { CatalogPage } from './pages/catalog/CatalogPage';
 import { HomePage } from './pages/home/HomePage';
 import { HistoryPage } from './pages/history/HistoryPage';
-import { TryOnPage } from './pages/tryon/TryOnPage';
+import { ImageTryOnPage } from './pages/tryon/ImageTryOnPage';
 import './styles/auth.css';
 import './styles/home.css';
 import './styles/tryon.css';
@@ -162,13 +162,13 @@ const MainContent: React.FC = () => {
 
         {currentTab === 'try-on' && (
           <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
-            <TryOnPage
+            <ImageTryOnPage
               initialGarment={selectedProduct}
               onNavigateCatalog={() => navigate('catalog')}
             />
           </div>
         )}
-
+        
         {currentTab === 'garment-3d' && (
           <div className="vfit-garment-page">
             <Suspense fallback={<p className="vfit-garment-loading" role="status">Đang mở trang tạo trang phục 3D…</p>}>

@@ -1,17 +1,22 @@
 # Chạy backend và frontend trên Windows
 
-Chạy các lệnh dưới đây bằng PowerShell. Cần Python 3.10+ và Node.js/npm. Mở **hai cửa sổ terminal**; các terminal bắt đầu tại thư mục gốc của repo (`virtual-try-on-platform`). Backend chính cũng phục vụ tính năng tạo trang phục 3D trên cổng 8000.
+Chạy các lệnh dưới đây bằng PowerShell theo thứ tự: **PostgreSQL → migration → backend → worker → frontend**. Cần Python 3.11 cho luồng thử đồ từ ảnh và Node.js/npm. Mở **ba cửa sổ terminal** tại thư mục gốc repo (`virtual-try-on-platform`); PostgreSQL chạy qua Docker. Backend chính phục vụ API trên cổng 8000.
 
 ## Terminal 1: backend
 
 Lần đầu, tạo môi trường Python và cài dependency:
 
 ```powershell
-py -3.10 -m venv .venv
+py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
 ```
 
-Backend chính dùng PostgreSQL cho metadata body, asset, job và bước xử lý. Khởi động PostgreSQL trước, tạo database `tryon` và đặt `DATABASE_URL` trong `.env` (xem `.env.example`). Có thể dùng `docker compose up -d postgres` cho database phát triển. Sau khi cài dependency, chạy migration **trước** khi khởi động API:
+Backend dùng PostgreSQL cho body, asset và job. Đặt `DATABASE_URL` trong `.env` (xem `.env.example`), rồi khởi động database và chạy migration trước API:
+
+```powershell
+docker compose up -d postgres
+.\.venv\Scripts\python.exe -m alembic upgrade head
+```
 
 Nếu chỉ cần database và pgAdmin, không cần chạy backend/frontend:
 
@@ -21,10 +26,6 @@ docker compose ps postgres pgadmin
 ```
 
 Compose dùng image `postgres:16-alpine` và `dpage/pgadmin4:latest` có sẵn, lưu dữ liệu trong hai named volume riêng. PostgreSQL ở `127.0.0.1:5432`, database/user/password phát triển là `tryon`/`tryon`/`tryon`. Mở pgAdmin tại `http://127.0.0.1:5050`, đăng nhập bằng `PGADMIN_DEFAULT_EMAIL` và `PGADMIN_DEFAULT_PASSWORD` trong `.env` (giá trị mẫu trong `.env.example`). Khi thêm server trong pgAdmin, dùng host **`postgres`**, port `5432`, database `tryon`, username/password `tryon`/`tryon`; không dùng `localhost` vì pgAdmin chạy trong container khác. Lệnh trên chỉ chọn `postgres` và `pgadmin`, không build hay khởi động backend/frontend.
-
-```powershell
-.\.venv\Scripts\python.exe -m alembic upgrade head
-```
 
 Với `docker compose up --build`, service backend chờ PostgreSQL healthy và tự chạy `alembic upgrade head` trước Uvicorn. Dữ liệu PostgreSQL nằm trong named volume `postgres_data`; file asset tạo trong `data/assets/` cần được giữ cùng database khi backup hoặc chuyển máy. Không đưa mật khẩu thật vào `.env.example` hay commit `.env`.
 
@@ -42,7 +43,17 @@ Kiểm tra tại [http://localhost:8000/health](http://localhost:8000/health) v�
 curl.exe http://localhost:8000/health
 ```
 
-## Terminal 2: frontend
+## Terminal 2: worker thử đồ từ ảnh
+
+Sau khi API chạy, mở terminal mới tại gốc repo và chạy worker để xử lý các job `/api/tryon/image-jobs` đang `pending`:
+
+```powershell
+.\.venv\Scripts\python.exe -c "from dotenv import load_dotenv; load_dotenv('.env'); from backend.workers.image_tryon import main; main()"
+```
+
+Worker nạp `.env` để dùng cùng `DATABASE_URL` và `BLENDER_PATH` với API. Giữ terminal này mở khi thử đồ từ ảnh; xem thêm [hướng dẫn thử đồ từ ảnh](image-tryon-runbook.md).
+
+## Terminal 3: frontend
 
 Lần đầu, cài dependency từ lockfile:
 
