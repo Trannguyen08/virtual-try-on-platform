@@ -40,7 +40,7 @@ function parseFriendlyError(raw: string) {
 
 /* ── Inline styles ── */
 const S = {
-  page: { maxWidth: 820, margin: '0 auto', padding: '2rem 1.25rem 4rem', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' } as React.CSSProperties,
+  page: { width: '100%', padding: '1.5rem 0 4rem', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' } as React.CSSProperties,
   hero: { background: 'linear-gradient(135deg,#14172c 0%,#272b59 55%,#5a46d7 100%)', borderRadius: 24, padding: '2rem 2.5rem', color: '#fff', marginBottom: '2rem', position: 'relative' as const, overflow: 'hidden' } as React.CSSProperties,
   heroPill: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: '.72rem', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: '#d4d8ff', marginBottom: '0.6rem' } as React.CSSProperties,
   heroTitle: { margin: '0 0 0.4rem', fontSize: 'clamp(1.4rem,4vw,2rem)', fontWeight: 800, letterSpacing: '-.04em', lineHeight: 1.1 } as React.CSSProperties,

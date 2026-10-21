@@ -161,7 +161,7 @@ const MainContent: React.FC = () => {
         )}
 
         {currentTab === 'try-on' && (
-          <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
+          <div style={{ paddingTop: '4.5rem', width: '100%', boxSizing: 'border-box', padding: '5.5rem 1.5rem 3rem' }}>
             <ImageTryOnPage
               initialGarment={selectedProduct}
               onNavigateCatalog={() => navigate('catalog')}
