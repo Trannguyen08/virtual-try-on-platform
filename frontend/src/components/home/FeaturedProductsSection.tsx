@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
+import { Product } from '../../data/mockProducts';
+import { useGarmentProducts } from '../../hooks/useGarmentProducts';
 
 interface FeaturedProductsSectionProps {
   onSelectProductForTryOn: (product: Product) => void;
@@ -13,6 +14,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
   onViewAllCatalog,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { products } = useGarmentProducts();
 
   const categories = [
     { key: 'all', label: 'Tất cả' },
@@ -20,12 +22,19 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
     { key: 'shirt', label: 'Áo sơ mi' },
     { key: 'dress', label: 'Váy đầm' },
     { key: 'jacket', label: 'Áo khoác' },
+    { key: 'pants', label: 'Quần' },
   ];
 
-  const filteredProducts =
+  const collection = products.filter((product) => product.collection === 'makehuman-20');
+  const featured = collection.length ? [
+    ...collection.filter((product) => product.category !== 'pants').slice(0, 4),
+    ...collection.filter((product) => product.category === 'pants').slice(0, 4),
+  ] : products;
+  const filteredProducts = (
     selectedCategory === 'all'
-      ? MOCK_PRODUCTS
-      : MOCK_PRODUCTS.filter((p) => p.category === selectedCategory);
+      ? featured
+      : products.filter((p) => p.category === selectedCategory)
+  ).slice(0, 8);
 
   return (
     <section className="vfit-products-section">
@@ -65,7 +74,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
               style={{ cursor: onViewProductDetail ? 'pointer' : 'default' }}
               onClick={() => onViewProductDetail && onViewProductDetail(product)}
             >
-              <img src={product.imageUrl} alt={product.name} />
+              <img src={product.imageUrl} alt={product.name} style={product.fittingMode ? { objectFit: 'contain', backgroundColor: '#f3f4f6' } : undefined} />
 
               {/* Material Pill */}
               <span
@@ -127,7 +136,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                   <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
-                    {product.price.toLocaleString('vi-VN')}₫
+                    {product.fittingMode ? 'Có sẵn để thử' : `${product.price.toLocaleString('vi-VN')}₫`}
                   </span>
                   {product.originalPrice && (
                     <span style={{ fontSize: '0.85rem', color: 'var(--vfit-outline)', textDecoration: 'line-through' }}>
@@ -162,7 +171,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
           style={{ display: 'inline-flex', padding: '0 2.5rem' }}
           onClick={onViewAllCatalog}
         >
-          <span>Khám phá toàn bộ danh mục ({MOCK_PRODUCTS.length} trang phục)</span>
+          <span>Khám phá toàn bộ danh mục ({products.length} trang phục)</span>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>

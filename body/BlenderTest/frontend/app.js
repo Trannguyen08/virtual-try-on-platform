@@ -190,9 +190,9 @@ function loadGLBModel(url) {
       scene.add(currentModel);
 
       // Focus camera on model
-      const height = size.y;
-      controls.target.set(0, height * 0.45, 0);
-      camera.position.set(0, height * 0.5, height * 1.8);
+      const baseHeight = 1.7;
+      controls.target.set(0, baseHeight * 0.45, 0);
+      camera.position.set(0, baseHeight * 0.5, baseHeight * 1.8);
       controls.update();
 
       // Show canvas

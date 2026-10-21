@@ -409,7 +409,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                     style={{ cursor: onViewProductDetail ? 'pointer' : 'default' }}
                     onClick={() => onViewProductDetail && onViewProductDetail(product)}
                   >
-                    <img src={product.imageUrl} alt={product.name} />
+                    <img src={product.imageUrl} alt={product.name} style={product.fittingMode ? { objectFit: 'contain', backgroundColor: '#f3f4f6' } : undefined} />
 
                     {/* Material Pill */}
                     <span
@@ -500,7 +500,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                         <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
-                          {product.price.toLocaleString('vi-VN')}₫
+                          {product.fittingMode ? 'Có sẵn để thử' : `${product.price.toLocaleString('vi-VN')}₫`}
                         </span>
                         {product.originalPrice && (
                           <span style={{ fontSize: '0.8rem', color: 'var(--vfit-outline)', textDecoration: 'line-through' }}>

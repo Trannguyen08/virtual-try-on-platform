@@ -10,7 +10,7 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { CatalogPage } from './pages/catalog/CatalogPage';
 import { HomePage } from './pages/home/HomePage';
 import { HistoryPage } from './pages/history/HistoryPage';
-import { ImageTryOnPage } from './pages/tryon/ImageTryOnPage';
+import { OutfitTryOnPage } from './pages/tryon/OutfitTryOnPage';
 import './styles/auth.css';
 import './styles/home.css';
 import './styles/tryon.css';
@@ -40,6 +40,7 @@ const MainContent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<AppTab>(tabFromPath);
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -58,14 +59,16 @@ const MainContent: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  const handleSelectProductForTryOn = (product: Product) => {
+  const handleSelectProductForTryOn = (product: Product, size?: string) => {
     setSelectedProduct(product);
+    setSelectedSize(size);
     setModalProduct(null);
     navigate('try-on');
   };
 
   const handleStartTryOn = () => {
     setSelectedProduct(null);
+    setSelectedSize(undefined);
     setModalProduct(null);
     navigate('try-on');
   };
@@ -85,6 +88,7 @@ const MainContent: React.FC = () => {
       colors: [{ name: item.colorName, hex: item.colorHex }],
     };
     setSelectedProduct(found);
+    setSelectedSize(undefined);
     navigate('try-on');
   };
 
@@ -162,8 +166,9 @@ const MainContent: React.FC = () => {
 
         {currentTab === 'try-on' && (
           <div style={{ paddingTop: '4.5rem', width: '100%', boxSizing: 'border-box', padding: '5.5rem 1.5rem 3rem' }}>
-            <ImageTryOnPage
+            <OutfitTryOnPage
               initialGarment={selectedProduct}
+              initialSize={selectedSize}
               onNavigateCatalog={() => navigate('catalog')}
             />
           </div>

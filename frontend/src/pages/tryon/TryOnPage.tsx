@@ -5,7 +5,7 @@ import { GeneratedBodyViewer } from '../../components/tryon/GeneratedBodyViewer'
 import { ProcessingStep } from '../../components/tryon/ProcessingStep';
 import { SelectGarmentStep } from '../../components/tryon/SelectGarmentStep';
 import { UploadStep } from '../../components/tryon/UploadStep';
-import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
+import { Product } from '../../data/mockProducts';
 
 type TryOnStep = 'upload' | 'body-builder' | 'select-garment' | 'processing' | 'viewer-3d';
 
@@ -21,8 +21,8 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
 
   const [heightCm, setHeightCm] = useState<number>(170);
 
-  const [selectedGarment, setSelectedGarment] = useState<Product>(
-    initialGarment || MOCK_PRODUCTS[0]
+  const [selectedGarment, setSelectedGarment] = useState<Product | null>(
+    initialGarment || null
   );
   const [selectedSize, setSelectedSize] = useState<string>('M');
 
@@ -190,7 +190,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
         <ProcessingStep statusMessage={processingStatus} />
       )}
 
-      {currentStep === 'viewer-3d' && manualBodyJob && (
+      {currentStep === 'viewer-3d' && manualBodyJob && selectedGarment && (
         <GeneratedBodyViewer bodyJob={manualBodyJob} initialClothingJob={manualClothingJob}
           garment={selectedGarment} selectedSize={selectedSize} initialError={error}
           onTryAnotherSize={() => setCurrentStep('select-garment')} onRestart={handleRestart} />

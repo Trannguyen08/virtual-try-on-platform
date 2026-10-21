@@ -108,6 +108,10 @@ def generate_with_mpfb(params: dict, output_path: str, mpfb_module_name: str = "
         age_normalized = (params.get("age", 25) - 10) / 70.0  # normalize 10-80 → 0-1
         human_obj.MPFB_HUM_age = age_normalized
 
+        # ─── Apply height ────────────────────────────────────────────────────
+        height_norm = max(0.0, min(1.0, (height - 1.5) / 0.5))
+        human_obj.MPFB_HUM_height = height_norm
+
         # ─── Apply weight/muscle ─────────────────────────────────────────────
         weight = params.get("weight", 65)
         # normalize weight (approx 40kg -> 0.0, 100kg -> 1.0)
@@ -145,12 +149,7 @@ def generate_with_mpfb(params: dict, output_path: str, mpfb_module_name: str = "
         # Bake shape keys thành mesh cố định trước khi export
         TargetService.bake_targets(human_obj)
 
-        # ─── Apply height scale ──────────────────────────────────────────────
-        # MPFB human mặc định ~1.7m, scale theo chiều cao mong muốn
-        default_height = 1.70
-        scale_factor = height / default_height
-        human_obj.scale = (scale_factor, scale_factor, scale_factor)
-        bpy.ops.object.transform_apply(scale=True)
+        
 
         # ─── Apply material (skin tone) ──────────────────────────────────────────
         color_hex = skin.get("color_hex", "#C68642")

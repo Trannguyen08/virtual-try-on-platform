@@ -16,7 +16,9 @@ export const SizeChartPanel: React.FC<{
   onRegionChange: (region: SizeRegion) => void;
   onSizeChange: (size: GarmentSize) => void;
 }> = ({ garmentType, region, size, onRegionChange, onSizeChange }) => {
-  const profile = getGarmentSizeProfile(garmentType, region)[size];
+  const profiles = getGarmentSizeProfile(garmentType, region);
+  if (!profiles) return <p className="g3d-size-note" role="status">Chưa xác định loại trang phục để hiển thị bảng size tham khảo.</p>;
+  const profile = profiles[size];
 
   return (
     <section className="g3d-size-chart" aria-labelledby="g3d-size-chart-title">

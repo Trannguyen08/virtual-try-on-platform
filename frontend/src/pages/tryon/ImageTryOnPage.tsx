@@ -1,6 +1,6 @@
 import React, { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { bodyBuilderApi, BodyBuilderJob, BodyParameters } from '../../api/bodyBuilderApi';
-import { GarmentType } from '../../api/garment3d';
+import { GarmentType as ApiGarmentType } from '../../api/garment3d';
 import { imageTryOnApi, ImageTryOnJob } from '../../api/imageTryOnApi';
 import { GarmentFiles, GarmentImageInputs } from '../../components/GarmentImageInputs';
 import { BodyBuilderStep } from '../../components/tryon/BodyBuilderStep';
@@ -8,6 +8,7 @@ import { Product } from '../../data/mockProducts';
 import { Garment360Viewer } from '../../viewer/Garment360Viewer';
 
 const BODY_KEY = 'tryon.mpfb.body_id';
+type GarmentType = Exclude<ApiGarmentType, 'auto'>;
 const JOB_KEY = 'tryon.image.job_id';
 const GARMENT_TYPES: GarmentType[] = ['tshirt', 'shirt', 'jacket', 'pants', 'skirt', 'dress'];
 const ESTIMATED_GARMENT_LENGTH_CM: Record<GarmentType, number> = {

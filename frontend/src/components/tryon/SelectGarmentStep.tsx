@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Product } from '../../data/mockProducts';
 import { useGarmentProducts } from '../../hooks/useGarmentProducts';
 
@@ -14,10 +14,19 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
   onConfirm,
 }) => {
   const { products, refitStatus } = useGarmentProducts();
-  const [selectedGarment, setSelectedGarment] = useState<Product>(
-    initialGarment || products[0]
+  const [selectedGarment, setSelectedGarment] = useState<Product | null>(
+    initialGarment
   );
   const [selectedSize, setSelectedSize] = useState<string>(initialGarment?.sizes.includes('M') ? 'M' : initialGarment?.sizes[0] || 'M');
+
+  useEffect(() => {
+    if (!selectedGarment && products[0]) {
+      setSelectedGarment(products[0]);
+      setSelectedSize(products[0].sizes[0] || 'M');
+    }
+  }, [products, selectedGarment]);
+
+  if (!selectedGarment) return <div role="status"><p>{refitStatus}</p><button type="button" onClick={onBack}>← Quay lại</button></div>;
 
   const sizes = selectedGarment.sizes;
 

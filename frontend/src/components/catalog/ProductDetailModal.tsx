@@ -17,6 +17,45 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [activeThumbIndex, setActiveThumbIndex] = useState<number>(0);
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
 
+  if (product.fittingMode) return (
+    <div className="vfit-product-modal-backdrop" onClick={onClose}>
+      <div className="vfit-product-modal-box" role="dialog" aria-modal="true" aria-labelledby="asset-product-title" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="vfit-product-modal-close" onClick={onClose} aria-label="Đóng">✕</button>
+        <div className="vfit-product-detail-layout">
+          <div className="vfit-product-gallery">
+            <div className="vfit-main-image-viewport" style={{ background: '#f3f4f6' }}>
+              <img src={product.imageUrl} alt={`Ảnh xem trước ${product.name}`} style={{ objectFit: 'contain' }} />
+            </div>
+            <p style={{ color: 'var(--vfit-secondary)', fontSize: '.8rem', lineHeight: 1.6 }}>
+              {product.collection === 'makehuman-20' ? 'Ảnh xem trước gốc của đúng asset MakeHuman. Màu và chất liệu được giữ theo asset.' : 'Ảnh đại diện của trang phục trong kho.'}
+            </p>
+          </div>
+          <div className="vfit-product-info-col">
+            <div>
+              <div className="vfit-product-collection-meta">{product.collection === 'makehuman-20' ? 'MAKEHUMAN COMMUNITY · BỘ SƯU TẬP 20 MẪU' : product.categoryLabel}</div>
+              <h2 id="asset-product-title" className="vfit-product-modal-title">{product.name}</h2>
+              <p className="vfit-price-main">Có sẵn để thử</p>
+              <p style={{ lineHeight: 1.8, color: 'var(--vfit-secondary)' }}>
+                {product.fittingMode === 'body_refit' ? 'Trang phục được refit theo model MPFB của bạn.' : 'Trang phục được căn theo chiều cao, giữ tư thế gốc.'}
+                {' '}Bạn có thể phối cùng một món khác trong phòng thử đồ. Chưa mô phỏng tương tác vải hoặc kiểm chứng độ vừa theo size.
+              </p>
+              <div className="vfit-size-pills">
+                {product.sizes.map((size) => <button key={size} type="button" className={`vfit-size-pill-btn ${selectedSize === size ? 'active' : ''}`} aria-pressed={selectedSize === size} onClick={() => setSelectedSize(size)}>{size}</button>)}
+              </div>
+              <p style={{ fontSize: '.8rem', color: 'var(--vfit-secondary)' }}>M là nhãn thử nghiệm cho refit, chưa phải size bán lẻ đã kiểm chứng.</p>
+              {product.author && <p>Tác giả: <strong>{product.author}</strong></p>}
+              {product.license && <p>Giấy phép: <strong>{product.license}</strong></p>}
+              {product.sourceUrl && <a href={product.sourceUrl} target="_blank" rel="noreferrer">Xem asset và nguồn MakeHuman ↗</a>}
+            </div>
+            <div className="vfit-action-stack">
+              <button type="button" className="vfit-btn-try-now" onClick={() => { onClose(); onSelectProductForTryOn(product, selectedSize); }}>THỬ VÀ PHỐI ĐỒ TRÊN MODEL</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // 4 curated gallery angles matching the design
   const galleryImages = [
     {
