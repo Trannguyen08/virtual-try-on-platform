@@ -1,60 +1,36 @@
 ---
 name: m5-frontend-expert
-description: Chuyên môn kỹ thuật về Three.js 3D WebGL Viewer, Custom Heatmap Shaders và Xây dựng Giao diện Người dùng Thử đồ Ảo cho Module M5 trong Virtual Try-On Platform.
+description: Hướng dẫn agent M5 triển khai giao diện thử đồ, API, polling và viewer 3D với trạng thái mock/real minh bạch.
 ---
 
-# M5 FRONTEND & 3D WEBGL EXPERT SKILL
+# M5 FRONTEND EXPERT
 
-## 1. Bản chất Kiến trúc M5 (Interactive 3D Dressing Room)
-Module M5 là mặt tiền trải nghiệm của người dùng (User Experience), nơi kết hợp giao diện web hiện đại với khung nhìn 3D WebGL trực quan:
+## Điều kiện kích hoạt
 
-```text
-┌────────────────────────────────────────────────────────┐
-│               GIAO DIỆN PHÒNG THỬ ĐỒ ẢO               │
-├──────────────────────────┬─────────────────────────────┤
-│   3D WEBGL VIEWER        │       BẢNG ĐIỀU KHIỂN       │
-│   (Three.js Scene)       │       (Fit Panel & Options) │
-│                          │                             │
-│  - Load body.glb         │  - Form tải ảnh / số đo     │
-│  - Load draped.glb       │  - Điểm Fit Score [0, 100]  │
-│  - OrbitControls 360°    │  - Nhãn Too Tight/Good/Loose│
-│  - Vertex Color Heatmap  │  - Size khuyến nghị bởi AI  │
-│  - Nút Bật/Tắt Heatmap   │  - Bộ chọn size (S/M/L/XL)  │
-│                          │                             │
-└──────────────────────────┴─────────────────────────────┘
-```
+Dùng khi nhiệm vụ giao M5 hoặc liên quan frontend/src/, frontend/tests/, trải nghiệm upload, gọi API, polling, GLB viewer và kết quả Fit. Đọc Rule 01–02, Rule 09 và Rule 10 trước khi sửa.
 
----
+## Hiện trạng đã đối chiếu
 
-## 2. Phương pháp luận Kỹ thuật Cốt lõi
+Nhánh feature/backend-tryon-flow có TryOnPage theo bước upload/chọn áo/processing/viewer, frontend/src/api/tryonApi.ts gọi analyze/fit/jobs và fallback mock phía client, InteractiveViewer3DStep.tsx dựng avatar/quần áo hình học bằng Three.js. Có nhiều component giao diện; useTryOn.ts, useJobPolling.ts, ModelLoader.ts, Heatmap.ts, Scene.tsx, FitPanel.tsx và ResultPage.tsx được xem còn placeholder. Viewer đang dựng hình minh họa, không phải tải và drape GLB thật. Fallback client hiện tạo score demo, trong khi contract mock M3 trả score null; đây là khác biệt cần M3–M5 thống nhất, không xem score demo là điểm Fit thật.
 
-### 2.1. Cấu hình Three.js Scene Chuẩn
-- **Camera:** Sử dụng `PerspectiveCamera` (FOV $45^\circ$, near $0.1$, far $1000$). Vị trí camera hướng vào tâm thân người ($y \approx 0.9\text{ m}$), khoảng cách $z \approx 2.2\text{ m}$.
-- **Hệ thống Ánh sáng (Lighting):**
-  - `AmbientLight` (cường độ $0.6$) tạo ánh sáng nền mềm mại.
-  - 2 `DirectionalLight` (ánh sáng chính phía trước góc $45^\circ$ và ánh sáng phụ ngược sáng rim-light phía sau) để thấy rõ độ nổi khối của vải.
-- **Tải và Đồng bộ Mesh:** Dùng `GLTFLoader` tải cả `body.glb` và `draped.glb`. Bắt buộc kiểm tra tỉ lệ và giữ nguyên gốc tọa độ $(0, 0, 0)$ để áo khớp hoàn hảo quanh cơ thể.
+## Input và output
 
-### 2.2. Kỹ thuật Tô màu Fit Heatmap (Vertex Color Shader)
-- Không dùng texture ảnh tĩnh. Áp dụng kỹ thuật tô màu trực tiếp trên từng đỉnh (Vertex Colors):
-  - Đọc mảng khoảng cách từ file `heatmap.json` (độ dài đúng bằng số đỉnh của mesh áo).
-  - Chuẩn hóa khoảng cách sang dải màu:
-    - Khoảng cách âm hoặc $< 0.005\text{ m}$ (Chật/Căng): Màu **Đỏ** (`rgb(239, 68, 68)`).
-    - Khoảng cách lý tưởng $0.015 - 0.035\text{ m}$ (Vừa vặn): Màu **Xanh lá** (`rgb(34, 197, 94)`).
-    - Khoảng cách $> 0.05\text{ m}$ (Rộng/Thùng thình): Màu **Xanh dương** (`rgb(59, 130, 246)`) hoặc Vàng.
-  - Gán vào thuộc tính `geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))` và kích hoạt `material.vertexColors = true`.
+- Input API M3: response envelope data/error, Body với measurements *_cm và mesh, catalog, Job với status/result/error, FitResult với recommendation/overall/regions/assets và provenance.
+- Output M5: trạng thái UI, polling, thông báo lỗi, hiển thị số đo/fit và viewer. Hiển thị rõ source=mock/mixed, null là “chưa có”, không trình bày số synthetic như đo thật.
+- Asset URL tương đối phải ghép với backend origin. GLB m, Y-up, +Z forward; chọn tryon_mesh hoặc body_mesh cộng garment_mesh. Không suy diễn heatmap khi API chưa có.
 
----
+## Quy trình làm việc
 
-## 3. Xử lý Trường hợp Ngoại lệ (Edge Cases)
-1. **API Backend phản hồi chậm hoặc lỗi 500:** Tuyệt đối không để vỡ giao diện (màn hình trắng). Hiển thị Toast thông báo lỗi thân thiện hoặc bật Fallback Mock Data để người dùng vẫn trải nghiệm được giao diện.
-2. **File Mesh quá nặng làm tụt FPS:** Tự động phát hiện FPS $< 20$ để giảm cấp độ khử răng cưa (antialiasing) hoặc hạ độ phân giải pixel ratio trên thiết bị yếu.
-3. **Mô phỏng đang chạy nền (Async Polling):** Khi người dùng đổi size, hiển thị trạng thái loading spinner mượt mà trên avatar, tự động polling trạng thái job mỗi $2 - 3$ giây và có nút hủy nếu người dùng không muốn chờ.
+1. Đọc docs/api/api-contract.md, backend/schemas/** liên quan và frontend/src/api/tryonApi.ts trước khi đổi kiểu dữ liệu hay UI.
+2. Tách rõ dữ liệu API, fixture và fallback client; mô tả đúng trạng thái từng đường đi. Trình thiết kế và xin duyệt theo Rule 01.
+3. Xử lý input upload, validation phía UI, 202 job, polling terminal state, timeout, failed và API error; không nuốt lỗi thành kết quả thật. Phối hợp M3 nếu behavior API cần đổi.
+4. Xây viewer theo asset do M3 phát, giữ hệ trục M1/M2 và dọn tài nguyên Three.js khi component rời trang. Dữ liệu M4 chỉ được hiển thị theo contract tích hợp đã chốt.
+5. Kiểm tra nội dung UI tránh khẳng định AI/SMPL-X/mô phỏng vải đã chạy khi source vẫn mock. Gọi change-impact-log sau đợt sửa.
 
----
+## Kiểm thử và bàn giao
 
-## 4. Tài liệu Tham khảo Chuyên sâu (References)
-Khi giải quyết các vấn đề kỹ thuật cụ thể, hãy tra cứu các tài liệu trong `references/`:
-- [threejs-viewer-setup.md](references/threejs-viewer-setup.md): Cấu hình Scene, Camera framing, Lighting và OrbitControls.
-- [heatmap-colormap.md](references/heatmap-colormap.md): Thang màu Heatmap và kỹ thuật tô màu Vertex Colors.
-- [ux-flows-and-states.md](references/ux-flows-and-states.md): Luồng tương tác người dùng và quản lý trạng thái Client.
+Đề xuất user chạy build/test frontend theo Rule 01, kiểm tra upload hợp lệ/lỗi, polling completed/failed/timeout, null/source và viewer khi asset thiếu. Kiểm tra e2e với API M3 khi có môi trường; test HTTP backend không thay thế test browser. Nếu chưa có log chạy, ghi chưa chạy. Bàn giao component, trường API cần M3 xác nhận, giới hạn mock/asset/heatmap và ảnh bằng chứng UI.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [threejs-viewer-setup.md](references/threejs-viewer-setup.md), [heatmap-colormap.md](references/heatmap-colormap.md) và [ux-flows-and-states.md](references/ux-flows-and-states.md) khi thiết kế M5; đối chiếu với API và viewer đang chạy trước khi áp dụng.

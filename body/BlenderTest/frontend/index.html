@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BodyForge — Thiết Kế Nhân Vật 3D với Blender</title>
+  <meta name="description" content="Điều chỉnh tỉ lệ cơ thể 3D và thử đồ ảo với sức mạnh của Blender MPFB" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L28 10V22L16 29L4 22V10L16 3Z" stroke="url(#grad)" stroke-width="2" fill="none"/>
+          <circle cx="16" cy="16" r="5" fill="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="4" y1="3" x2="28" y2="29" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7C3AED"/>
+              <stop offset="1" stop-color="#06B6D4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="brand-name">BodyForge</span>
+      <span class="brand-badge">BETA</span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" id="nav-body" onclick="switchTab('body')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+        Thân Hình
+      </button>
+      <button class="nav-btn" id="nav-clothing" onclick="switchTab('clothing')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z" clip-rule="evenodd"/></svg>
+        Tủ Đồ
+      </button>
+    </nav>
+    <div class="header-actions">
+      <div id="connection-status" class="status-badge status-checking">
+        <span class="status-dot"></span>
+        <span id="status-text">Đang kết nối...</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════
+     MAIN LAYOUT
+══════════════════════════════════════════════════ -->
+<main class="app-layout">
+
+  <!-- ── LEFT PANEL: Controls ── -->
+  <aside class="control-panel" id="panel-body">
+
+    <!-- Gender & Preset -->
+    <section class="ctrl-section">
+      <h3 class="section-title">Giới Tính & Preset</h3>
+      <div class="gender-toggle">
+        <button class="gender-btn active" id="btn-female" onclick="setGender('female')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M12 12v8M9 18h6M8.5 15h7"/></svg>
+          Nữ
+        </button>
+        <button class="gender-btn" id="btn-male" onclick="setGender('male')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="14" r="4"/><path d="M20 4h-5M20 4v5M20 4l-6 6"/></svg>
+          Nam
+        </button>
+      </div>
+
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="loadPreset('slim')">Mảnh Mai</button>
+        <button class="preset-btn" onclick="loadPreset('athletic')">Vận Động</button>
+        <button class="preset-btn" onclick="loadPreset('curvy')">Đầy Đặn</button>
+        <button class="preset-btn" onclick="loadPreset('petite')">Nhỏ Nhắn</button>
+      </div>
+    </section>
+
+    <!-- Body Measurements -->
+    <section class="ctrl-section">
+      <h3 class="section-title">Số Đo Cơ Thể</h3>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Chiều Cao</span>
+          <span class="slider-value" id="val-height">170 cm</span>
+        </label>
+        <input type="range" class="slider" id="sl-height"
+          min="140" max="210" value="170" step="1"
+          oninput="updateSlider('height', this.value, 'cm')" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Cân Nặng</span>
+          <span class="slider-value" id="val-weight">65 kg</span>
+        </label>
+        <input type="range" class="slider" id="sl-weight"
+          min="35" max="150" value="65" step="1"
+          oninput="updateSlider('weight', this.value, 'kg')" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Tuổi</span>
+          <span class="slider-value" id="val-age">25 tuổi</span>
+        </label>
+        <input type="range" class="slider" id="sl-age"
+          min="10" max="80" value="25" step="1"
+          oninput="updateSlider('age', this.value, 'tuổi')" />
+      </div>
+    </section>
+
+    <!-- Proportions -->
+    <section class="ctrl-section">
+      <h3 class="section-title">Tỉ Lệ Cơ Thể</h3>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Vai</span><span class="slider-value" id="val-shoulder">50%</span>
+        </label>
+        <input type="range" class="slider accent-purple" id="sl-shoulder"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('shoulder_width', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Ngực</span><span class="slider-value" id="val-chest">50%</span>
+        </label>
+        <input type="range" class="slider accent-purple" id="sl-chest"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('chest', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Eo</span><span class="slider-value" id="val-waist">50%</span>
+        </label>
+        <input type="range" class="slider accent-cyan" id="sl-waist"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('waist', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Hông</span><span class="slider-value" id="val-hips">50%</span>
+        </label>
+        <input type="range" class="slider accent-cyan" id="sl-hips"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('hips', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Bụng</span><span class="slider-value" id="val-belly">20%</span>
+        </label>
+        <input type="range" class="slider accent-pink" id="sl-belly"
+          min="0" max="100" value="20"
+          oninput="updatePropSlider('belly', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Độ Cơ Bắp</span><span class="slider-value" id="val-muscle">30%</span>
+        </label>
+        <input type="range" class="slider accent-pink" id="sl-muscle"
+          min="0" max="100" value="30"
+          oninput="updatePropSlider('muscle_tone', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Chân Dài</span><span class="slider-value" id="val-leg">50%</span>
+        </label>
+        <input type="range" class="slider" id="sl-leg"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('leg_length', this.value)" />
+      </div>
+
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>Tay Dài</span><span class="slider-value" id="val-arm">50%</span>
+        </label>
+        <input type="range" class="slider" id="sl-arm"
+          min="0" max="100" value="50"
+          oninput="updatePropSlider('arm_length', this.value)" />
+      </div>
+    </section>
+
+    <!-- Skin Tone -->
+    <section class="ctrl-section">
+      <h3 class="section-title">Màu Da</h3>
+      <div class="skin-tones">
+        <button class="skin-btn" style="background:#FFDBB4" onclick="setSkin('#FFDBB4')" title="Trắng Sáng"></button>
+        <button class="skin-btn" style="background:#F1C27D" onclick="setSkin('#F1C27D')" title="Ngà"></button>
+        <button class="skin-btn active" style="background:#C68642" onclick="setSkin('#C68642')" title="Trung Bình"></button>
+        <button class="skin-btn" style="background:#8D5524" onclick="setSkin('#8D5524')" title="Nâu"></button>
+        <button class="skin-btn" style="background:#4A2912" onclick="setSkin('#4A2912')" title="Đậm"></button>
+        <div class="skin-custom">
+          <input type="color" id="custom-skin" value="#C68642"
+            onchange="setSkin(this.value)" title="Màu tùy chỉnh" />
+          <label for="custom-skin">Tùy chỉnh</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Generate Button -->
+    <div class="generate-section">
+      <button class="btn-generate" id="btn-generate" onclick="generateModel()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/></svg>
+        Tạo Mô Hình 3D
+      </button>
+      <button class="btn-secondary" onclick="resetParams()">Đặt Lại</button>
+    </div>
+  </aside>
+
+  <!-- ── LEFT PANEL: Clothing ── -->
+  <aside class="control-panel hidden" id="panel-clothing">
+    <section class="ctrl-section">
+      <h3 class="section-title">Danh Mục Quần Áo</h3>
+      <div class="category-tabs">
+        <button class="cat-btn active" onclick="filterClothing('all', this)">Tất Cả</button>
+        <button class="cat-btn" onclick="filterClothing('tops', this)">Áo</button>
+        <button class="cat-btn" onclick="filterClothing('bottoms', this)">Quần</button>
+        <button class="cat-btn" onclick="filterClothing('dresses', this)">Váy</button>
+      </div>
+    </section>
+
+    <section class="ctrl-section">
+      <div class="clothing-grid" id="clothing-grid">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <section class="ctrl-section" id="clothing-color-section" style="display:none">
+      <h3 class="section-title">Màu Sắc</h3>
+      <div class="color-palette" id="color-palette">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <div class="generate-section">
+      <button class="btn-generate" id="btn-apply-clothing" onclick="applyClothing()" disabled>
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H3z"/></svg>
+        Mặc Thử
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── CENTER: 3D Viewport ── -->
+  <section class="viewport-section">
+    <!-- Viewport Canvas -->
+    <div class="viewport-container" id="viewport">
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 80 80" fill="none">
+            <path d="M40 10L65 25V55L40 70L15 55V25L40 10Z" stroke="url(#vg)" stroke-width="2"/>
+            <circle cx="40" cy="40" r="8" fill="url(#vg)" opacity="0.5"/>
+            <circle cx="40" cy="40" r="20" stroke="url(#vg)" stroke-width="1" stroke-dasharray="4 4"/>
+            <defs>
+              <linearGradient id="vg" x1="15" y1="10" x2="65" y2="70" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7C3AED"/>
+                <stop offset="1" stop-color="#06B6D4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h2>Chưa có mô hình</h2>
+        <p>Điều chỉnh thông số bên trái và nhấn<br/><strong>"Tạo Mô Hình 3D"</strong> để bắt đầu</p>
+      </div>
+
+      <!-- Three.js canvas will be inserted here -->
+      <canvas id="three-canvas" style="display:none"></canvas>
+
+      <!-- Loading overlay -->
+      <div class="loading-overlay" id="loading-overlay" style="display:none">
+        <div class="loading-content">
+          <div class="spinner-ring"></div>
+          <div class="loading-info">
+            <p class="loading-title">Blender đang xử lý...</p>
+            <p class="loading-sub" id="loading-sub">Khởi tạo MPFB</p>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Viewport Controls Bar -->
+    <div class="viewport-controls">
+      <div class="view-info">
+        <span id="model-info">— Chưa có model —</span>
+      </div>
+      <div class="view-actions">
+        <button class="view-btn" onclick="resetCamera()" title="Reset Camera">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/></svg>
+        </button>
+        <button class="view-btn" onclick="toggleWireframe()" title="Wireframe" id="btn-wireframe">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        </button>
+        <button class="view-btn" onclick="downloadModel()" title="Tải xuống GLB" id="btn-download" disabled>
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════ -->
+<!-- Three.js CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

@@ -1,71 +1,38 @@
 ---
 name: m3-backend-expert
-description: Chuyên môn kỹ thuật về Thiết kế FastAPI RESTful API, Quản lý Tác vụ Bất đồng bộ (Async Job Manager) và Bộ điều phối Pipeline (Orchestrator) cho Module M3 trong Virtual Try-On Platform.
+description: Hướng dẫn agent M3 bảo trì API, validation, điều phối, job, database và asset theo contract mock MVP và tiến trình tích hợp module thật.
 ---
 
-# M3 BACKEND, API & ORCHESTRATION EXPERT SKILL
+# M3 BACKEND EXPERT
 
-## 1. Bản chất Kiến trúc M3 (The Core Orchestrator)
-Module M3 đóng vai trò là "Nhạc trưởng điều phối" toàn bộ hệ thống Virtual Try-On, tiếp nhận yêu cầu từ Frontend và điều phối công việc giữa M1, M2, M4:
+## Điều kiện kích hoạt
 
-```text
-               ┌───────────────────────┐
-               │  Frontend Client (M5) │
-               └───────────┬───────────┘
-                           │ HTTP Request
-                           ▼
-               ┌───────────────────────┐
-               │      FastAPI API      │
-               │ (/analyze, /fit, ...) │
-               └───────────┬───────────┘
-                           │
-                           ▼
-               ┌───────────────────────┐
-               │ Pipeline Orchestrator │ ◄── Cờ APP_MODE (mock / real)
-               └───────────┬───────────┘
-                           │
-      ┌────────────────────┼────────────────────┐
-      ▼                    ▼                    ▼
-┌───────────┐        ┌───────────┐        ┌───────────┐
-│ Module M1 │        │ Module M2 │        │ Module M4 │
-│ (Body)    │        │ (Garment) │        │ (Fit/AI)  │
-└───────────┘        └───────────┘        └───────────┘
-```
+Dùng khi nhiệm vụ giao M3 hoặc đụng backend/api/, backend/schemas/, backend/services/, cấu hình backend hay docs/api/. Đọc Rule 01–02, Rule 08 và Rule 10. Không nhận thay thuật toán của M1/M2/M4 hoặc UI của M5.
 
----
+## Hiện trạng đã đối chiếu
 
-## 2. Phương pháp luận Kỹ thuật Cốt lõi
+Nhánh feature/backend-tryon-flow có FastAPI create_app, route health/catalog/analyze/fit/jobs/assets, schema Pydantic và response envelope. TryOnOrchestrator kiểm tra ảnh PNG/JPEG, kích thước, MIME và decode; MockProvider dùng fixture cố định. JobManager lưu job trong process và chạy qua BackgroundTasks; asset chỉ cho tên GLB đăng ký. tests/unit/backend/test_backend.py và tests/e2e/mock/test_mock_e2e.py có ca kiểm tra API mock. Chưa thấy database bền vững, queue, adapter M1/M2/M4 thật hoặc đo AI từ ảnh. Không tuyên bố test đã PASS nếu chưa có kết quả chạy.
 
-### 2.1. Thiết kế Endpoint & Hợp đồng Dữ liệu (Pydantic Contracts)
-- Mọi request và response bắt buộc được định nghĩa thông qua Pydantic V2 models tại `shared/schemas/`.
-- Phân tách rõ ràng giữa Response đồng bộ (Sync - cho các tác vụ tính toán nhanh như gợi ý size `/tryon/recommend` <= 1.0s) và Response bất đồng bộ (Async - cho mô phỏng Blender `/tryon/fit` mất nhiều phút):
-  - Khi gọi `/tryon/fit`: Trả về ngay lập tức HTTP `202 Accepted` kèm JSON:
-    ```json
-    {
-      "job_id": "job_123e4567-e89b-12d3-a456-426614174000",
-      "status": "pending",
-      "estimated_seconds": 180
-    }
-    ```
-  - Frontend sau đó sẽ polling endpoint `GET /jobs/{id}` để cập nhật tiến độ cho đến khi `status: "completed"`.
+## Input và output
 
-### 2.2. Kiến trúc Orchestrator Decoupling (`APP_MODE`)
-- Hệ thống hỗ trợ chuyển đổi chế độ hoạt động thông qua biến môi trường `APP_MODE`:
-  - `APP_MODE = mock`: Mọi module (M1, M2, M4) đều dùng Mock implementation, trả dữ liệu giả lập chuẩn schema ngay lập tức, phục vụ test CI và phát triển Frontend.
-  - `APP_MODE = real`: Kích hoạt module thật tương ứng khi module đó đã hoàn thành và vượt qua kiểm thử.
-  - Hỗ trợ bật/tắt từng module riêng rẽ: `M1_MODE = real`, `M2_MODE = mock`, `M4_MODE = real`.
+- GET /health trả status; GET /api/garments trả catalog; POST /api/tryon/analyze nhận multipart image và height_cm; POST /api/tryon/fit nhận body_id, garment_id, size; GET /api/jobs/{job_id} cho polling; GET /api/assets/{asset_name} trả GLB đã đăng ký.
+- Thành công dùng data/error=null; lỗi dùng data=null/error với code, message, details. Asset là binary; health ngoài envelope.
+- Số đo API là cm, mesh GLB là m, tay phải/Y-up/+Z forward. source/method/notes ghi provenance; mock score/confidence là null. Job có pending, running, completed, failed với result/error nhất quán.
+- API schema đang chạy ở backend/schemas/** và docs/api/api-contract.md. Reference JSON M4 khác cấu trúc; giữ riêng đến khi M3–M4–M5 quyết định mapping hoặc version contract.
 
----
+## Quy trình làm việc
 
-## 3. Xử lý Trường hợp Ngoại lệ (Edge Cases)
-1. **Tiến trình mô phỏng Blender bị treo hoặc quá tải:** Job Manager phải có bộ hẹn giờ (Timeout watchdog). Nếu quá thời gian quy định (ví dụ 6 phút), tiến trình con phải bị buộc ngắt (kill process), cập nhật trạng thái job thành `failed` kèm mã lỗi `JOB_TIMEOUT`.
-2. **Người dùng gửi file ảnh hỏng hoặc sai định dạng:** Bắt lỗi ngay tại tầng validation của FastAPI, trả về HTTP `422 Unprocessable Entity` hoặc `400 Bad Request` kèm message chi tiết, không truyền dữ liệu bẩn xuống M1.
-3. **Đổi size nhiều lần liên tục:** Triển khai bộ nhớ đệm (In-memory LRU Cache hoặc Redis) lưu kết quả theo key `hash(body_mesh, garment_id, size)`. Nếu người dùng chuyển lại size đã mô phỏng trước đó, trả về kết quả ngay lập tức mà không chạy lại mô phỏng.
+1. Đọc route, schema, provider, tests và docs/api của endpoint liên quan; xác định mock hay module thật.
+2. Trình thiết kế và tác động consumer trước khi đổi field, nullability, error, status, asset URL hay storage. Xin phê duyệt theo Rule 01.
+3. Thực hiện validation input, xử lý và validation output theo contract; tách adapter thật khỏi MockProvider, giữ provenance chính xác.
+4. Nếu làm database/job bền vững, xác định vòng đời, worker, idempotency, cleanup và giới hạn tài nguyên; không suy rằng JobManager hiện đã bền vững.
+5. Phối hợp M1/M2/M4 về dữ liệu thật và M5 về API/polling. Chỉ đăng ký asset có quyền truy cập phù hợp, không lộ đường dẫn máy hay lỗi thô.
+6. Sau đợt sửa, gọi change-impact-log trước khi báo hoàn thành.
 
----
+## Kiểm thử và bàn giao
 
-## 4. Tài liệu Tham khảo Chuyên sâu (References)
-Khi giải quyết các vấn đề kỹ thuật cụ thể, hãy tra cứu các tài liệu trong `references/`:
-- [api-endpoints-and-schemas.md](references/api-endpoints-and-schemas.md): Đặc tả chi tiết Endpoint và Pydantic schemas.
-- [async-job-flow.md](references/async-job-flow.md): Vòng đời Job bất đồng bộ và cơ chế bộ nhớ đệm Caching.
-- [error-codes.md](references/error-codes.md): Bảng mã lỗi hệ thống và ánh xạ HTTP status.
+Đề xuất user chạy test backend về schema, validate ảnh, state machine, lỗi và asset; test e2e mock chỉ xác minh HTTP, không phải viewer. Tích hợp module thật cần các INT tương ứng và kiểm tra API contract. Theo Rule 01, agent không tự chạy lệnh; ghi chưa chạy khi thiếu log. Bàn giao OpenAPI/field thay đổi, tác động M5, migration database nếu có, trạng thái mock/real và việc cần owner khác xác nhận.
+
+## Tài liệu kỹ thuật
+
+Tham khảo [api-endpoints-and-schemas.md](references/api-endpoints-and-schemas.md), [async-job-flow.md](references/async-job-flow.md) và [error-codes.md](references/error-codes.md) khi thiết kế M3; đối chiếu với API đang chạy trước khi áp dụng.

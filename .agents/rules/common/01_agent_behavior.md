@@ -24,6 +24,8 @@ Agent **TUYỆT ĐỐI KHÔNG ĐƯỢC TỰ THỰC THI** các hành động sau 
 Mọi công việc phải tuân thủ nghiêm ngặt chu trình sau, không được nhảy cóc:
 
 ```text
+READ ACTIVE MEMORY (.agents/memory/ACTIVE_CONTEXT.md)
+  ↓
 DISCUSS / CLARIFY (nếu mơ hồ)
   ↓
 DESIGN / DECISION PROPOSAL
@@ -31,6 +33,8 @@ DESIGN / DECISION PROPOSAL
 USER APPROVAL ("OK triển khai")
   ↓
 IMPLEMENT (Agent ghi file)
+  ↓
+UPDATE ACTIVE MEMORY (.agents/memory/ACTIVE_CONTEXT.md)
   ↓
 TEST PLAN (Agent đề xuất lệnh test)
   ↓

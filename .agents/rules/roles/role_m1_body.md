@@ -9,7 +9,7 @@ Agent sở hữu và toàn quyền quyết định cấu trúc nội bộ trong 
 
 ### 1.1. Cấu trúc Thư mục Sở hữu
 - `body/preprocessing/`: Tiếp nhận ảnh người dùng toàn thân, tiền xử lý (resize, crop, normalize), kiểm tra ảnh hợp lệ, tách nền `rembg` (tùy chọn bật/tắt).
-- `body/estimation/`: 
+- `body/estimation/`:
   - `pose.py`: Phát hiện 33 MediaPipe pose keypoints kèm độ tin cậy confidence.
   - `smplx_loader.py`: Tải và khởi tạo mô hình SMPL-X (10.475 đỉnh).
   - `optimization.py`: Thuật toán tối ưu (`OptimizationEstimator`) khớp tham số shape $\beta$ và pose $\theta$ của SMPL-X với keypoints 2D và chiều cao người dùng.
