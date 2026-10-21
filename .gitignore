@@ -49,6 +49,7 @@ data/external/
 data/raw/
 data/synthetic/
 data/outputs/
+data/assets/
 !data/external/.gitkeep
 !data/raw/.gitkeep
 !data/synthetic/.gitkeep

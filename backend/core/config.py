@@ -2,6 +2,12 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -16,7 +22,7 @@ class Settings:
     asset_dir: Path = Path(__file__).resolve().parents[1] / "fixtures" / "assets"
     managed_asset_dir: Path = Path(__file__).resolve().parents[2] / "data" / "assets"
     database_url: str = field(default_factory=lambda: os.getenv(
-        "DATABASE_URL", "sqlite+pysqlite:///./data/tryon.sqlite3",
+        "DATABASE_URL", "postgresql+psycopg://tryon:tryon@localhost:5432/tryon",
     ))
     max_image_bytes: int = 5 * 1024 * 1024
     max_image_pixels: int = 16_000_000

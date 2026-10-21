@@ -1,16 +1,21 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { Footer } from './components/common/Footer';
 import { AppTab, Navbar } from './components/common/Navbar';
+import { ProductDetailModal } from './components/catalog/ProductDetailModal';
 import { AuthProvider } from './context/AuthContext';
-import { Product } from './data/mockProducts';
+import { MOCK_PRODUCTS, Product } from './data/mockProducts';
+import { TryOnHistoryItem } from './data/mockHistory';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { CatalogPage } from './pages/catalog/CatalogPage';
 import { HomePage } from './pages/home/HomePage';
+import { HistoryPage } from './pages/history/HistoryPage';
 import { ImageTryOnPage } from './pages/tryon/ImageTryOnPage';
 import './styles/auth.css';
 import './styles/home.css';
 import './styles/tryon.css';
+import './styles/history.css';
+import './styles/productDetail.css';
 import './styles/garment3d.css';
 
 const Garment3DPage = React.lazy(() => import('./pages/Garment3DPage'));
@@ -35,6 +40,7 @@ const MainContent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<AppTab>(tabFromPath);
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     if (window.location.pathname === '/garment3d.html') {
@@ -54,12 +60,31 @@ const MainContent: React.FC = () => {
 
   const handleSelectProductForTryOn = (product: Product) => {
     setSelectedProduct(product);
+    setModalProduct(null);
     navigate('try-on');
   };
 
-  
   const handleStartTryOn = () => {
     setSelectedProduct(null);
+    setModalProduct(null);
+    navigate('try-on');
+  };
+
+  const handleView3DFromHistory = (item: TryOnHistoryItem) => {
+    const found = MOCK_PRODUCTS.find((p) => p.id === item.productId) || {
+      id: item.productId,
+      name: item.productName,
+      category: item.category,
+      categoryLabel: item.categoryLabel,
+      tagline: 'Bộ sưu tập cá nhân',
+      price: item.price,
+      material: 'Vải cao cấp',
+      imageUrl: item.resultPhotoUrl,
+      gender: 'unisex' as const,
+      sizes: ['S' as const, 'M' as const, 'L' as const, 'XL' as const],
+      colors: [{ name: item.colorName, hex: item.colorHex }],
+    };
+    setSelectedProduct(found);
     navigate('try-on');
   };
 
@@ -123,6 +148,7 @@ const MainContent: React.FC = () => {
             onStartTryOn={handleStartTryOn}
             onExploreCatalog={() => navigate('catalog')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
+            onViewProductDetail={(product) => setModalProduct(product)}
           />
         )}
 
@@ -130,11 +156,12 @@ const MainContent: React.FC = () => {
           <CatalogPage
             onNavigateHome={() => navigate('home')}
             onSelectProductForTryOn={handleSelectProductForTryOn}
+            onViewProductDetail={(product) => setModalProduct(product)}
           />
         )}
 
         {currentTab === 'try-on' && (
-          <div style={{ paddingTop: '5rem', maxWidth: '1440px', margin: '0 auto', padding: '5.5rem 1.5rem 3rem 1.5rem' }}>
+          <div style={{ paddingTop: '4.5rem', width: '100%', boxSizing: 'border-box', padding: '5.5rem 1.5rem 3rem' }}>
             <ImageTryOnPage
               initialGarment={selectedProduct}
               onNavigateCatalog={() => navigate('catalog')}
@@ -151,25 +178,22 @@ const MainContent: React.FC = () => {
         )}
 
         {currentTab === 'history' && (
-          <div style={{ paddingTop: '6rem', maxWidth: '1280px', margin: '0 auto', padding: '6rem 2rem 4rem 2rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🕰️</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--vfit-on-surface)' }}>
-              LỊCH SỬ THỬ ĐỒ 3D
-            </h2>
-            <p style={{ color: 'var(--vfit-secondary)', maxWidth: '400px', margin: '0.5rem auto 1.5rem auto' }}>
-              Bạn chưa có lần thử đồ nào được lưu. Hãy bắt đầu chọn một bộ trang phục yêu thích để thử ngay!
-            </p>
-            <button
-              type="button"
-              className="vfit-btn-primary"
-              style={{ width: 'auto', display: 'inline-flex', padding: '0 2rem' }}
-              onClick={handleStartTryOn}
-            >
-              THỬ ĐỒ NGAY
-            </button>
-          </div>
+          <HistoryPage
+            onStartTryOn={handleStartTryOn}
+            onView3DItem={handleView3DFromHistory}
+            onReTryItem={handleView3DFromHistory}
+          />
         )}
       </main>
+
+      {/* Product Detail Modal */}
+      {modalProduct && (
+        <ProductDetailModal
+          product={modalProduct}
+          onClose={() => setModalProduct(null)}
+          onSelectProductForTryOn={handleSelectProductForTryOn}
+        />
+      )}
 
       {/* Global Footer */}
       <Footer />

@@ -312,7 +312,7 @@ không phải số đo suy từ ảnh người.
 | `front` | bắt buộc | ảnh mặt trước JPG/PNG/WebP |
 | `left`, `back`, `right` | tùy chọn | các góc ảnh khác của cùng trang phục |
 | `garment_type` | mặc định `tshirt` | `tshirt`, `shirt`, `jacket`, `pants`, `skirt`, `dress` |
-| `reference_value_cm` | bắt buộc, 1–300 | chiều dài thật của trang phục, dùng chuẩn tỉ lệ |
+| `reference_value_cm` | bắt buộc, 1–300 | mốc chiều dài dùng chuẩn tỉ lệ. Giao diện hiện ước lượng theo loại trang phục; client khác có thể gửi số đo thật |
 | `simulate_cloth` | mặc định `false` | `true` hiện trả lỗi job `SIMULATION_UNAVAILABLE`; solver chưa hiệu chuẩn |
 
 Mỗi ảnh tối đa 10 MiB và 16 triệu pixel. Backend kiểm tra MIME, định dạng thực,

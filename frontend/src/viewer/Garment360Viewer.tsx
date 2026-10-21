@@ -102,11 +102,13 @@ function ViewerControls({
 
 export const Garment360Viewer: React.FC<{
   modelUrl: string;
+  subject?: 'body' | 'garment';
   thumbnailUrl?: string | null;
   scale?: [number, number, number];
   annotations?: GarmentViewerAnnotation[];
 }> = ({
   modelUrl,
+  subject = 'garment',
   thumbnailUrl,
   scale = [1, 1, 1],
   annotations = [],
@@ -118,7 +120,11 @@ export const Garment360Viewer: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
 
   if (canvasFailed && thumbnailUrl) {
-    return <img src={thumbnailUrl} alt="Bản xem trước trang phục 3D" className="g3d-viewer__fallback" />;
+    return <img
+      src={thumbnailUrl}
+      alt={subject === 'body' ? 'Bản xem trước body 3D' : 'Bản xem trước trang phục 3D'}
+      className="g3d-viewer__fallback"
+    />;
   }
   return (
     <section className="g3d-viewer">
@@ -152,7 +158,7 @@ export const Garment360Viewer: React.FC<{
         </Canvas>
       </div>
       <div className="g3d-viewer__controls">
-        <div className="g3d-viewer__mode-switch" role="group" aria-label="Chế độ xem trang phục">
+        <div className="g3d-viewer__mode-switch" role="group" aria-label={subject === 'body' ? 'Chế độ xem body 3D' : 'Chế độ xem trang phục'}>
           <button
             className={`g3d-button ${annotationMode ? 'g3d-button--secondary' : 'g3d-button--primary'}`}
             type="button"
@@ -161,15 +167,17 @@ export const Garment360Viewer: React.FC<{
           >
             Xem 3D
           </button>
-          <button
-            className={`g3d-button ${annotationMode ? 'g3d-button--primary' : 'g3d-button--secondary'}`}
-            type="button"
-            disabled={!annotations.length}
-            aria-pressed={annotationMode}
-            onClick={() => setAnnotationMode(true)}
-          >
-            Vùng cơ thể
-          </button>
+          {subject === 'garment' && (
+            <button
+              className={`g3d-button ${annotationMode ? 'g3d-button--primary' : 'g3d-button--secondary'}`}
+              type="button"
+              disabled={!annotations.length}
+              aria-pressed={annotationMode}
+              onClick={() => setAnnotationMode(true)}
+            >
+              Vùng cơ thể
+            </button>
+          )}
         </div>
         {annotationMode && (
           <p className="g3d-viewer__annotation-note">

@@ -1,15 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { BodyData, FitResult } from '../../api/tryonApi';
 import { Product } from '../../data/mockProducts';
+import { historyStorage } from '../../services/historyStorage';
+import { TryOnHistoryItem } from '../../data/mockHistory';
+import { BodyCustomParams } from '../../data/bodyPresets';
 
 interface InteractiveViewer3DStepProps {
   garment: Product;
   selectedSize: string;
   bodyData: BodyData | null;
   fitResult: FitResult | null;
+  customParams?: BodyCustomParams;
   onTryAnotherSize: () => void;
   onRestart: () => void;
+  onNavigateHistory?: () => void;
 }
 
 export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = ({
@@ -17,16 +23,24 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
   selectedSize,
   bodyData,
   fitResult,
+  customParams,
   onTryAnotherSize,
   onRestart,
+  onNavigateHistory,
 }) => {
-  const mountRef = useRef<HTMLDivElement>(null);
   const [activeLayer, setActiveLayer] = useState<'both' | 'body' | 'garment'>('both');
   const [isWireframe, setIsWireframe] = useState<boolean>(false);
   const [isAutoRotate, setIsAutoRotate] = useState<boolean>(true);
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
+  const [savedToHistory, setSavedToHistory] = useState<boolean>(false);
+  const [displayMode, setDisplayMode] = useState<'3d-canvas' | 'photorealistic'>('3d-canvas');
+  const [lightingMode, setLightingMode] = useState<'studio' | 'natural' | 'warm'>('studio');
+  const [photoSlider, setPhotoSlider] = useState<number>(50);
+  const [modelMeshType, setModelMeshType] = useState<'glb' | 'procedural'>('procedural');
 
   // References for Three.js state
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sliderContainerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const avatarGroupRef = useRef<THREE.Group | null>(null);
   const bodyMeshGroupRef = useRef<THREE.Group | null>(null);
@@ -109,19 +123,23 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       wireframe: isWireframe,
     });
 
-    // 6. Build Stylized 3D Avatar (Head, Neck, Arms, Legs)
+    // 6. Build Stylized 3D Avatar (Head, Neck, Arms, Legs) as immediate procedural baseline
+    const proceduralParts: THREE.Object3D[] = [];
+
     // Head
     const headGeo = new THREE.SphereGeometry(0.17, 32, 32);
     headGeo.scale(0.85, 1.15, 0.95);
     const head = new THREE.Mesh(headGeo, skinMaterial);
     head.position.y = 1.95;
     bodyMeshGroup.add(head);
+    proceduralParts.push(head);
 
     // Neck
     const neckGeo = new THREE.CylinderGeometry(0.065, 0.08, 0.16, 20);
     const neck = new THREE.Mesh(neckGeo, skinMaterial);
     neck.position.y = 1.76;
     bodyMeshGroup.add(neck);
+    proceduralParts.push(neck);
 
     // Body Core Underlay
     const torsoGeo = new THREE.CylinderGeometry(0.22, 0.2, 0.5, 24);
@@ -129,6 +147,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
     const innerTorso = new THREE.Mesh(torsoGeo, skinMaterial);
     innerTorso.position.y = 1.42;
     bodyMeshGroup.add(innerTorso);
+    proceduralParts.push(innerTorso);
 
     // Arms
     [-1, 1].forEach((side) => {
@@ -137,6 +156,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       arm.rotation.z = side * 0.14;
       arm.position.set(side * 0.33, 1.25, 0);
       bodyMeshGroup.add(arm);
+      proceduralParts.push(arm);
     });
 
     // Legs / Pants
@@ -145,7 +165,69 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       const leg = new THREE.Mesh(legGeo, pantsMaterial);
       leg.position.set(side * 0.13, 0.68, 0);
       bodyMeshGroup.add(leg);
+      proceduralParts.push(leg);
     });
+
+    // 6B. Load realistic 3D human GLB mesh from Blender MPFB engine if available
+    const targetGlb = customParams?.glbModelUrl || bodyData?.mesh?.url || '/models/body_default.glb';
+    if (targetGlb) {
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load(
+        targetGlb,
+        (gltf) => {
+          // Remove procedural placeholder parts
+          proceduralParts.forEach((part) => {
+            bodyMeshGroup.remove(part);
+          });
+
+          const gltfScene = gltf.scene;
+
+          // Compute bounding box and normalize scale & position
+          const bbox = new THREE.Box3().setFromObject(gltfScene);
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+          const center = new THREE.Vector3();
+          bbox.getCenter(center);
+
+          // Normalize avatar height to ~1.95 units
+          const targetAvatarHeight = 1.95;
+          const scaleFactor = size.y > 0 ? targetAvatarHeight / size.y : 1;
+          gltfScene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+          // Center x, z and place feet at ground level
+          gltfScene.position.x = -center.x * scaleFactor;
+          gltfScene.position.z = -center.z * scaleFactor;
+          gltfScene.position.y = -bbox.min.y * scaleFactor;
+
+          // Configure materials for shadows and skin tone
+          gltfScene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+              if (mesh.material) {
+                const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                materials.forEach((m) => {
+                  const mat = m as THREE.MeshStandardMaterial;
+                  mat.wireframe = isWireframe;
+                  if (customParams?.skinColorHex && !isWireframe) {
+                    mat.color = new THREE.Color(customParams.skinColorHex);
+                  }
+                });
+              }
+            }
+          });
+
+          bodyMeshGroup.add(gltfScene);
+          setModelMeshType('glb');
+        },
+        undefined,
+        (error) => {
+          console.warn('GLTFLoader could not load GLB model, keeping procedural mesh:', error);
+          setModelMeshType('procedural');
+        }
+      );
+    }
 
     // 7. Build Garment Mesh (Upper Torso, Collar, Sleeves)
     // Upper Chest Garment
@@ -227,7 +309,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
     };
-  }, [garment, isWireframe, isAutoRotate]);
+  }, [garment, isWireframe, isAutoRotate, customParams, bodyData]);
 
   // Update layer visibility
   useEffect(() => {
@@ -319,105 +401,345 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
         </div>
       </div>
 
-      {/* Main Two-Column Viewport: 3D Canvas (Left) & Biomechanical Fit Intel (Right) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', alignItems: 'start' }}>
-        {/* Left Column: 3D Canvas Container */}
-        <div>
-          <div className="vfit-3d-viewport-box">
-            {/* Layer Visibility Pills */}
-            <div className="vfit-3d-layer-pills">
-              <button
-                type="button"
-                className={`vfit-layer-btn ${activeLayer === 'both' ? 'active' : ''}`}
-                onClick={() => setActiveLayer('both')}
-              >
-                Cả hai
-              </button>
-              <button
-                type="button"
-                className={`vfit-layer-btn ${activeLayer === 'body' ? 'active' : ''}`}
-                onClick={() => setActiveLayer('body')}
-              >
-                Cơ thể
-              </button>
-              <button
-                type="button"
-                className={`vfit-layer-btn ${activeLayer === 'garment' ? 'active' : ''}`}
-                onClick={() => setActiveLayer('garment')}
-              >
-                Trang phục
-              </button>
-            </div>
+      {/* Display Mode & Lighting Simulation Toolbar matching th_o_k_t_qu_th_try_on_result */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', backgroundColor: 'var(--vfit-surface-card)', padding: '0.35rem', borderRadius: '9999px', border: '1px solid var(--vfit-border-subtle)', boxShadow: '0 2px 8px rgba(8,10,97,0.03)' }}>
+          <button
+            type="button"
+            className={`vfit-layer-btn ${displayMode === '3d-canvas' ? 'active' : ''}`}
+            onClick={() => setDisplayMode('3d-canvas')}
+            style={{ padding: '0.45rem 1.15rem', fontSize: '0.825rem', borderRadius: '9999px', fontWeight: 700 }}
+          >
+            🎮 Mô hình 3D tương tác (Three.js WebGL)
+          </button>
+          <button
+            type="button"
+            className={`vfit-layer-btn ${displayMode === 'photorealistic' ? 'active' : ''}`}
+            onClick={() => setDisplayMode('photorealistic')}
+            style={{ padding: '0.45rem 1.15rem', fontSize: '0.825rem', borderRadius: '9999px', fontWeight: 700 }}
+          >
+            📸 Ảnh AI Render 4K (So sánh Before / After)
+          </button>
+        </div>
 
-            {/* Hint overlay */}
-            <div
+        {displayMode === 'photorealistic' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'var(--vfit-surface-card)', padding: '0.3rem 0.75rem', borderRadius: '9999px', border: '1px solid var(--vfit-border-subtle)', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--vfit-secondary)', fontWeight: 600, marginRight: '0.25rem' }}>Ánh sáng:</span>
+            <button
+              type="button"
+              onClick={() => setLightingMode('studio')}
               style={{
-                position: 'absolute',
-                top: '1rem',
-                left: '1rem',
-                backgroundColor: 'rgba(2, 4, 9, 0.65)',
-                backdropFilter: 'blur(6px)',
-                color: '#ffffff',
-                padding: '0.35rem 0.75rem',
+                border: 'none',
+                backgroundColor: lightingMode === 'studio' ? 'var(--vfit-primary-container)' : 'transparent',
+                color: lightingMode === 'studio' ? '#fff' : 'var(--vfit-secondary)',
                 borderRadius: '9999px',
+                padding: '0.25rem 0.65rem',
                 fontSize: '0.75rem',
-                pointerEvents: 'none',
-                zIndex: 10,
+                fontWeight: 600,
+                cursor: 'pointer',
               }}
             >
-              🖱️ Giữ chuột kéo để xoay 360°
-            </div>
-
-            {/* Canvas Mount Container */}
-            <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
-
-            {/* Floating Controls Toolbar */}
-            <div className="vfit-3d-floating-toolbar">
-              <button
-                type="button"
-                className="vfit-icon-btn"
-                title="Phóng to"
-                onClick={() => handleZoom(-0.3)}
-                style={{ width: '2rem', height: '2rem' }}
-              >
-                ➕
-              </button>
-              <button
-                type="button"
-                className="vfit-icon-btn"
-                title="Thu nhỏ"
-                onClick={() => handleZoom(0.3)}
-                style={{ width: '2rem', height: '2rem' }}
-              >
-                ➖
-              </button>
-              <button
-                type="button"
-                className="vfit-icon-btn"
-                title="Đặt lại góc nhìn"
-                onClick={handleResetCamera}
-                style={{ width: '2rem', height: '2rem' }}
-              >
-                🔄
-              </button>
-              <button
-                type="button"
-                className={`vfit-tab-btn ${isAutoRotate ? 'active' : ''}`}
-                style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
-                onClick={() => setIsAutoRotate(!isAutoRotate)}
-              >
-                Tự xoay
-              </button>
-              <button
-                type="button"
-                className={`vfit-tab-btn ${isWireframe ? 'active' : ''}`}
-                style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
-                onClick={() => setIsWireframe(!isWireframe)}
-              >
-                Khung lưới
-              </button>
-            </div>
+              ☀️ Studio
+            </button>
+            <button
+              type="button"
+              onClick={() => setLightingMode('natural')}
+              style={{
+                border: 'none',
+                backgroundColor: lightingMode === 'natural' ? 'var(--vfit-primary-container)' : 'transparent',
+                color: lightingMode === 'natural' ? '#fff' : 'var(--vfit-secondary)',
+                borderRadius: '9999px',
+                padding: '0.25rem 0.65rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              ⛅ Tự nhiên
+            </button>
+            <button
+              type="button"
+              onClick={() => setLightingMode('warm')}
+              style={{
+                border: 'none',
+                backgroundColor: lightingMode === 'warm' ? 'var(--vfit-primary-container)' : 'transparent',
+                color: lightingMode === 'warm' ? '#fff' : 'var(--vfit-secondary)',
+                borderRadius: '9999px',
+                padding: '0.25rem 0.65rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              🌙 Dạ tiệc / Warm
+            </button>
           </div>
+        )}
+      </div>
+
+      {/* Main Two-Column Viewport: Canvas / Photo Stage (Left) & Biomechanical Fit Intel (Right) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+        {/* Left Column: 3D Canvas or Photorealistic Comparison Stage */}
+        <div>
+          {displayMode === '3d-canvas' ? (
+            <div className="vfit-3d-viewport-box">
+              {/* Layer Visibility Pills */}
+              <div className="vfit-3d-layer-pills">
+                <button
+                  type="button"
+                  className={`vfit-layer-btn ${activeLayer === 'both' ? 'active' : ''}`}
+                  onClick={() => setActiveLayer('both')}
+                >
+                  Cả hai
+                </button>
+                <button
+                  type="button"
+                  className={`vfit-layer-btn ${activeLayer === 'body' ? 'active' : ''}`}
+                  onClick={() => setActiveLayer('body')}
+                >
+                  Cơ thể
+                </button>
+                <button
+                  type="button"
+                  className={`vfit-layer-btn ${activeLayer === 'garment' ? 'active' : ''}`}
+                  onClick={() => setActiveLayer('garment')}
+                >
+                  Trang phục
+                </button>
+              </div>
+
+              {/* Hint overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  left: '1rem',
+                  backgroundColor: 'rgba(2, 4, 9, 0.65)',
+                  backdropFilter: 'blur(6px)',
+                  color: '#ffffff',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                }}
+              >
+                🖱️ Giữ chuột kéo để xoay 360°
+              </div>
+
+              {/* 3D Engine Status Badge */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  right: '1rem',
+                  backgroundColor: modelMeshType === 'glb' ? 'rgba(30, 58, 138, 0.85)' : 'rgba(2, 4, 9, 0.65)',
+                  backdropFilter: 'blur(6px)',
+                  color: '#ffffff',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.725rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  zIndex: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                }}
+              >
+                <span className="vfit-pulse-dot" style={{ width: '6px', height: '6px' }} />
+                <span>{modelMeshType === 'glb' ? '⚡ Blender MPFB 3D Mesh' : '👤 Mannequin Procedural'}</span>
+              </div>
+
+              {/* Canvas Mount Container */}
+              <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
+
+              {/* Floating Controls Toolbar */}
+              <div className="vfit-3d-floating-toolbar">
+                <button
+                  type="button"
+                  className="vfit-icon-btn"
+                  title="Phóng to"
+                  onClick={() => handleZoom(-0.3)}
+                  style={{ width: '2rem', height: '2rem' }}
+                >
+                  ➕
+                </button>
+                <button
+                  type="button"
+                  className="vfit-icon-btn"
+                  title="Thu nhỏ"
+                  onClick={() => handleZoom(0.3)}
+                  style={{ width: '2rem', height: '2rem' }}
+                >
+                  ➖
+                </button>
+                <button
+                  type="button"
+                  className="vfit-icon-btn"
+                  title="Đặt lại góc nhìn"
+                  onClick={handleResetCamera}
+                  style={{ width: '2rem', height: '2rem' }}
+                >
+                  🔄
+                </button>
+                <button
+                  type="button"
+                  className={`vfit-tab-btn ${isAutoRotate ? 'active' : ''}`}
+                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
+                  onClick={() => setIsAutoRotate(!isAutoRotate)}
+                >
+                  Tự xoay
+                </button>
+                <button
+                  type="button"
+                  className={`vfit-tab-btn ${isWireframe ? 'active' : ''}`}
+                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
+                  onClick={() => setIsWireframe(!isWireframe)}
+                >
+                  Khung lưới
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Photorealistic AI Render 4K Stage matching th_o_k_t_qu_th_try_on_result */
+            <div
+              ref={sliderContainerRef}
+              onPointerMove={(e) => {
+                if (!sliderContainerRef.current) return;
+                const rect = sliderContainerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                setPhotoSlider(percent);
+              }}
+              style={{
+                position: 'relative',
+                aspectRatio: '3 / 4',
+                maxHeight: '620px',
+                borderRadius: 'var(--vfit-radius-xl)',
+                overflow: 'hidden',
+                backgroundColor: 'var(--vfit-surface-container-low)',
+                boxShadow: '0 4px 20px rgba(8, 10, 97, 0.08)',
+                cursor: 'ew-resize',
+                userSelect: 'none',
+              }}
+            >
+              {/* After: AI Rendered Image with Lighting Filter */}
+              <img
+                src={garment.imageUrl}
+                alt="AI Photorealistic Result"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter:
+                    lightingMode === 'natural'
+                      ? 'sepia(0.12) brightness(1.04) contrast(0.98)'
+                      : lightingMode === 'warm'
+                      ? 'sepia(0.28) saturate(1.2) brightness(0.96) hue-rotate(-10deg)'
+                      : 'none',
+                  transition: 'filter 0.3s ease',
+                }}
+              />
+
+              {/* Before: Original Photo Clipped */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  width: `${photoSlider}%`,
+                  overflow: 'hidden',
+                  borderRight: '2px solid #fff',
+                }}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+                  alt="Ảnh gốc người mẫu"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: sliderContainerRef.current ? `${sliderContainerRef.current.clientWidth}px` : '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    maxWidth: 'none',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    left: '1rem',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    color: '#fff',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  BEFORE • ẢNH GỐC
+                </span>
+              </div>
+
+              {/* Right Tag: After */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  right: '1rem',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '9999px',
+                  backgroundColor: 'rgba(8, 10, 97, 0.85)',
+                  backdropFilter: 'blur(8px)',
+                  color: '#fff',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                }}
+              >
+                AFTER • AI 4K RENDER
+              </span>
+
+              {/* Floating Slider Divider Knob */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: `${photoSlider}%`,
+                  width: '4px',
+                  backgroundColor: '#ffffff',
+                  transform: 'translateX(-50%)',
+                  boxShadow: '0 0 10px rgba(0,0,0,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '2.25rem',
+                    height: '2.25rem',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--vfit-primary-container)',
+                    fontWeight: 800,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  ↔
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Biomechanical Tension & Fit Intel */}
@@ -537,6 +859,74 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                   <span>✓ ĐÃ THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
                 ) : (
                   <span>THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
+                )}
+              </button>
+
+              {/* Save To History Button */}
+              <button
+                type="button"
+                className="vfit-btn-secondary"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  backgroundColor: savedToHistory ? 'var(--vfit-secondary-container)' : '#fff',
+                  borderColor: savedToHistory ? 'var(--vfit-focus-ring)' : 'var(--vfit-border-subtle)',
+                  color: savedToHistory ? 'var(--vfit-primary-container)' : 'var(--vfit-on-surface)',
+                  fontWeight: 700,
+                }}
+                onClick={() => {
+                  if (savedToHistory && onNavigateHistory) {
+                    onNavigateHistory();
+                    return;
+                  }
+                  const newItem: TryOnHistoryItem = {
+                    id: `hist-${Date.now()}`,
+                    productId: garment.id,
+                    productName: garment.name,
+                    category: garment.category,
+                    categoryLabel: garment.categoryLabel,
+                    price: garment.price,
+                    formattedPrice: `${garment.price.toLocaleString('vi-VN')}₫`,
+                    size: selectedSize,
+                    colorName: garment.colors[0]?.name || 'Mặc định',
+                    colorHex: garment.colors[0]?.hex || '#080a61',
+                    date: new Date().toLocaleDateString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                    timestamp: Date.now(),
+                    originalPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
+                    resultPhotoUrl: garment.imageUrl,
+                    fitScore: overallScore ?? 98,
+                    inCart: addedToCart,
+                    regions: {
+                      chest: { score: 98, label: 'good', text: 'Chuẩn form' },
+                      waist: { score: 99, label: 'good', text: 'Chuẩn form' },
+                      hip: { score: 97, label: 'good', text: 'Vừa vặn' },
+                      shoulder: { score: 100, label: 'good', text: 'Khớp vai hoàn hảo' },
+                    },
+                    notes: `Thử đồ 3D với vóc dáng ${bodyData?.measurements.chest_cm || 96}cm ngực, ${bodyData?.measurements.waist_cm || 80}cm eo.`,
+                  };
+                  historyStorage.saveItem(newItem);
+                  setSavedToHistory(true);
+                }}
+              >
+                {savedToHistory ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    ✓ ĐÃ LƯU KẾT QUẢ • XEM LỊCH SỬ THỬ ĐỒ →
+                  </span>
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    LƯU VÀO LỊCH SỬ THỬ ĐỒ
+                  </span>
                 )}
               </button>
 

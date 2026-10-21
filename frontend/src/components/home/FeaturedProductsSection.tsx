@@ -3,11 +3,13 @@ import { MOCK_PRODUCTS, Product } from '../../data/mockProducts';
 
 interface FeaturedProductsSectionProps {
   onSelectProductForTryOn: (product: Product) => void;
+  onViewProductDetail?: (product: Product) => void;
   onViewAllCatalog: () => void;
 }
 
 export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
   onSelectProductForTryOn,
+  onViewProductDetail,
   onViewAllCatalog,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -58,7 +60,11 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
         {filteredProducts.slice(0, 4).map((product) => (
           <div key={product.id} className="vfit-product-card">
             {/* Thumbnail */}
-            <div className="vfit-product-thumb">
+            <div
+              className="vfit-product-thumb"
+              style={{ cursor: onViewProductDetail ? 'pointer' : 'default' }}
+              onClick={() => onViewProductDetail && onViewProductDetail(product)}
+            >
               <img src={product.imageUrl} alt={product.name} />
 
               {/* Material Pill */}
@@ -106,7 +112,17 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
                 <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--vfit-secondary)', letterSpacing: '0.05em' }}>
                   {product.tagline}
                 </span>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--vfit-on-surface)', margin: '0.25rem 0 0.5rem 0', lineHeight: '1.3' }}>
+                <h3
+                  style={{
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    color: 'var(--vfit-on-surface)',
+                    margin: '0.25rem 0 0.5rem 0',
+                    lineHeight: '1.3',
+                    cursor: onViewProductDetail ? 'pointer' : 'default',
+                  }}
+                  onClick={() => onViewProductDetail && onViewProductDetail(product)}
+                >
                   {product.name}
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
