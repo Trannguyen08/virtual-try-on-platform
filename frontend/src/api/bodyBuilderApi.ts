@@ -54,15 +54,22 @@ export interface RefitGarment {
   available: boolean;
   error_code: string | null;
   mode: 'body_refit' | 'reference_alignment';
+  thumbnail_url?: string;
+  author?: string;
+  license?: string;
+  source?: string;
+  collection?: string;
+  assets?: string[];
 }
 
 type ProductCategory = 't_shirt' | 'shirt' | 'dress' | 'jacket' | 'pants';
 
-async function request<T>(path: string, body?: object): Promise<T> {
+async function request<T>(path: string, body?: object, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: body ? 'POST' : 'GET',
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
+    signal,
   });
   const payload: ApiResponse<T> = await response.json();
   if (!response.ok || !payload.data) {
@@ -71,10 +78,11 @@ async function request<T>(path: string, body?: object): Promise<T> {
   return payload.data;
 }
 
-async function waitForJob(jobId: string): Promise<BodyBuilderJob> {
+async function waitForJob(jobId: string, signal?: AbortSignal): Promise<BodyBuilderJob> {
   for (let attempt = 0; attempt < 120; attempt += 1) {
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
-    const job = await request<BodyBuilderJob>(`/api/body-builder/jobs/${jobId}`);
+    signal?.throwIfAborted();
+    const job = await request<BodyBuilderJob>(`/api/body-builder/jobs/${jobId}`, undefined, signal);
     if (job.status === 'completed') return job;
     if (job.status === 'failed') throw new Error(job.error || 'Blender không thể tạo mô hình');
   }
@@ -85,14 +93,14 @@ export const bodyBuilderApi = {
   garments: () => request<RefitGarment[]>('/api/body-builder/garments'),
   assetUrl: (job: BodyBuilderJob) => job.asset_url ? new URL(job.asset_url, API_BASE_URL).href : '',
   getBody: (bodyId: string) => request<BodyBuilderJob>(`/api/body-builder/bodies/${encodeURIComponent(bodyId)}`),
-  async generate(parameters: BodyParameters): Promise<BodyBuilderJob> {
-    const job = await request<BodyBuilderJob>('/api/body-builder/generate', parameters);
-    return waitForJob(job.job_id);
+  async generate(parameters: BodyParameters, signal?: AbortSignal): Promise<BodyBuilderJob> {
+    const job = await request<BodyBuilderJob>('/api/body-builder/generate', parameters, signal);
+    return waitForJob(job.job_id, signal);
   },
-  async clothing(bodyJobId: string, garmentId: string, category: string, colorHex: string, size: string): Promise<BodyBuilderJob> {
+  async clothing(bodyJobId: string, garmentId: string, category: string, colorHex: string, size: string, signal?: AbortSignal): Promise<BodyBuilderJob> {
     const job = await request<BodyBuilderJob>('/api/body-builder/clothing', {
       body_job_id: bodyJobId, garment_id: garmentId, category, color_hex: colorHex, size,
-    });
-    return waitForJob(job.job_id);
+    }, signal);
+    return waitForJob(job.job_id, signal);
   },
 };

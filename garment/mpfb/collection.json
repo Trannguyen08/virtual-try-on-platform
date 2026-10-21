@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "collection": "makehuman-20",
+  "downloads": {
+    "pants02": "https://files2.makehumancommunity.org/asset_packs/pants02/pants02_ccby.zip",
+    "shirts02": "https://files2.makehumancommunity.org/asset_packs/shirts02/shirts02_ccby.zip"
+  },
+  "packs": {
+    "shirts01": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+    "pants01": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+    "pants02": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+    "shirts02": "https://static.makehumancommunity.org/assets/assetpacks/shirts02.html"
+  },
+  "products": [
+    {"id":"mh-crude-tshirt-male","asset":"elvs_crude_t-shirt_male","name":"Áo thun nam Crude","category":"t_shirt","gender":"menswear","author":"Elvaerwyn","license":"CC0","pack":"shirts01"},
+    {"id":"mh-crude-tshirt-female","asset":"joepal_crude_t-shirt_female","name":"Áo thun nữ Crude","category":"t_shirt","gender":"womenswear","author":"Joel Palmius","license":"CC0","pack":"shirts01"},
+    {"id":"mh-polo-shirt","asset":"namuhekam_male_polo_shirt","name":"Áo polo nam Basic","category":"shirt","gender":"menswear","author":"Namuhekam","license":"CC0","pack":"shirts01"},
+    {"id":"mh-tube-top","asset":"skalldyrssuppe_tube_top_funky_colors","name":"Áo ống Funky Colors","category":"t_shirt","gender":"womenswear","author":"skalldyrssuppe","license":"CC0","pack":"shirts01"},
+    {"id":"mh-boho-top","asset":"elvs_male_boho_top1","name":"Áo nam Boho","category":"shirt","gender":"menswear","author":"Elvaerwyn","license":"CC-BY","pack":"shirts02"},
+    {"id":"mh-bodice-top","asset":"toigo_bodice-style_top","name":"Áo kiểu Bodice","category":"shirt","gender":"womenswear","author":"MargaretToigo","license":"CC0","pack":"shirts01"},
+    {"id":"mh-camisole-top","asset":"toigo_camisole_top","name":"Áo hai dây Camisole","category":"t_shirt","gender":"womenswear","author":"MargaretToigo","license":"CC0","pack":"shirts01"},
+    {"id":"mh-fisherman-sweater","asset":"toigo_fisherman_sweater","name":"Áo len Fisherman","category":"shirt","gender":"unisex","author":"MargaretToigo","license":"CC0","pack":"shirts01"},
+    {"id":"mh-keyhole-tank","asset":"toigo_keyhole_tank_top","name":"Áo tank top Keyhole","category":"t_shirt","gender":"womenswear","author":"MargaretToigo","license":"CC0","pack":"shirts01"},
+    {"id":"mh-halter-top","asset":"toigo_turtleneck_halter_top","name":"Áo yếm cổ cao Halter","category":"shirt","gender":"womenswear","author":"MargaretToigo","license":"CC0","pack":"shirts01"},
+    {"id":"mh-trouser-chain","asset":"elvs_male_trouser_with_chain","name":"Quần nam phối dây xích","category":"pants","gender":"menswear","author":"Elvaerwyn","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-jeans-shorts","asset":"cortu_jeans_shorts","name":"Quần short jeans Cortu","category":"pants","gender":"unisex","author":"Cortu","license":"CC0","pack":"pants01"},
+    {"id":"mh-harem-pants","asset":"toigo_harem_pants","name":"Quần ống rộng Harem","category":"pants","gender":"unisex","author":"MargaretToigo","license":"CC0","pack":"pants01"},
+    {"id":"mh-wool-pants","asset":"toigo_wool_pants","name":"Quần tây Wool","category":"pants","gender":"unisex","author":"MargaretToigo","license":"CC0","pack":"pants01"},
+    {"id":"mh-jeans-bootcut","asset":"elvs_jeans_bootcut","name":"Quần jeans ống loe Bootcut","category":"pants","gender":"womenswear","author":"Elvaerwyn","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-jeans-straight","asset":"elvs_jeans_straight_leg","name":"Quần jeans ống đứng Straight","category":"pants","gender":"unisex","author":"Elvaerwyn","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-male-trouser","asset":"elvs_male_trouser","name":"Quần tây nam Classic","category":"pants","gender":"menswear","author":"Elvaerwyn","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-female-trousers","asset":"mindfront_female_trousers_1","name":"Quần tây nữ Tailored","category":"pants","gender":"womenswear","author":"Mindfront","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-male-trousers-1","asset":"mindfront_male_trousers_1","name":"Quần nam Tailored 01","category":"pants","gender":"menswear","author":"Mindfront","license":"CC-BY","pack":"pants02"},
+    {"id":"mh-male-trousers-2","asset":"mindfront_male_trousers_2","name":"Quần nam Tailored 02","category":"pants","gender":"menswear","author":"Mindfront","license":"CC-BY","pack":"pants02"}
+  ]
+}

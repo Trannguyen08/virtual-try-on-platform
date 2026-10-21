@@ -42,13 +42,13 @@ export const Garment3DPage: React.FC = () => {
   };
 
   const sizeProfiles = getGarmentSizeProfile(resolvedGarmentType, sizeRegion);
-  const selectedProfile = sizeProfiles[selectedSize] ?? sizeProfiles.M;
-  const mediumProfile = sizeProfiles.M;
-  const sizeScale: [number, number, number] = [
+  const selectedProfile = sizeProfiles?.[selectedSize];
+  const mediumProfile = sizeProfiles?.M;
+  const sizeScale: [number, number, number] = selectedProfile && mediumProfile ? [
     selectedProfile.widthCm / mediumProfile.widthCm,
     selectedProfile.lengthCm / mediumProfile.lengthCm,
     selectedProfile.widthCm / mediumProfile.widthCm,
-  ];
+  ] : [1, 1, 1];
 
   return (
     <div className="g3d-app">

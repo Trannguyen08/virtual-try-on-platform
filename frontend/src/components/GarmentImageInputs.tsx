@@ -1,4 +1,4 @@
-import React, { ChangeEvent, DragEvent, useEffect, useMemo, useRef } from 'react';
+import React, { ChangeEvent, DragEvent, useEffect, useId, useMemo, useRef } from 'react';
 import { GarmentView } from '../api/garment3d';
 
 export type GarmentFiles = Partial<Record<GarmentView, File>>;
@@ -35,6 +35,7 @@ function ViewSlot({
   onFile: (file?: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(
     () => () => {
@@ -63,7 +64,7 @@ function ViewSlot({
         </span>
       </div>
       <label
-        htmlFor={`garment-${view}`}
+        htmlFor={inputId}
         className="g3d-upload-card__dropzone"
         onDragOver={(event) => event.preventDefault()}
         onDrop={drop}
@@ -84,7 +85,7 @@ function ViewSlot({
       </label>
       <input
         ref={inputRef}
-        id={`garment-${view}`}
+        id={inputId}
         className="g3d-visually-hidden"
         type="file"
         accept={tryOnImagesOnly

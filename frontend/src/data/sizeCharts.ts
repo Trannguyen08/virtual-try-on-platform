@@ -25,7 +25,7 @@ type GarmentChartDefinition = {
   dimensions: DimensionSeries[];
 };
 
-type RegionCharts = Record<GarmentType, GarmentChartDefinition>;
+type RegionCharts = Record<Exclude<GarmentType, 'auto'>, GarmentChartDefinition>;
 
 const CHARTS: Record<SizeRegion, RegionCharts> = {
   asia: {
@@ -159,8 +159,9 @@ const CHARTS: Record<SizeRegion, RegionCharts> = {
 export function getGarmentSizeProfile(
   garmentType: GarmentType,
   region: SizeRegion,
-): Record<GarmentSize, GarmentSizeProfile> {
-  const chart = CHARTS[region][garmentType];
+): Record<GarmentSize, GarmentSizeProfile> | null {
+  const chart = garmentType === 'auto' ? null : CHARTS[region][garmentType];
+  if (!chart) return null;
   return Object.fromEntries(
     SIZES.map((size, sizeIndex) => {
       const measurements = chart.dimensions.map((dimension) => ({

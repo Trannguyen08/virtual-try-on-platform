@@ -46,7 +46,7 @@ class PackLinks(HTMLParser):
                 self.urls.append(parsed._replace(scheme="https").geturl())
 
 
-def download_pack(page, target):
+def download_pack(page, target, max_bytes=MAX_DOWNLOAD):
     request = Request(page, headers={"User-Agent": "VirtualTryOn-MPFB-setup/1"})
     with urlopen(request, timeout=60) as response:
         markup = response.read(2 * 1024 * 1024).decode("utf-8")
@@ -62,8 +62,8 @@ def download_pack(page, target):
             with urlopen(request, timeout=60) as response, target.open("wb") as stream:
                 while chunk := response.read(1024 * 1024):
                     size += len(chunk)
-                    if size > MAX_DOWNLOAD:
-                        raise ValueError("Asset pack vượt giới hạn tải 64 MiB.")
+                    if size > max_bytes:
+                        raise ValueError(f"Asset pack vượt giới hạn tải {max_bytes // (1024 * 1024)} MiB.")
                     stream.write(chunk)
             return url
         except (OSError, ValueError) as exc:
@@ -71,11 +71,15 @@ def download_pack(page, target):
     raise ValueError("Không tải được pack từ mirror chính thức; dùng file ZIP tải thủ công.") from last_error
 
 
-def extract_pack(archive, destination):
+def extract_pack(archive, destination, asset_names=None):
     """Validate all members first; never execute pack contents or replace edits."""
     destination = Path(destination).resolve()
     with ZipFile(archive) as bundle:
         members = bundle.infolist()
+        if asset_names is not None:
+            selected = set(asset_names)
+            members = [member for member in members
+                       if selected.intersection(PurePosixPath(member.filename).parts)]
         if len(members) > 5000 or sum(m.file_size for m in members) > MAX_EXPANDED:
             raise ValueError("Asset pack vượt giới hạn giải nén.")
         planned, seen = [], set()
