@@ -11,6 +11,52 @@ const BODY_KEY = 'tryon.mpfb.body_id';
 const JOB_KEY = 'tryon.image.job_id';
 const GARMENT_TYPES: GarmentType[] = ['tshirt', 'shirt', 'jacket', 'pants', 'skirt', 'dress'];
 
+/** Ánh xạ mã lỗi kỹ thuật sang thông báo thân thiện + hướng xử lý bằng tiếng Việt */
+const ERROR_MESSAGES: Record<string, { title: string; detail: string; hint: string }> = {
+  SEVERE_MESH_PENETRATION: {
+    title: '⚠️ Trang phục quá chật với body này',
+    detail: 'Khi dựng 3D, áo bị lún sâu vào body quá mức cho phép — thường xảy ra khi trang phục quá nhỏ hoặc ảnh không đủ rõ.',
+    hint: 'Thử tăng chiều dài áo, chọn loại áo đúng hơn (ví dụ: Áo khoác thay vì Áo thun), hoặc tải ảnh chụp thẳng, nền trắng.',
+  },
+  GARMENT_FRAME_INVALID: {
+    title: '⚠️ Trang phục không đúng định dạng',
+    detail: 'File trang phục bị sai hệ trục tọa độ (cần Y-up, mét).',
+    hint: 'Hãy xuất lại file trang phục từ pipeline chuẩn hoặc liên hệ quản trị viên.',
+  },
+  BODY_MESH_MISSING: {
+    title: '⚠️ Không tìm thấy body 3D',
+    detail: 'File GLB body không chứa mesh nào hợp lệ.',
+    hint: 'Vui lòng tạo lại body MPFB bằng nút "Tạo body mới" bên trên.',
+  },
+  GARMENT_MESH_MISSING: {
+    title: '⚠️ Không tìm thấy mesh trang phục',
+    detail: 'Không dựng được lưới 3D từ ảnh trang phục đã tải lên.',
+    hint: 'Hãy tải ảnh rõ hơn, nền sáng và trang phục chiếm ≥ 60% khung hình.',
+  },
+  BODY_SCALE_INVALID: {
+    title: '⚠️ Kích thước body không hợp lệ',
+    detail: 'Chiều cao body GLB nằm ngoài khoảng 1.2 – 2.3 m.',
+    hint: 'Tạo lại body MPFB với chiều cao người thật của bạn.',
+  },
+  BLENDER_TIMEOUT: {
+    title: '⏱ Quá thời gian xử lý',
+    detail: 'Blender mất quá 4 phút để dựng cảnh thử đồ.',
+    hint: 'Thử lại sau vài phút hoặc sử dụng ảnh trang phục nhỏ hơn.',
+  },
+  COMPOSITION_FAILED: {
+    title: '❌ Không thể ghép áo và body',
+    detail: 'Quá trình hợp nhất mesh áo và body gặp lỗi không xác định.',
+    hint: 'Thử tải lại ảnh trang phục khác hoặc tạo body mới rồi thử lại.',
+  },
+};
+
+function parseFriendlyError(rawError: string): { title: string; detail: string; hint: string } | null {
+  for (const [code, msg] of Object.entries(ERROR_MESSAGES)) {
+    if (rawError.includes(code)) return msg;
+  }
+  return null;
+}
+
 function initialType(product?: Product | null): GarmentType {
   const category = product?.category === 't_shirt' ? 'tshirt' : product?.category;
   return GARMENT_TYPES.find((candidate) => candidate === category) ?? 'tshirt';
@@ -206,7 +252,57 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
           <p>Job {job.job_id}: {job.status === 'pending' ? 'đang chờ worker' : 'đang dựng áo và ghép với body'}.</p>
         </section>
       )}
-      {error && <p role="alert" className="vfit-builder-error">{error}</p>}
+      {error && (() => {
+        const friendly = parseFriendlyError(error);
+        return friendly ? (
+          <section
+            role="alert"
+            style={{
+              background: 'linear-gradient(135deg, #fff8f0 0%, #fff1e6 100%)',
+              border: '1.5px solid #f97316',
+              borderRadius: '1rem',
+              padding: '1.25rem 1.5rem',
+              marginTop: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+            }}
+          >
+            <strong style={{ fontSize: '1rem', color: '#c2410c' }}>{friendly.title}</strong>
+            <p style={{ margin: 0, color: '#431407', fontSize: '0.9rem' }}>{friendly.detail}</p>
+            <p style={{
+              margin: 0,
+              background: '#ffedd5',
+              borderRadius: '0.5rem',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.875rem',
+              color: '#7c2d12',
+            }}>
+              💡 <strong>Gợi ý:</strong> {friendly.hint}
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="vfit-btn-primary"
+                style={{ fontSize: '0.85rem', padding: '0.4rem 1rem' }}
+                onClick={() => { setError(''); setJob(null); }}
+              >
+                Thử lại
+              </button>
+              <button
+                type="button"
+                className="vfit-btn-secondary"
+                style={{ fontSize: '0.85rem', padding: '0.4rem 1rem' }}
+                onClick={() => { setError(''); setJob(null); setEditingBody(true); }}
+              >
+                Tạo body mới
+              </button>
+            </div>
+          </section>
+        ) : (
+          <p role="alert" className="vfit-builder-error">{error}</p>
+        );
+      })()}
       {result && (
         <section className="vfit-builder-card" aria-labelledby="tryon-result-title">
           <h2 id="tryon-result-title">3. Cảnh thử đồ</h2>

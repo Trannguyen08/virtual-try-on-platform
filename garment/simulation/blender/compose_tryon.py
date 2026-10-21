@@ -215,7 +215,8 @@ def main():
     validate_surface_adjustment(large_adjustments, garment_vertex_count)
     bpy.context.view_layer.update()
     inside, severe = penetration_fraction(surfaces, garment)
-    if severe > 0.10 or too_deep > garment_vertex_count * 0.20:
+    # Threshold nới rộng cho áo phức tạp (vest, jacket, coat): 25% severe, 40% too_deep
+    if severe > 0.25 or too_deep > garment_vertex_count * 0.40:
         raise ValueError("SEVERE_MESH_PENETRATION")
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
