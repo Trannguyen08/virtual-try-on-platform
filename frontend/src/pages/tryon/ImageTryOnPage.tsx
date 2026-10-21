@@ -305,7 +305,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
             <div style={S.spinner} />
             <div>
               <div style={{ fontWeight: 700, fontSize: '.9rem' }}>
-                {job.status === 'pending' ? 'Đang xếp hàng chờ…' : 'Blender đang dựng cảnh thử đồ…'}
+                {job.status === 'pending' ? 'Đang xếp hàng chờ…' : 'Đang tái dựng trang phục và ghép cảnh 3D…'}
               </div>
               <div style={{ color: '#677089', fontSize: '.8rem', marginTop: 2 }}>
                 Job <code style={{ fontFamily: 'monospace', background: '#eef0ff', padding: '1px 5px', borderRadius: 4, color: '#4a39c7' }}>{shortId(job.job_id)}</code>{' '}— thường mất 1–3 phút

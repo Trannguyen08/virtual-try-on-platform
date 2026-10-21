@@ -97,6 +97,176 @@ def nearest_surface(trees, point):
     return min(nearest, key=lambda item: (point - item[0]).length) if nearest else None
 
 
+def ray_surface_depth(trees, point, side, body_depth_bounds):
+    """Find the visible body surface along the shell's front/back direction."""
+    from mathutils import Vector
+
+    lower, upper = body_depth_bounds
+    start_y = lower - 0.5 if side < 0 else upper + 0.5
+    direction = Vector((0.0, 1.0 if side < 0 else -1.0, 0.0))
+    origin = Vector((point.x, start_y, point.z))
+    distance = upper - lower + 1.0
+    hits = [tree.ray_cast(origin, direction, distance) for tree in trees]
+    hits = [hit for hit in hits if hit and hit[0] is not None]
+    return min(hits, key=lambda hit: hit[3])[0].y if hits else None
+
+
+def fit_parametric_shell(trees, garment_objects, body_depth_bounds,
+                         *, category, body_bottom, body_height):
+    """Wrap image-derived front/back panels around the body without lateral spikes.
+
+    A single photograph produces a shallow shell. Nearest-triangle normal pushes
+    can send neighboring vertices in unrelated directions and tear the texture.
+    Depth-only projection retains every vertex's horizontal and vertical place.
+    """
+    from mathutils import Vector
+    from mathutils.kdtree import KDTree
+
+    front = next((obj for obj in garment_objects
+                  if obj.name.startswith("GarmentFront")), None)
+    back = next((obj for obj in garment_objects
+                 if obj.name.startswith("GarmentBack")), None)
+    if front is None or back is None:
+        raise ValueError("GARMENT_MESH_MISSING: parametric front/back panels required")
+
+    def panel_center(obj):
+        return median((obj.matrix_world @ vertex.co).y
+                      for vertex in obj.data.vertices)
+
+    front_center = panel_center(front)
+    back_center = panel_center(back)
+    if abs(front_center - back_center) < 0.001:
+        raise ValueError("GARMENT_FRAME_INVALID: front/back depth is ambiguous")
+    front_side = -1 if front_center < back_center else 1
+    center_y = (front_center + back_center) / 2.0
+    clearance = 0.01
+    projected = 0
+    missed = 0
+    moved = 0
+    deep = 0
+    large = 0
+    panel_trees = {}
+    # A shirt hem hangs below the pelvis. Sampling the body below this height
+    # follows the gap between the legs and turns a long shirt into shorts.
+    hip_floor = (body_bottom + body_height * 0.56
+                 if category in {"tshirt", "shirt", "jacket", "dress"} else None)
+
+    for obj, side in ((front, front_side), (back, -front_side)):
+        original = [obj.matrix_world @ vertex.co for vertex in obj.data.vertices]
+        targets = []
+        for point in original:
+            actual_depth = ray_surface_depth(trees, point, side, body_depth_bounds)
+            if hip_floor is None or point.z >= hip_floor:
+                targets.append(actual_depth)
+                continue
+            hem_depth = ray_surface_depth(
+                trees, Vector((point.x, point.y, hip_floor)),
+                side, body_depth_bounds,
+            )
+            candidates = [depth for depth in (actual_depth, hem_depth)
+                          if depth is not None]
+            targets.append(max(candidates, key=lambda depth: side * depth)
+                           if candidates else None)
+        hits = [(index, depth) for index, depth in enumerate(targets)
+                if depth is not None]
+        if not hits:
+            raise ValueError("SEVERE_MESH_PENETRATION: no body surface under garment panel")
+        nearest_hits = KDTree(len(hits))
+        for index, _depth in hits:
+            point = original[index]
+            nearest_hits.insert(Vector((point.x, 0.0, point.z)), index)
+        nearest_hits.balance()
+        inverse = obj.matrix_world.inverted()
+        mapped = KDTree(len(original))
+        panel_depths = []
+
+        for index, point in enumerate(original):
+            target = targets[index]
+            if target is None:
+                missed += 1
+                _location, neighbor_index, distance = nearest_hits.find(
+                    Vector((point.x, 0.0, point.z))
+                )
+                neighbor = original[neighbor_index]
+                neighbor_depth = targets[neighbor_index]
+                influence = max(0.0, 1.0 - distance / 0.08)
+                target_y = point.y + influence * (
+                    neighbor_depth + side * clearance - neighbor.y
+                )
+            else:
+                projected += 1
+                target_y = target + side * clearance
+            panel_depths.append(target_y)
+
+        # The ray result changes abruptly around the arm silhouette. Smooth
+        # along existing mesh edges and keep every hit outside the body.
+        neighbors = [[] for _vertex in obj.data.vertices]
+        for edge in obj.data.edges:
+            first, second = edge.vertices
+            neighbors[first].append(second)
+            neighbors[second].append(first)
+        for _iteration in range(12):
+            smoothed = []
+            for index, depth in enumerate(panel_depths):
+                adjacent = neighbors[index]
+                value = (0.6 * depth + 0.4 *
+                         sum(panel_depths[other] for other in adjacent) / len(adjacent)
+                         if adjacent else depth)
+                if targets[index] is not None:
+                    required = targets[index] + side * clearance
+                    if side * value < side * required:
+                        value = required
+                smoothed.append(value)
+            panel_depths = smoothed
+
+        for index, point in enumerate(original):
+            target_y = panel_depths[index]
+            displacement = abs(target_y - point.y)
+            if displacement > 0.000001:
+                moved += 1
+            if displacement > 0.06:
+                large += 1
+            if displacement > 0.12:
+                deep += 1
+            obj.data.vertices[index].co = inverse @ Vector(
+                (point.x, target_y, point.z)
+            )
+            mapped.insert(Vector((point.x, 0.0, point.z)), index)
+        obj.data.update()
+        mapped.balance()
+        panel_trees[side] = (mapped, panel_depths)
+
+    # The reconstruction exports side seams as a separate mesh. Reuse the
+    # projected boundary depth so those faces stay attached to both panels.
+    for obj in garment_objects:
+        if obj is front or obj is back:
+            continue
+        inverse = obj.matrix_world.inverted()
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            side = front_side if (point.y - center_y) * front_side > 0 else -front_side
+            mapped, depths = panel_trees[side]
+            _location, index, distance = mapped.find(
+                Vector((point.x, 0.0, point.z))
+            )
+            if distance > 0.002:
+                raise ValueError(
+                    "SEVERE_MESH_PENETRATION: seam is detached from panel"
+                )
+            target_y = depths[index]
+            displacement = abs(target_y - point.y)
+            if displacement > 0.000001:
+                moved += 1
+            if displacement > 0.06:
+                large += 1
+            if displacement > 0.12:
+                deep += 1
+            vertex.co = inverse @ Vector((point.x, target_y, point.z))
+        obj.data.update()
+
+    return moved, deep, large, projected, missed
+
+
 def fit_to_body(trees, garment_objects):
     """Move penetrating garment vertices to 1 cm outside the body surface."""
     max_displacement = 0.12
@@ -215,19 +385,27 @@ def main():
         obj.matrix_world.translation += Vector(translation)
     bpy.context.view_layer.update()
     surfaces = body_surfaces(body)
-    moved, too_deep, large_adjustments = fit_to_body(surfaces, garment)
+    parametric = (metadata.get("reconstruction_mode") == "local_parametric"
+                  and category in {"tshirt", "shirt", "jacket", "dress",
+                                   "pants", "skirt"})
+    if parametric:
+        moved, too_deep, large_adjustments, projected, missed = fit_parametric_shell(
+            surfaces, garment, (low_body[1], high_body[1]),
+            category=category, body_bottom=low_body[2], body_height=body_height,
+        )
+    else:
+        moved, too_deep, large_adjustments = fit_to_body(surfaces, garment)
+        projected = missed = 0
     garment_vertex_count = sum(len(obj.data.vertices) for obj in garment)
-    max_adjustment_fraction = (
-        0.40 if metadata.get("reconstruction_mode") == "local_parametric" else 0.15
-    )
-    validate_surface_adjustment(
-        large_adjustments, garment_vertex_count, max_adjustment_fraction
-    )
+    if not parametric:
+        validate_surface_adjustment(large_adjustments, garment_vertex_count)
     bpy.context.view_layer.update()
     inside, severe = penetration_fraction(surfaces, garment)
-    # Threshold nới rộng cho áo phức tạp (vest, jacket, coat): 25% severe, 40% too_deep
-    if severe > 0.25 or too_deep > garment_vertex_count * 0.40:
-        raise ValueError("SEVERE_MESH_PENETRATION")
+    if severe > 0.01 or inside > 0.03 or (not parametric and too_deep > garment_vertex_count * 0.05):
+        raise ValueError(
+            "SEVERE_MESH_PENETRATION: "
+            f"inside={inside:.4f}, severe={severe:.4f}, deep={too_deep}"
+        )
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
@@ -235,11 +413,13 @@ def main():
         export_yup=True, export_materials="EXPORT",
     )
     print("TRYON_REPORT=" + json.dumps({
-        "placement": "body_height_anchor_and_surface_clearance",
+        "placement": "body_ray_projected_shell" if parametric else "body_height_anchor_and_surface_clearance",
         "translation_m_blender_frame": translation,
         "clearance_adjusted_vertices": moved,
         "large_adjustment_vertices": large_adjustments,
         "deep_vertices": too_deep,
+        "projection_hits": projected,
+        "projection_misses": missed,
         "penetration_fraction": round(inside, 6),
         "severe_penetration_fraction": round(severe, 6),
         "simulation_ran": False,

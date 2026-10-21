@@ -13,6 +13,8 @@ py -3.11 -m venv .venv
 
 Backend dùng PostgreSQL cho body, asset và job. Đặt `DATABASE_URL` trong `.env` (xem `.env.example`), rồi khởi động database và chạy migration trước API:
 
+Trên Windows khi PostgreSQL Docker chỉ publish ở `127.0.0.1`, đặt host DB trong `DATABASE_URL` là `127.0.0.1` thay vì `localhost`. `localhost` có thể được phân giải thành `::1` trước và làm bước startup chờ kết nối lâu.
+
 ```powershell
 docker compose up -d postgres
 .\.venv\Scripts\python.exe -m alembic upgrade head

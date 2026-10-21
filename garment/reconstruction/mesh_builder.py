@@ -515,18 +515,21 @@ class GarmentMeshBuilder:
         normalized_y = (point[1] - y0) / max(1.0, y1 - y0)
         width = max(1.0, x1 - x0)
         height = max(1.0, y1 - y0)
+        # Waist and hem openings run across the garment. A side edge near the
+        # top/bottom must still connect the front and back panels.
+        crosses_width = abs(edge_vec[0]) > abs(edge_vec[1])
 
         if garment_type == "pants":
-            if normalized_y < 0.08:
+            if normalized_y < 0.08 and crosses_width:
                 return "waist"
-            if normalized_y > 0.88:
+            if normalized_y > 0.88 and crosses_width:
                 return "left_hem" if normalized_x < 0.5 else "right_hem"
             return None
 
         if garment_type == "skirt":
-            if normalized_y < 0.08:
+            if normalized_y < 0.08 and crosses_width:
                 return "waist"
-            if normalized_y > 0.88:
+            if normalized_y > 0.88 and crosses_width:
                 return "hem"
             return None
 
@@ -565,7 +568,7 @@ class GarmentMeshBuilder:
         torso_left = min(waist_left[0], landmarks.get("hem_left", waist_left)[0])
         torso_right = max(waist_right[0], landmarks.get("hem_right", waist_right)[0])
 
-        if point[1] >= y1 - max(12.0, height * 0.065):
+        if crosses_width and point[1] >= y1 - max(12.0, height * 0.065):
             # Across the entire torso width at the bottom, mark as hem opening!
             if (torso_left - max(8.0, width * 0.03)) <= point[0] <= (torso_right + max(8.0, width * 0.03)):
                 return "hem"

@@ -48,6 +48,7 @@ class ImageTryOnWorker:
         if claimed is None:
             return False
         job_id, attempt, request = claimed
+        started = time.perf_counter()
         try:
             result = self._process(job_id, request)
             self.jobs.finish(job_id, attempt, result=result.model_dump(mode="json"))
@@ -63,9 +64,13 @@ class ImageTryOnWorker:
             self.jobs.finish(job_id, attempt, error=ErrorSchema(
                 code="PROCESSING_FAILED", message="Try-on processing failed",
             ).model_dump(mode="json"))
+        finally:
+            logger.info("Image try-on job %s attempt %s finished in %.2fs",
+                        job_id, attempt, time.perf_counter() - started)
         return True
 
     def _process(self, job_id: str, request: dict) -> ImageTryOnResult:
+        stage_started = time.perf_counter()
         body_id = request["body_id"]
         body_path = self.storage.mpfb_body_path(body_id)
         body_record = self.storage.bodies.get(body_id)
@@ -100,6 +105,8 @@ class ImageTryOnWorker:
             max_pixels=self.settings.max_garment_image_pixels,
         )
         images = preprocessor.process(sources, work_dir / "normalized")
+        logger.info("Image try-on job %s input preparation: %.2fs",
+                    job_id, time.perf_counter() - stage_started)
         generation = GenerationRequest(
             images=images,
             options=get_preset("balanced").to_options(
@@ -108,19 +115,26 @@ class ImageTryOnWorker:
                 reference_value_cm=request["reference_value_cm"],
             ),
         )
+        stage_started = time.perf_counter()
         reconstructed = LocalGarmentReconstructor().reconstruct(
             generation, work_dir / "reconstruction",
         )
+        logger.info("Image try-on job %s garment reconstruction: %.2fs",
+                    job_id, time.perf_counter() - stage_started)
         metadata = reconstructed.metadata
         if metadata.get("schema_version") != "garment-fit-ready/1.0" or not metadata.get("fit_ready"):
             raise ProcessingError("GARMENT_NOT_FIT_READY", "Garment scale could not be calibrated")
         validator = GlbValidator(max_file_bytes=100 * 1024 * 1024)
         garment_info = validator.validate(reconstructed.model_path)
         output = work_dir / f"scene-{uuid4().hex}.glb"
+        stage_started = time.perf_counter()
+        logger.info("Image try-on job %s starting Blender composition", job_id)
         report = self._compose(
             body_path, reconstructed.model_path, reconstructed.metadata_path,
             output, bool(request["simulate_cloth"]),
         )
+        logger.info("Image try-on job %s Blender composition: %.2fs",
+                    job_id, time.perf_counter() - stage_started)
         output_info = validator.validate(output)
         if garment_info.material_count and (
             output_info.material_count == 0 or not output_info.has_pbr_material
@@ -181,7 +195,8 @@ class ImageTryOnWorker:
         except FileNotFoundError as exc:
             raise ProcessingError("BLENDER_UNAVAILABLE", "Blender executable is unavailable") from exc
         command = [
-            blender, "--background", "--python", str(COMPOSER), "--",
+            blender, "--background", "--factory-startup", "--python-exit-code", "1",
+            "--python", str(COMPOSER), "--",
             "--body", str(body), "--garment", str(garment),
             "--metadata", str(metadata), "--output", str(output),
         ]

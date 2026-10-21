@@ -1,4 +1,6 @@
+import logging
 from contextlib import asynccontextmanager
+from time import perf_counter
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +18,9 @@ from backend.services.blender_body import BlenderBodyJobs
 from backend.services.image_tryon import ImageTryOnService
 from backend.services.orchestrator import TryOnOrchestrator, TryOnProvider
 from backend.services.storage import StorageService
+
+
+startup_logger = logging.getLogger("uvicorn.error")
 
 
 def create_app(
@@ -36,9 +41,21 @@ def create_app(
     async def lifespan(_: FastAPI):
         try:
             from backend.db.models import Base
+
+            step_started = perf_counter()
+            startup_logger.info("Startup: checking database schema")
             Base.metadata.create_all(engine)
+            startup_logger.info("Startup: database schema ready in %.2fs", perf_counter() - step_started)
+
+            step_started = perf_counter()
+            startup_logger.info("Startup: registering fixture assets")
             storage.seed_fixtures()
+            startup_logger.info("Startup: fixture assets ready in %.2fs", perf_counter() - step_started)
+
+            step_started = perf_counter()
+            startup_logger.info("Startup: initializing Garment 3D")
             async with garment_app.router.lifespan_context(garment_app):
+                startup_logger.info("Startup: Garment 3D ready in %.2fs", perf_counter() - step_started)
                 yield
         finally:
             engine.dispose()
