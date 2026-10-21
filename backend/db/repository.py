@@ -63,6 +63,17 @@ class BodyRepository:
             ))
             return result.rowcount == 1
 
+    def update_mpfb_metadata(self, body_id: str, metadata: dict) -> bool:
+        with self.sessions.begin() as session:
+            result = session.execute(update(BodyRecord).where(
+                BodyRecord.body_id == body_id,
+                BodyRecord.kind == "mpfb",
+            ).values(
+                metadata_json=metadata, status="ready", error_code=None,
+                updated_at=utc_now(),
+            ))
+            return result.rowcount == 1
+
 
 class AssetRepository:
     def __init__(self, sessions: sessionmaker):
@@ -111,6 +122,33 @@ class AssetRepository:
             ))
             return result.rowcount == 1
 
+    def restore_managed_glb(self, asset_id: str, *, key: str,
+                            byte_size: int, sha256: str) -> bool:
+        """Point a missing managed GLB record at its atomically restored file."""
+        with self.sessions.begin() as session:
+            result = session.execute(update(AssetRecord).where(
+                AssetRecord.asset_id == asset_id,
+                AssetRecord.storage_scope == "managed",
+                AssetRecord.kind == "glb",
+            ).values(
+                storage_key=key, byte_size=byte_size, sha256=sha256,
+                status="available", updated_at=utc_now(),
+            ))
+            return result.rowcount == 1
+
+    def update_managed_glb(self, asset_id: str, *, key: str,
+                           byte_size: int, sha256: str) -> bool:
+        with self.sessions.begin() as session:
+            result = session.execute(update(AssetRecord).where(
+                AssetRecord.asset_id == asset_id,
+                AssetRecord.storage_scope == "managed",
+                AssetRecord.kind == "glb",
+            ).values(
+                storage_key=key, byte_size=byte_size, sha256=sha256,
+                status="available", updated_at=utc_now(),
+            ))
+            return result.rowcount == 1
+
 
 class ImageTryOnRepository:
     """PostgreSQL rows act as the durable queue; assets and enqueue commit together."""
@@ -120,10 +158,13 @@ class ImageTryOnRepository:
 
     @staticmethod
     def _public(record: ImageTryOnRecord) -> ImageTryOnJob:
+        public_request = {key: value for key, value in record.request_json.items()
+                          if key != "views"}
+        for garment in public_request.get("garments", []):
+            garment.pop("views", None)
         return ImageTryOnJob.model_validate({
             "job_id": record.job_id, "status": record.status,
-            "request": {key: value for key, value in record.request_json.items()
-                        if key != "views"},
+            "request": public_request,
             "result": record.result_json, "error": record.error_json,
             "attempt_count": record.attempt_count,
         })
@@ -154,6 +195,31 @@ class ImageTryOnRepository:
         with self.sessions() as session:
             record = session.get(ImageTryOnRecord, job_id)
             return self._public(record) if record else None
+
+    def retry_completed(self, job_id: str) -> bool:
+        """Requeue a completed image try-on whose published file is missing."""
+        with self.sessions.begin() as session:
+            result = session.execute(update(ImageTryOnRecord).where(
+                ImageTryOnRecord.job_id == job_id,
+                ImageTryOnRecord.status == "completed",
+            ).values(
+                status="pending", result_json=None, error_json=None,
+                leased_until=None, updated_at=utc_now(),
+            ))
+            return result.rowcount == 1
+
+    def fail_completed(self, job_id: str, *, code: str, message: str) -> bool:
+        """Replace a stale completed result with a visible terminal error."""
+        with self.sessions.begin() as session:
+            result = session.execute(update(ImageTryOnRecord).where(
+                ImageTryOnRecord.job_id == job_id,
+                ImageTryOnRecord.status == "completed",
+            ).values(
+                status="failed", result_json=None,
+                error_json={"code": code, "message": message, "details": []},
+                leased_until=None, updated_at=utc_now(),
+            ))
+            return result.rowcount == 1
 
     def claim(self, *, lease_seconds: int = 600, max_attempts: int = 2
               ) -> tuple[str, int, dict] | None:

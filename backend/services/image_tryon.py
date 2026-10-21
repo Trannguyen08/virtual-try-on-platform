@@ -44,12 +44,20 @@ class ImageTryOnService:
             GlbValidator(max_file_bytes=100 * 1024 * 1024).validate(body_path)
         except (InvalidMeshError, OSError) as exc:
             raise AppException(422, "BODY_ASSET_INVALID", "MPFB body GLB is invalid") from exc
-        if uploads.get("front") is None:
-            raise AppException(422, "FRONT_VIEW_REQUIRED", "Front garment image is required")
         validated: dict[str, tuple[bytes, str]] = {}
-        for view, upload in uploads.items():
-            if upload is not None:
-                validated[view] = await self._read_image(upload)
+        garment_views: list[dict[str, str]] = []
+        for index, _garment in enumerate(request.garments):
+            front_key = f"{index}_front"
+            if uploads.get(front_key) is None:
+                raise AppException(422, "FRONT_VIEW_REQUIRED", "Each garment needs a front image")
+            views: dict[str, str] = {}
+            for view in ("front", "back"):
+                upload = uploads.get(f"{index}_{view}")
+                if upload is not None:
+                    key = f"{index}_{view}"
+                    validated[key] = await self._read_image(upload)
+                    views[view] = key
+            garment_views.append(views)
         job_id = f"itry_{uuid4().hex}"
         root = self.settings.managed_asset_dir.resolve()
         input_dir = root / "image_tryon" / job_id / "inputs"
@@ -57,20 +65,25 @@ class ImageTryOnService:
         views: dict[str, str] = {}
         try:
             input_dir.mkdir(parents=True, exist_ok=False)
-            for view, (content, media_type) in validated.items():
-                path = input_dir / f"{view}.image"
-                temporary = input_dir / f"{view}.part"
+            for image_key, (content, media_type) in validated.items():
+                path = input_dir / f"{image_key}.image"
+                temporary = input_dir / f"{image_key}.part"
                 temporary.write_bytes(content)
                 os.replace(temporary, path)
                 key = path.relative_to(root).as_posix()
-                views[view] = key
+                _garment_index, _view = image_key.split("_", maxsplit=1)
+                views[image_key] = key
                 images.append({
-                    "view": view, "key": key, "media_type": media_type,
+                    "view": image_key, "key": key, "media_type": media_type,
                     "byte_size": len(content),
                     "sha256": hashlib.sha256(content).hexdigest(),
                 })
             internal_request = request.model_dump(mode="json")
-            internal_request["views"] = views
+            for index, garment in enumerate(internal_request["garments"]):
+                garment["views"] = {
+                    view: views[f"{index}_{view}"]
+                    for view in garment_views[index]
+                }
             return self.jobs.enqueue(job_id, request.body_id, internal_request, images)
         except Exception:
             shutil.rmtree(input_dir.parent, ignore_errors=True)
@@ -80,6 +93,28 @@ class ImageTryOnService:
         job = self.jobs.get(job_id)
         if job is None:
             raise AppException(404, "JOB_NOT_FOUND", "Try-on job was not found")
+        if job.status == "completed" and job.result is not None:
+            asset_name = job.result.tryon_mesh.url.rsplit("/", 1)[-1]
+            try:
+                self.storage.asset_path(asset_name)
+            except AppException:
+                try:
+                    self.storage.mpfb_body_path(job.request.body_id)
+                except AppException:
+                    self.storage.bodies.update_status(
+                        job.request.body_id, "failed", error_code="BODY_ASSET_NOT_FOUND",
+                    )
+                    self.jobs.fail_completed(
+                        job_id, code="BODY_ASSET_NOT_FOUND",
+                        message="The body asset is missing; create the body again before retrying this try-on.",
+                    )
+                else:
+                    self.jobs.retry_completed(job_id)
+                # Re-read after the conditional transition so concurrent polls
+                # observe one consistent state and only one worker retry runs.
+                refreshed = self.jobs.get(job_id)
+                if refreshed is not None:
+                    job = refreshed
         return job
 
     async def _read_image(self, upload: UploadFile) -> tuple[bytes, str]:

@@ -88,7 +88,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
     currentStep === 'upload' || currentStep === 'body-builder' ? 1 : currentStep === 'select-garment' ? 2 : 3;
 
   return (
-    <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 0 4rem 0' }}>
+    <div className="vfit-legacy-tryon-page" style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 0 4rem 0' }}>
       {/* Top Stepper Progression Bar */}
       {currentStep !== 'processing' && (
         <div className="vfit-stepper-container">

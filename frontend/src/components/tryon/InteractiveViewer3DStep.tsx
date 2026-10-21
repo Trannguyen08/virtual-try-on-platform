@@ -345,7 +345,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
   const overallScore = fitResult?.overall.score;
 
   return (
-    <div style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="vfit-legacy-tryon-viewer" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Top Banner Status */}
       <div
         style={{
