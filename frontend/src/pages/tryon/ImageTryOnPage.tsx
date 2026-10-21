@@ -10,6 +10,14 @@ import { Garment360Viewer } from '../../viewer/Garment360Viewer';
 const BODY_KEY = 'tryon.mpfb.body_id';
 const JOB_KEY = 'tryon.image.job_id';
 const GARMENT_TYPES: GarmentType[] = ['tshirt', 'shirt', 'jacket', 'pants', 'skirt', 'dress'];
+const ESTIMATED_GARMENT_LENGTH_CM: Record<GarmentType, number> = {
+  tshirt: 70,
+  shirt: 75,
+  jacket: 68,
+  pants: 100,
+  skirt: 60,
+  dress: 115,
+};
 
 const GARMENT_LABELS: Record<GarmentType, string> = {
   tshirt: 'Áo thun', shirt: 'Áo sơ mi', jacket: 'Áo khoác',
@@ -22,9 +30,9 @@ function shortId(id: string) { return id.length > 12 ? `${id.slice(0, 8)}…` : 
 /** Ánh xạ mã lỗi → thông báo thân thiện */
 const ERROR_MESSAGES: Record<string, { title: string; detail: string; hint: string }> = {
   SEVERE_MESH_PENETRATION: {
-    title: '⚠️ Trang phục quá chật với body này',
-    detail: 'Khi dựng 3D, áo bị lún sâu vào body quá mức — thường xảy ra khi trang phục quá nhỏ hoặc ảnh không đủ rõ.',
-    hint: 'Thử tăng chiều dài áo, chọn loại áo đúng hơn (ví dụ: Áo khoác thay vì Áo thun), hoặc tải ảnh chụp thẳng, nền trắng.',
+    title: '⚠️ Không thể căn chỉnh trang phục an toàn',
+    detail: 'Mesh cần hiệu chỉnh quá nhiều hoặc vẫn xuyên sâu vào body sau khi căn chỉnh.',
+    hint: 'Kiểm tra lại loại trang phục và tải ảnh chụp thẳng, đủ sáng, nền đơn giản để cải thiện mesh.',
   },
   GARMENT_FRAME_INVALID: { title: '⚠️ Trang phục không đúng định dạng', detail: 'File trang phục bị sai hệ trục tọa độ (cần Y-up, mét).', hint: 'Hãy xuất lại file trang phục từ pipeline chuẩn hoặc liên hệ quản trị viên.' },
   BODY_MESH_MISSING: { title: '⚠️ Không tìm thấy body 3D', detail: 'File GLB body không chứa mesh nào hợp lệ.', hint: 'Vui lòng tạo lại body MPFB bằng nút "Tạo body mới" bên trên.' },
@@ -53,13 +61,11 @@ const S = {
   cardHead: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' } as React.CSSProperties,
   cardTitle: { fontSize: '.95rem', fontWeight: 700, color: '#172033', margin: 0, display: 'flex', alignItems: 'center', gap: 8 } as React.CSSProperties,
   numBadge: (green?: boolean): React.CSSProperties => ({ width: 24, height: 24, borderRadius: '50%', background: green ? '#dcfce7' : '#eef0ff', color: green ? '#16a34a' : '#4a39c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.72rem', fontWeight: 800, flexShrink: 0 }),
-  bodyChip: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 12px', background: '#eef0ff', border: '1px solid #c7cef8', borderRadius: 999, fontSize: '.8rem', color: '#4a39c7', fontWeight: 700, fontFamily: 'ui-monospace,monospace' } as React.CSSProperties,
   inputRow: { display: 'flex', gap: 8, marginTop: '0.9rem', flexWrap: 'wrap' as const } as React.CSSProperties,
-  input: { flex: 1, minWidth: 0, padding: '0.55rem 0.9rem', border: '1.5px solid #dde1ef', borderRadius: 12, fontSize: '.88rem', color: '#172033', outline: 'none', background: '#f9fafc' } as React.CSSProperties,
   btnPrimary: { padding: '0.6rem 1.25rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#5a46d7,#3b82f6)', color: '#fff', fontWeight: 700, fontSize: '.88rem', cursor: 'pointer', whiteSpace: 'nowrap' as const } as React.CSSProperties,
   btnSecondary: { padding: '0.6rem 1.1rem', borderRadius: 12, border: '1.5px solid #dde1ef', background: '#fff', color: '#4a39c7', fontWeight: 700, fontSize: '.88rem', cursor: 'pointer', whiteSpace: 'nowrap' as const } as React.CSSProperties,
   btnSubmit: { width: '100%', padding: '0.85rem', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg,#14172c,#272b59,#5a46d7)', color: '#fff', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', marginTop: '1.25rem' } as React.CSSProperties,
-  fieldGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' } as React.CSSProperties,
+  fieldGrid: { display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' } as React.CSSProperties,
   fieldLabel: { display: 'flex', flexDirection: 'column' as const, gap: 6, fontSize: '.85rem', fontWeight: 600, color: '#4f586d' } as React.CSSProperties,
   fieldCtrl: { padding: '0.55rem 0.85rem', border: '1.5px solid #dde1ef', borderRadius: 12, fontSize: '.9rem', color: '#172033', background: '#f9fafc', outline: 'none' } as React.CSSProperties,
   statusCard: { background: 'linear-gradient(135deg,#f0f4ff,#e8f4ff)', border: '1.5px solid #c7d9f8', borderRadius: 16, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 14, marginBottom: '1rem' } as React.CSSProperties,
@@ -81,12 +87,10 @@ interface Props {
 
 export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
   const [body, setBody] = useState<BodyBuilderJob | null>(null);
-  const [existingBodyId, setExistingBodyId] = useState('');
   const [editingBody, setEditingBody] = useState(false);
   const [creatingBody, setCreatingBody] = useState(false);
   const [files, setFiles] = useState<GarmentFiles>({});
   const [garmentType, setGarmentType] = useState<GarmentType>(() => initialType(initialGarment));
-  const [garmentLength, setGarmentLength] = useState('');
   const [job, setJob] = useState<ImageTryOnJob | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -135,7 +139,6 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
       const created = await bodyBuilderApi.generate(parameters);
       const bodyId = created.body_id || created.job_id;
       setBody(created);
-      setExistingBodyId(bodyId);
       setEditingBody(false);
       setJob(null);
       window.localStorage.setItem(BODY_KEY, bodyId);
@@ -147,28 +150,9 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
     }
   };
 
-  const useExistingBody = async () => {
-    setError('');
-    try {
-      const restored = await bodyBuilderApi.getBody(existingBodyId.trim());
-      setBody(restored);
-      setEditingBody(false);
-      setJob(null);
-      window.localStorage.setItem(BODY_KEY, existingBodyId.trim());
-      window.localStorage.removeItem(JOB_KEY);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Không tìm thấy body MPFB');
-    }
-  };
-
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!body || !files.front) return;
-    const length = Number(garmentLength);
-    if (!Number.isFinite(length) || length < 1 || length > 300) {
-      setError('Nhập chiều dài trang phục thật từ 1 đến 300 cm.');
-      return;
-    }
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -178,7 +162,8 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
     try {
       const created = await imageTryOnApi.create(
         body.body_id || body.job_id,
-        { ...files, front: files.front }, garmentType, length, controller.signal,
+        { ...files, front: files.front }, garmentType,
+        ESTIMATED_GARMENT_LENGTH_CM[garmentType], controller.signal,
       );
       setJob(created);
       window.localStorage.setItem(JOB_KEY, created.job_id);
@@ -196,6 +181,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
   const active = submitting || job?.status === 'pending' || job?.status === 'running';
   const result = job?.status === 'completed' ? job.result : null;
   const bodyId = body ? (body.body_id || body.job_id) : null;
+  const bodyAssetUrl = body ? bodyBuilderApi.assetUrl(body) : '';
   const step1Done = !!body;
   const step2Done = !!result;
   const step2Active = !!body && !result;
@@ -240,31 +226,24 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
               <span style={S.numBadge()}>1</span>
               Body 3D của bạn
             </h2>
-            {bodyId && (
-              <div style={S.bodyChip}>
-                🧍 <span title={bodyId}>{shortId(bodyId)}</span>
-                <a href={bodyBuilderApi.assetUrl(body!)} download style={{ color: 'inherit', opacity: .65, textDecoration: 'none', fontSize: '.75rem' }} title="Tải GLB body">↓</a>
-              </div>
-            )}
           </div>
           {bodyId
             ? <p style={{ margin: '0 0 1rem', color: '#16a34a', fontSize: '.85rem', fontWeight: 600 }}>✅ Body đã sẵn sàng — tiếp tục tải ảnh trang phục bên dưới.</p>
-            : <p style={{ margin: '0 0 1rem', color: '#8c94a7', fontSize: '.88rem' }}>Nhập ID body đã tạo trước đó hoặc tạo mới để bắt đầu.</p>
+            : <p style={{ margin: '0 0 1rem', color: '#8c94a7', fontSize: '.88rem' }}>Tạo body 3D để xem trước và tiếp tục thử trang phục.</p>
           }
+          {bodyId && bodyAssetUrl && (
+            <div style={{ marginBottom: '1rem' }}>
+              <Garment360Viewer modelUrl={bodyAssetUrl} subject="body" />
+            </div>
+          )}
           <div style={S.inputRow}>
-            <input
-              aria-label="Body ID đã tạo"
-              value={existingBodyId}
-              onChange={(e) => setExistingBodyId(e.target.value)}
-              placeholder="Dán Body ID đã tạo…"
-              style={S.input}
-              disabled={active || creatingBody}
-            />
-            <button type="button" style={{ ...S.btnSecondary, opacity: !existingBodyId.trim() || active || creatingBody ? .5 : 1 }}
-              disabled={!existingBodyId.trim() || active || creatingBody}
-              onClick={() => void useExistingBody()}>Dùng ID này</button>
             <button type="button" style={S.btnPrimary} disabled={active || creatingBody}
-              onClick={() => setEditingBody(true)}>+ Tạo body mới</button>
+              onClick={() => setEditingBody(true)}>{bodyId ? '+ Tạo body mới' : '+ Tạo body'}</button>
+            {bodyId && bodyAssetUrl && (
+              <a href={bodyAssetUrl} download="body-3d.glb" style={{ ...S.btnSecondary, textDecoration: 'none' }}>
+                Tải body GLB
+              </a>
+            )}
           </div>
           {creatingBody && (
             <div style={{ ...S.statusCard, marginTop: '1rem', marginBottom: 0 }}>
@@ -307,20 +286,13 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
                     {GARMENT_TYPES.map((t) => <option key={t} value={t}>{GARMENT_LABELS[t]}</option>)}
                   </select>
                 </label>
-                <label style={S.fieldLabel}>
-                  Chiều dài thật (cm)
-                  <input type="number" min="1" max="300" step="0.1" required
-                    value={garmentLength} disabled={active} placeholder="VD: 70"
-                    onChange={(e) => setGarmentLength(e.target.value)}
-                    style={S.fieldCtrl} />
-                </label>
               </div>
               <p style={{ margin: '0.6rem 0 0', color: '#8c94a7', fontSize: '.8rem' }}>
-                💡 Chiều dài thật dùng để đổi tỉ lệ ảnh sang mét. Mặt sau không có ảnh sẽ được suy từ mặt trước.
+                💡 Tỉ lệ được ước lượng theo loại trang phục; mặt sau không có ảnh sẽ được suy từ mặt trước.
               </p>
               <button type="submit"
-                style={{ ...S.btnSubmit, opacity: active || !files.front || !garmentLength ? .5 : 1, cursor: active || !files.front || !garmentLength ? 'not-allowed' : 'pointer' }}
-                disabled={active || !files.front || !garmentLength}>
+                style={{ ...S.btnSubmit, opacity: active || !files.front ? .5 : 1, cursor: active || !files.front ? 'not-allowed' : 'pointer' }}
+                disabled={active || !files.front}>
                 {active ? '⏳ Đang xử lý…' : '✨ Tạo cảnh thử đồ 3D'}
               </button>
             </div>

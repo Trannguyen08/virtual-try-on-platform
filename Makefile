@@ -14,7 +14,7 @@ setup:
 	cd frontend && npm install
 
 dev-backend:
-	uvicorn backend.main:app --reload --port 8000
+	uvicorn backend.main:app --reload --reload-exclude ".venv" --port 8000
 
 dev-frontend:
 	cd frontend && npm run dev

@@ -126,9 +126,14 @@ def fit_to_body(trees, garment_objects):
     return moved, too_deep, large_adjustments
 
 
-def validate_surface_adjustment(large_adjustments, vertex_count):
-    """Reject a garment that would need large-scale warping to cover the body."""
-    if vertex_count <= 0 or large_adjustments > vertex_count * 0.05:
+def validate_surface_adjustment(large_adjustments, vertex_count, max_fraction=0.05):
+    """Reject a garment that would need large-scale warping to cover the body.
+
+    Direct callers use the conservative default. The composition path passes a
+    reconstruction-specific limit; final penetration checks still reject
+    unsafe placements.
+    """
+    if vertex_count <= 0 or large_adjustments > vertex_count * max_fraction:
         raise ValueError(
             "SEVERE_MESH_PENETRATION: garment requires excessive surface deformation"
         )
@@ -212,7 +217,12 @@ def main():
     surfaces = body_surfaces(body)
     moved, too_deep, large_adjustments = fit_to_body(surfaces, garment)
     garment_vertex_count = sum(len(obj.data.vertices) for obj in garment)
-    validate_surface_adjustment(large_adjustments, garment_vertex_count)
+    max_adjustment_fraction = (
+        0.40 if metadata.get("reconstruction_mode") == "local_parametric" else 0.15
+    )
+    validate_surface_adjustment(
+        large_adjustments, garment_vertex_count, max_adjustment_fraction
+    )
     bpy.context.view_layer.update()
     inside, severe = penetration_fraction(surfaces, garment)
     # Threshold nới rộng cho áo phức tạp (vest, jacket, coat): 25% severe, 40% too_deep

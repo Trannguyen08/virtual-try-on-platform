@@ -1,0 +1,842 @@
+{
+  "schema_version": "garment-fit-ready/1.0",
+  "reconstruction_mode": "local_parametric",
+  "fit_ready": true,
+  "garment_type": "tshirt",
+  "auto_detected": false,
+  "coordinate_system": {
+    "handedness": "right",
+    "up_axis": "Y",
+    "forward_axis": "+Z",
+    "mesh_unit": "m",
+    "measurement_unit": "cm"
+  },
+  "scale": {
+    "calibrated": true,
+    "cm_per_pixel": 0.07963595,
+    "calibrated_from": "garment_length",
+    "mesh_scale_source": "user_reference",
+    "confidence": 0.95
+  },
+  "segmentation": {
+    "method": "opencv_guided_grabcut",
+    "coverage_ratio": 0.4347,
+    "border_leak_ratio": 0.0,
+    "confidence": 0.94,
+    "auto_detected": false,
+    "resolved_garment_type": "tshirt",
+    "multi_entity_detected": false,
+    "salient_garment_isolated": false,
+    "salient_entity_area_ratio": 1.0,
+    "discarded_entities_count": 0
+  },
+  "measurements": {
+    "garment_length": {
+      "value_cm": 70.0,
+      "value_px": 879.0,
+      "method": "vertical_landmark_distance",
+      "source": "user_reference",
+      "confidence": 0.98
+    },
+    "shoulder_width": {
+      "value_cm": 27.64,
+      "value_px": 347.06,
+      "method": "silhouette_landmarks",
+      "source": "derived_from_calibration",
+      "confidence": 0.68
+    },
+    "chest_flat_width": {
+      "value_cm": 37.35,
+      "value_px": 469.0,
+      "method": "silhouette_row_width",
+      "source": "derived_from_calibration",
+      "confidence": 0.82
+    },
+    "chest_circumference_est": {
+      "value_cm": 74.7,
+      "value_px": 938.0,
+      "method": "flat_width_x2",
+      "source": "derived_from_calibration",
+      "confidence": 0.66
+    },
+    "waist_flat_width": {
+      "value_cm": 37.27,
+      "value_px": 468.0,
+      "method": "silhouette_row_width",
+      "source": "derived_from_calibration",
+      "confidence": 0.78
+    },
+    "waist_circumference_est": {
+      "value_cm": 74.54,
+      "value_px": 936.0,
+      "method": "flat_width_x2",
+      "source": "derived_from_calibration",
+      "confidence": 0.62
+    },
+    "hem_flat_width": {
+      "value_cm": 37.35,
+      "value_px": 469.0,
+      "method": "silhouette_row_width",
+      "source": "derived_from_calibration",
+      "confidence": 0.8
+    },
+    "sleeve_length": {
+      "value_cm": 21.54,
+      "value_px": 270.54,
+      "method": "silhouette_landmarks",
+      "source": "derived_from_calibration",
+      "confidence": 0.56
+    },
+    "armhole_depth": {
+      "value_cm": 16.8,
+      "value_px": 210.96,
+      "method": "silhouette_landmarks",
+      "source": "derived_from_calibration",
+      "confidence": 0.54
+    },
+    "neck_opening_width": {
+      "value_cm": 14.05,
+      "value_px": 176.44,
+      "method": "inferred_neck_landmarks",
+      "source": "derived_from_calibration",
+      "confidence": 0.48
+    }
+  },
+  "landmarks": {
+    "neck_center": {
+      "image_px": [
+        517.0,
+        90.4
+      ],
+      "image_normalized": [
+        0.505376,
+        0.08837
+      ],
+      "front_vertex": 44,
+      "back_vertex": 44,
+      "front_position_m": [
+        -0.001247,
+        0.3225,
+        0.011832
+      ],
+      "back_position_m": [
+        -0.001247,
+        0.3225,
+        -0.011832
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "neck_left": {
+      "image_px": [
+        428.78,
+        70.19
+      ],
+      "image_normalized": [
+        0.41914,
+        0.068607
+      ],
+      "front_vertex": 0,
+      "back_vertex": 0,
+      "front_position_m": [
+        -0.066698,
+        0.33543,
+        0.010049
+      ],
+      "back_position_m": [
+        -0.066698,
+        0.33543,
+        -0.010049
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": false
+    },
+    "neck_right": {
+      "image_px": [
+        605.22,
+        70.19
+      ],
+      "image_normalized": [
+        0.591613,
+        0.068607
+      ],
+      "front_vertex": 2,
+      "back_vertex": 2,
+      "front_position_m": [
+        0.068589,
+        0.337266,
+        0.009842
+      ],
+      "back_position_m": [
+        0.068589,
+        0.337266,
+        -0.009842
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "left_shoulder": {
+      "image_px": [
+        343.47,
+        180.06
+      ],
+      "image_normalized": [
+        0.335748,
+        0.176012
+      ],
+      "front_vertex": 1047,
+      "back_vertex": 1047,
+      "front_position_m": [
+        -0.139711,
+        0.25,
+        0.014438
+      ],
+      "back_position_m": [
+        -0.139711,
+        0.25,
+        -0.014438
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "right_shoulder": {
+      "image_px": [
+        690.53,
+        180.06
+      ],
+      "image_normalized": [
+        0.675005,
+        0.176012
+      ],
+      "front_vertex": 1103,
+      "back_vertex": 1103,
+      "front_position_m": [
+        0.139711,
+        0.25,
+        0.014438
+      ],
+      "back_position_m": [
+        0.139711,
+        0.25,
+        -0.014438
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "left_armpit": {
+      "image_px": [
+        282.5,
+        391.02
+      ],
+      "image_normalized": [
+        0.276149,
+        0.382229
+      ],
+      "front_vertex": 4833,
+      "back_vertex": 4833,
+      "front_position_m": [
+        -0.184619,
+        0.085,
+        0.017098
+      ],
+      "back_position_m": [
+        -0.184619,
+        0.085,
+        -0.017098
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "right_armpit": {
+      "image_px": [
+        751.5,
+        391.02
+      ],
+      "image_normalized": [
+        0.734604,
+        0.382229
+      ],
+      "front_vertex": 4907,
+      "back_vertex": 4907,
+      "front_position_m": [
+        0.184619,
+        0.085,
+        0.017098
+      ],
+      "back_position_m": [
+        0.184619,
+        0.085,
+        -0.017098
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "left_sleeve_end": {
+      "image_px": [
+        116.0,
+        324.0
+      ],
+      "image_normalized": [
+        0.113392,
+        0.316716
+      ],
+      "front_vertex": 3585,
+      "back_vertex": 3585,
+      "front_position_m": [
+        -0.318268,
+        0.135176,
+        0.002517
+      ],
+      "back_position_m": [
+        -0.318268,
+        0.135176,
+        -0.002517
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "right_sleeve_end": {
+      "image_px": [
+        918.0,
+        329.0
+      ],
+      "image_normalized": [
+        0.897361,
+        0.321603
+      ],
+      "front_vertex": 3713,
+      "back_vertex": 3713,
+      "front_position_m": [
+        0.317703,
+        0.134434,
+        0.002816
+      ],
+      "back_position_m": [
+        0.317703,
+        0.134434,
+        -0.002816
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "waist_left": {
+      "image_px": [
+        282.0,
+        672.0
+      ],
+      "image_normalized": [
+        0.27566,
+        0.656891
+      ],
+      "front_vertex": 8539,
+      "back_vertex": 8539,
+      "front_position_m": [
+        -0.184619,
+        -0.14,
+        0.00357
+      ],
+      "back_position_m": [
+        -0.184619,
+        -0.14,
+        -0.00357
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "waist_right": {
+      "image_px": [
+        750.0,
+        672.0
+      ],
+      "image_normalized": [
+        0.733138,
+        0.656891
+      ],
+      "front_vertex": 8613,
+      "back_vertex": 8613,
+      "front_position_m": [
+        0.187113,
+        -0.13875,
+        0.001604
+      ],
+      "back_position_m": [
+        0.187113,
+        -0.13875,
+        -0.001604
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "hem_left": {
+      "image_px": [
+        281.0,
+        901.0
+      ],
+      "image_normalized": [
+        0.274682,
+        0.880743
+      ],
+      "front_vertex": 11277,
+      "back_vertex": 11277,
+      "front_position_m": [
+        -0.187113,
+        -0.32125,
+        0.0012
+      ],
+      "back_position_m": [
+        -0.187113,
+        -0.32125,
+        -0.0012
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "hem_right": {
+      "image_px": [
+        750.0,
+        901.0
+      ],
+      "image_normalized": [
+        0.733138,
+        0.880743
+      ],
+      "front_vertex": 11352,
+      "back_vertex": 11352,
+      "front_position_m": [
+        0.187113,
+        -0.32125,
+        0.001642
+      ],
+      "back_position_m": [
+        0.187113,
+        -0.32125,
+        -0.001642
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    },
+    "garment_top": {
+      "image_px": [
+        517.0,
+        57.0
+      ],
+      "image_normalized": [
+        0.505376,
+        0.055718
+      ],
+      "front_vertex": 82,
+      "back_vertex": 82,
+      "front_position_m": [
+        0.001267,
+        0.32252,
+        0.01183
+      ],
+      "back_position_m": [
+        0.001267,
+        0.32252,
+        -0.01183
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": false
+    },
+    "garment_bottom": {
+      "image_px": [
+        517.0,
+        936.0
+      ],
+      "image_normalized": [
+        0.505376,
+        0.914956
+      ],
+      "front_vertex": 11699,
+      "back_vertex": 11699,
+      "front_position_m": [
+        -0.001247,
+        -0.3475,
+        0.025993
+      ],
+      "back_position_m": [
+        -0.001247,
+        -0.3475,
+        -0.025993
+      ],
+      "source": "silhouette_geometry",
+      "annotation_visible": true
+    }
+  },
+  "openings": {
+    "neck": {
+      "mesh_nodes": [
+        "GarmentFront",
+        "GarmentBack"
+      ],
+      "vertex_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        80,
+        81,
+        82,
+        83
+      ]
+    },
+    "left_cuff": {
+      "mesh_nodes": [
+        "GarmentFront",
+        "GarmentBack"
+      ],
+      "vertex_indices": [
+        1923,
+        1924,
+        2032,
+        2142,
+        2254,
+        2367,
+        2482,
+        2483,
+        2599,
+        2717,
+        2836,
+        2957,
+        2958,
+        3080,
+        3081,
+        3204,
+        3329,
+        3456,
+        3585,
+        3714,
+        3843,
+        3844,
+        3971,
+        3972,
+        4097,
+        4098,
+        4221,
+        4222,
+        4343,
+        4344,
+        4463,
+        4464,
+        4581,
+        4582,
+        4698,
+        4699,
+        4813,
+        4814,
+        4926,
+        4927,
+        5037,
+        5038,
+        5147,
+        5255,
+        5256
+      ]
+    },
+    "right_cuff": {
+      "mesh_nodes": [
+        "GarmentFront",
+        "GarmentBack"
+      ],
+      "vertex_indices": [
+        2030,
+        2031,
+        2140,
+        2141,
+        2252,
+        2253,
+        2366,
+        2480,
+        2481,
+        2597,
+        2598,
+        2715,
+        2716,
+        2835,
+        2955,
+        2956,
+        3078,
+        3079,
+        3202,
+        3203,
+        3327,
+        3328,
+        3454,
+        3455,
+        3583,
+        3584,
+        3713,
+        3842,
+        3969,
+        3970,
+        4096,
+        4220,
+        4342,
+        4462,
+        4580,
+        4697,
+        4812,
+        4925,
+        5036,
+        5145,
+        5146
+      ]
+    },
+    "hem": {
+      "mesh_nodes": [
+        "GarmentFront",
+        "GarmentBack"
+      ],
+      "vertex_indices": [
+        11047,
+        11121,
+        11122,
+        11123,
+        11197,
+        11198,
+        11199,
+        11200,
+        11274,
+        11275,
+        11276,
+        11277,
+        11351,
+        11352,
+        11353,
+        11354,
+        11428,
+        11429,
+        11430,
+        11431,
+        11505,
+        11506,
+        11507,
+        11508,
+        11582,
+        11583,
+        11584,
+        11585,
+        11659,
+        11660,
+        11661,
+        11662,
+        11681,
+        11682,
+        11683,
+        11684,
+        11685,
+        11686,
+        11687,
+        11688,
+        11689,
+        11690,
+        11691,
+        11692,
+        11693,
+        11694,
+        11695,
+        11696,
+        11697,
+        11698,
+        11699,
+        11700,
+        11701,
+        11702,
+        11703,
+        11704,
+        11705,
+        11706,
+        11707,
+        11708,
+        11709,
+        11710,
+        11711,
+        11712,
+        11713,
+        11714,
+        11715,
+        11716,
+        11717,
+        11718,
+        11719,
+        11720,
+        11721,
+        11722,
+        11723,
+        11724,
+        11725,
+        11726,
+        11727,
+        11728,
+        11729,
+        11730,
+        11731,
+        11732,
+        11733,
+        11734,
+        11735,
+        11736,
+        11737,
+        11738,
+        11739,
+        11740,
+        11741,
+        11742,
+        11743,
+        11744,
+        11745,
+        11746,
+        11747,
+        11748,
+        11749,
+        11750,
+        11751,
+        11752,
+        11753,
+        11754,
+        11755,
+        11756,
+        11757,
+        11758,
+        11759,
+        11760,
+        11761,
+        11762,
+        11763,
+        11764,
+        11765,
+        11766,
+        11767,
+        11768,
+        11769,
+        11770,
+        11771,
+        11772,
+        11773,
+        11774,
+        11775,
+        11776,
+        11777,
+        11778,
+        11779,
+        11780,
+        11781,
+        11782,
+        11783,
+        11784,
+        11785,
+        11786,
+        11787,
+        11788,
+        11789,
+        11790,
+        11791,
+        11792,
+        11793,
+        11794,
+        11795,
+        11796,
+        11797,
+        11798,
+        11799,
+        11800,
+        11801,
+        11802,
+        11803,
+        11804,
+        11805,
+        11806,
+        11807,
+        11808,
+        11809,
+        11810
+      ]
+    }
+  },
+  "attachment_regions": {
+    "shoulders": {
+      "body_region": "shoulders",
+      "landmarks": [
+        "left_shoulder",
+        "right_shoulder"
+      ],
+      "front_vertex_indices": [
+        1047,
+        1103
+      ],
+      "recommended_clearance_cm": 1.0
+    },
+    "chest": {
+      "body_region": "chest",
+      "landmarks": [
+        "left_armpit",
+        "right_armpit"
+      ],
+      "front_vertex_indices": [
+        4833,
+        4907
+      ],
+      "recommended_clearance_cm": 1.8
+    },
+    "waist": {
+      "body_region": "waist",
+      "landmarks": [
+        "waist_left",
+        "waist_right"
+      ],
+      "front_vertex_indices": [
+        8539,
+        8613
+      ],
+      "recommended_clearance_cm": 2.0
+    }
+  },
+  "mesh": {
+    "front_node": "GarmentFront",
+    "back_node": "GarmentBack",
+    "seams_node": "GarmentSeams",
+    "front_vertices": 11811,
+    "back_vertices": 11811,
+    "total_triangles": 46668,
+    "grid_resolution": 128
+  },
+  "warnings": [
+    "BACK_TEXTURE_INFERRED_FROM_FRONT",
+    "HIDDEN_GEOMETRY_PARAMETRICALLY_INFERRED"
+  ]
+}

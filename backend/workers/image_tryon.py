@@ -157,7 +157,7 @@ class ImageTryOnWorker:
         return ImageTryOnResult(
             source="module", method="local_parametric_reconstruction_and_blender_placement",
             notes=[
-                "Garment scale uses the supplied real garment length.",
+                "Garment scale uses the submitted garment-length reference value.",
                 "Garment placement uses a body-height anchor and 1 cm surface clearance.",
                 "This scene does not provide a fit score or size recommendation.",
             ],
@@ -194,21 +194,28 @@ class ImageTryOnWorker:
             )
         except subprocess.TimeoutExpired as exc:
             raise ProcessingError("BLENDER_TIMEOUT", "Blender composition timed out") from exc
-        if process.returncode != 0 or not output.is_file():
+        if process.returncode != 0:
             logger.error("Blender composition failed with exit code %s: %s",
                          process.returncode, process.stderr[-2000:])
-            reasons = {
-                "SIMULATION_UNAVAILABLE": "Cloth simulation is not calibrated for this garment",
-                "GARMENT_FRAME_INVALID": "Garment GLB has an incompatible frame or scale",
-                "BODY_MESH_MISSING": "Body GLB contains no mesh",
-                "GARMENT_MESH_MISSING": "Garment GLB contains no mesh",
-                "BODY_SCALE_INVALID": "Body GLB has an incompatible height",
-                "SEVERE_MESH_PENETRATION": "Garment penetrates the body too deeply",
-            }
-            output_text = process.stdout + process.stderr
-            for code, message in reasons.items():
-                if code in output_text:
-                    raise ProcessingError(code, message)
+        elif not output.is_file():
+            logger.error("Blender exited successfully but produced no output: %s",
+                         process.stderr[-2000:])
+        reasons = {
+            "SIMULATION_UNAVAILABLE": "Cloth simulation is not calibrated for this garment",
+            "GARMENT_FRAME_INVALID": "Garment GLB has an incompatible frame or scale",
+            "BODY_MESH_MISSING": "Body GLB contains no mesh",
+            "GARMENT_MESH_MISSING": "Garment GLB contains no mesh",
+            "BODY_SCALE_INVALID": "Body GLB has an incompatible height",
+            "BODY_TORSO_MISSING": "Body GLB has no usable torso cross-section",
+            "SEVERE_MESH_PENETRATION": "Garment cannot be aligned to the body safely",
+        }
+        output_text = process.stdout + process.stderr
+        # Always scan for known error codes first — Blender headless may exit
+        # with code 0 even when the embedded Python script raises an exception.
+        for code, message in reasons.items():
+            if code in output_text:
+                raise ProcessingError(code, message)
+        if process.returncode != 0 or not output.is_file():
             raise ProcessingError("COMPOSITION_FAILED", "Could not compose the body and garment GLB")
         for line in process.stdout.splitlines():
             if line.startswith("TRYON_REPORT="):
