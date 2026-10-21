@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Product } from '../../data/mockProducts';
 import { useGarmentProducts } from '../../hooks/useGarmentProducts';
+import { AiSizeAdvisorModal } from '../ai/AiSizeAdvisorModal';
+import '../../styles/aiChatWidget.css';
 
 interface SelectGarmentStepProps {
   initialGarment: Product | null;
@@ -18,6 +20,8 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
     initialGarment || products[0]
   );
   const [selectedSize, setSelectedSize] = useState<string>(initialGarment?.sizes.includes('M') ? 'M' : initialGarment?.sizes[0] || 'M');
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+  const [aiRecommendedSize, setAiRecommendedSize] = useState<string | null>(null);
 
   const sizes = selectedGarment.sizes;
 
@@ -118,10 +122,19 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--vfit-on-surface)' }}>
                   Chọn kích cỡ (Size)
+                  {aiRecommendedSize === selectedSize && (
+                    <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
+                      ✨ AI Khuyên dùng
+                    </span>
+                  )}
                 </label>
-                <span style={{ fontSize: '0.75rem', color: 'var(--vfit-focus-ring)', fontWeight: 600 }}>
-                  Chọn size có sẵn
-                </span>
+                <button
+                  type="button"
+                  className="vfit-ai-size-btn"
+                  onClick={() => setIsAiModalOpen(true)}
+                >
+                  ✨ AI Gợi ý Size
+                </button>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.65rem' }}>
@@ -193,6 +206,17 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
           </div>
         </div>
       </div>
+
+      {/* AI Size Advisor Modal */}
+      <AiSizeAdvisorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        product={selectedGarment}
+        onSelectSize={(size) => {
+          setSelectedSize(size);
+          setAiRecommendedSize(size);
+        }}
+      />
     </div>
   );
 };

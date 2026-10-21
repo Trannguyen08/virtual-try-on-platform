@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '../../data/mockProducts';
+import { AiSizeAdvisorModal } from '../ai/AiSizeAdvisorModal';
+import '../../styles/aiChatWidget.css';
 
 interface ProductDetailModalProps {
   product: Product;
@@ -16,6 +18,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0]?.name || '');
   const [activeThumbIndex, setActiveThumbIndex] = useState<number>(0);
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
+  const [isAiSizeModalOpen, setIsAiSizeModalOpen] = useState<boolean>(false);
+  const [aiRecommendedSize, setAiRecommendedSize] = useState<string | null>(null);
 
   // 4 curated gallery angles matching the design
   const galleryImages = [
@@ -187,19 +191,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
               {/* Size Selection */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <div className="vfit-section-label">
-                  <span>Kích cỡ: <strong>{selectedSize}</strong></span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'var(--vfit-focus-ring)',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    Bảng số đo cơ thể (Size Guide)
+                <div className="vfit-section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>
+                    Kích cỡ: <strong>{selectedSize}</strong>
+                    {aiRecommendedSize === selectedSize && (
+                      <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
+                        ✨ AI Khuyên dùng
+                      </span>
+                    )}
                   </span>
+                  <button
+                    type="button"
+                    className="vfit-ai-size-btn"
+                    onClick={() => setIsAiSizeModalOpen(true)}
+                  >
+                    <span>✨ AI Gợi ý Size</span>
+                  </button>
                 </div>
                 <div className="vfit-size-pills">
                   {product.sizes.map((s) => (
@@ -244,6 +251,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* AI Size Advisor Modal */}
+      <AiSizeAdvisorModal
+        isOpen={isAiSizeModalOpen}
+        onClose={() => setIsAiSizeModalOpen(false)}
+        product={product}
+        onSelectSize={(size) => {
+          setSelectedSize(size);
+          setAiRecommendedSize(size);
+        }}
+      />
     </div>
   );
 };
