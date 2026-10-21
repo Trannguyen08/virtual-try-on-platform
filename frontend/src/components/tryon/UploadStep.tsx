@@ -74,14 +74,14 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) 
       <div>
         <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 2px 10px rgba(8,10,97,0.03)' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-secondary-container)', color: 'var(--vfit-primary-container)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            <span>📸 Bước 1 • Tải ảnh & Số đo</span>
+            <span>Bước 1 • Tải ảnh và nhập số đo</span>
           </div>
 
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
             ẢNH CHÂN DUNG CỦA BẠN
           </h2>
           <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 1.5rem 0' }}>
-            Ảnh chỉ dùng để xem trước. Body 3D được tạo bằng MPFB2 từ thông số mặc định và chiều cao bạn chọn; ảnh chưa được dùng để đo hoặc dựng cơ thể.
+            Ảnh chỉ dùng để xem trước. Mẫu cơ thể 3D được tạo từ thông số mặc định và chiều cao bạn chọn; ảnh chưa được dùng để đo hoặc dựng cơ thể.
           </p>
 
           {/* Interactive Dropzone */}
@@ -112,7 +112,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) 
                     {photoFile ? photoFile.name : 'Ảnh người mẫu mẫu'}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--vfit-focus-ring)', fontWeight: 600, marginTop: '0.2rem' }}>
-                    ✓ Sẵn sàng dựng body mẫu bằng Blender
+                    Sẵn sàng dựng mẫu cơ thể
                   </div>
                   <button
                     type="button"
@@ -124,7 +124,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) 
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>☁️</div>
+                <div style={{ fontSize: '1rem', marginBottom: '0.5rem', fontWeight: 700 }}>Tải ảnh lên</div>
                 <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--vfit-on-surface)' }}>
                   Kéo thả ảnh toàn thân vào đây
                 </div>
@@ -199,7 +199,6 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) 
           {/* DOs */}
           <div className="vfit-guide-card vfit-guide-dos">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: 'var(--vfit-primary-container)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-              <span>✓</span>
               <span>NÊN LỰA CHỌN</span>
             </div>
             <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--vfit-on-surface)', lineHeight: '1.6' }}>
@@ -213,7 +212,6 @@ export const UploadStep: React.FC<UploadStepProps> = ({ onNext, onCreateBody }) 
           {/* DONTs */}
           <div className="vfit-guide-card vfit-guide-donts">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: 'var(--vfit-destructive-crimson)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-              <span>✕</span>
               <span>CẦN TRÁNH</span>
             </div>
             <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--vfit-on-surface)', lineHeight: '1.6' }}>

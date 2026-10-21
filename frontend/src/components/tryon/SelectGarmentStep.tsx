@@ -30,7 +30,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
     }
   }, [products, selectedGarment]);
 
-  if (!selectedGarment) return <div role="status"><p>{refitStatus}</p><button type="button" onClick={onBack}>← Quay lại</button></div>;
+  if (!selectedGarment) return <div role="status"><p>{refitStatus}</p><button type="button" onClick={onBack}>Quay lại</button></div>;
 
   const sizes = selectedGarment.sizes;
 
@@ -38,7 +38,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 2px 10px rgba(8,10,97,0.03)' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-secondary-container)', color: 'var(--vfit-primary-container)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-          <span>👗 Bước 2 • Chọn trang phục & Size</span>
+          <span>Bước 2 • Chọn trang phục và size</span>
         </div>
 
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
@@ -133,7 +133,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
                   Chọn kích cỡ (Size)
                   {aiRecommendedSize === selectedSize && (
                     <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
-                      ✨ AI Khuyên dùng
+                      AI khuyên dùng
                     </span>
                   )}
                 </label>
@@ -142,7 +142,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
                   className="vfit-ai-size-btn"
                   onClick={() => setIsAiModalOpen(true)}
                 >
-                  ✨ AI Gợi ý Size
+                  AI gợi ý size
                 </button>
               </div>
 
@@ -185,7 +185,6 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
                   gap: '0.5rem',
                 }}
               >
-                <span>💡</span>
                 <span>Size {selectedSize} chỉ thay đổi mẫu 3D; chưa có đánh giá fit cá nhân.</span>
               </div>
             </div>
@@ -198,7 +197,7 @@ export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
                 style={{ flex: 1 }}
                 onClick={onBack}
               >
-                ← Quay lại
+                Quay lại
               </button>
               <button
                 type="button"

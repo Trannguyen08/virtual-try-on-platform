@@ -11,16 +11,16 @@ interface Props {
 
 const defaults = defaultBodyParameters();
 
-const PROPORTION_SLIDERS: { key: keyof BodyParameters['proportions']; label: string; icon: string }[] = [
-  { key: 'shoulder_width', label: 'Bề rộng vai', icon: '🫱' },
-  { key: 'chest', label: 'Ngực', icon: '💪' },
-  { key: 'waist', label: 'Eo', icon: '⌛' },
-  { key: 'hips', label: 'Hông', icon: '🔵' },
-  { key: 'leg_length', label: 'Dài chân', icon: '🦵' },
-  { key: 'arm_length', label: 'Dài tay', icon: '💪' },
-  { key: 'muscle_tone', label: 'Cơ bắp', icon: '🏋️' },
-  { key: 'belly', label: 'Bụng', icon: '🫃' },
-  { key: 'buttocks', label: 'Mông', icon: '🍑' },
+const PROPORTION_SLIDERS: { key: keyof BodyParameters['proportions']; label: string }[] = [
+  { key: 'shoulder_width', label: 'Bề rộng vai' },
+  { key: 'chest', label: 'Ngực' },
+  { key: 'waist', label: 'Eo' },
+  { key: 'hips', label: 'Hông' },
+  { key: 'leg_length', label: 'Dài chân' },
+  { key: 'arm_length', label: 'Dài tay' },
+  { key: 'muscle_tone', label: 'Cơ bắp' },
+  { key: 'belly', label: 'Bụng' },
+  { key: 'buttocks', label: 'Mông' },
 ];
 
 const PRESETS = [
@@ -160,7 +160,7 @@ export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams
             <span style={Bs.fieldName}>Giới tính</span>
             <select value={params.gender} disabled={disabled} style={Bs.selectFull}
               onChange={(e) => { setActivePreset(null); setParams({ ...params, gender: e.target.value as BodyParameters['gender'] }); }}>
-              <option value="neutral">Trung tính (mẫu Blender)</option>
+              <option value="neutral">Trung tính</option>
               <option value="female">Nữ</option>
               <option value="male">Nam</option>
             </select>
@@ -201,16 +201,16 @@ export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams
             </label>
           ))}
           <div style={{ gridColumn: '1 / -1', fontSize: '.75rem', color: '#8991aa' }}>
-            MPFB dùng các giá trị này để ước lượng dáng body; đây không phải số đo xác minh từ ảnh.
+            Các giá trị này tạo dáng mẫu cơ thể tham khảo, không phải số đo được xác nhận từ ảnh.
           </div>
           {PROPORTION_SLIDERS.filter(({ key }) => ![
             'shoulder_width', 'chest', 'waist', 'hips', 'leg_length',
-          ].includes(key)).map(({ key, label, icon }) => {
+          ].includes(key)).map(({ key, label }) => {
             const pct = Math.round(params.proportions[key] * 100);
             return (
               <div key={key} style={Bs.sliderRow}>
                 <div style={Bs.sliderHead}>
-                  <span style={Bs.sliderLabel}>{icon} {label}</span>
+                  <span style={Bs.sliderLabel}>{label}</span>
                   <span style={Bs.sliderVal}>{pct}%</span>
                 </div>
                 <input type="range" min={0} max={100} value={pct} disabled={disabled}
@@ -232,10 +232,10 @@ export const BodyBuilderStep: React.FC<Props> = ({ onBack, onNext, initialParams
 
       {/* ── Actions ── */}
       <div style={Bs.actions}>
-        <button type="button" style={Bs.btnBack} disabled={disabled} onClick={onBack}>← Quay lại</button>
+        <button type="button" style={Bs.btnBack} disabled={disabled} onClick={onBack}>Quay lại</button>
         <button type="button" style={{ ...Bs.btnNext, opacity: canSubmit ? 1 : .5, cursor: canSubmit ? 'pointer' : 'not-allowed' }}
           disabled={!canSubmit} onClick={() => onNext(params)}>
-          {disabled ? '⏳ Đang xử lý…' : (submitLabel || '🏗️ Tạo body MPFB →')}
+          {disabled ? 'Đang xử lý…' : (submitLabel || 'Tạo mẫu cơ thể')}
         </button>
       </div>
 

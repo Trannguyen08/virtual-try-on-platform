@@ -123,10 +123,13 @@ class BlenderBodyJobs:
             return job.copy()
 
     def asset(self, job_id: str) -> Path:
-        job = self.get(job_id)
-        if job["status"] != "completed":
-            raise AppException(404, "ASSET_NOT_FOUND", "Generated model is not ready")
+        if not re.fullmatch(r"[a-f0-9]{32}", job_id):
+            raise AppException(404, "ASSET_NOT_FOUND", "Asset not found")
         path = OUTPUT / f"{job_id}.glb"
+        with self._lock:
+            job = self._jobs.get(job_id)
+        if job is not None and job["status"] != "completed":
+            raise AppException(404, "ASSET_NOT_FOUND", "Generated model is not ready")
         if not path.is_file():
             raise AppException(404, "ASSET_NOT_FOUND", "Generated model is unavailable")
         return path

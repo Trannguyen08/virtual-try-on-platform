@@ -129,11 +129,8 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="vfit-input-field"
-              style={{ height: '2.75rem', paddingLeft: '1rem', paddingRight: '2.5rem', borderRadius: '9999px' }}
+              style={{ height: '2.75rem', paddingLeft: '1rem', paddingRight: '1rem', borderRadius: '9999px' }}
             />
-            <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--vfit-outline)' }}>
-              🔍
-            </div>
           </div>
         </div>
       </section>
@@ -144,7 +141,6 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
         <aside className="vfit-filter-sidebar">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--vfit-surface-container-highest)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, color: 'var(--vfit-primary-container)', fontSize: '1rem' }}>
-              <span>⚙️</span>
               <span>BỘ LỌC</span>
             </div>
             <button
@@ -377,7 +373,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 borderRadius: 'var(--vfit-radius-xl)',
               }}
             >
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👗</div>
+              <div style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 700 }}>Chưa có sản phẩm</div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--vfit-on-surface)' }}>
                 Không tìm thấy trang phục phù hợp
               </h3>
@@ -463,7 +459,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                           borderRadius: '9999px',
                         }}
                       >
-                        ✨ {product.tryCount} lượt thử
+                        {product.tryCount} lượt thử
                       </span>
                     )}
                   </div>

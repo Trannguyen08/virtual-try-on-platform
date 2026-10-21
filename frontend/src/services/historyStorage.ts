@@ -1,22 +1,43 @@
-import { INITIAL_MOCK_HISTORY, TryOnHistoryItem } from '../data/mockHistory';
+import { TryOnHistoryItem } from '../data/mockHistory';
 
 const STORAGE_KEY = 'vfit_tryon_history';
+export const HISTORY_RETENTION_MS = 5 * 60 * 1000;
+let legacyStorageCleared = false;
+
+function isUnexpired(item: unknown, now: number): item is TryOnHistoryItem {
+  if (!item || typeof item !== 'object') return false;
+  const candidate = item as TryOnHistoryItem;
+  return typeof candidate.id === 'string'
+    && typeof candidate.productName === 'string'
+    && typeof candidate.category === 'string'
+    && Number.isFinite(candidate.timestamp)
+    && now - candidate.timestamp < HISTORY_RETENTION_MS
+    && candidate.timestamp <= now;
+}
 
 export const historyStorage = {
   getHistory(): TryOnHistoryItem[] {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!legacyStorageCleared) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch { /* Remove legacy persistent history when available. */ }
+        legacyStorageCleared = true;
+      }
+      const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed;
+          const now = Date.now();
+          const active = parsed.filter((item) => isUnexpired(item, now));
+          if (active.length !== parsed.length) {
+            try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(active)); } catch { /* Keep the in-memory result for this read. */ }
+          }
+          return active.sort((a, b) => b.timestamp - a.timestamp);
         }
       }
     } catch {
-      // ignore JSON parse or localStorage failure
+      // Treat unreadable or unavailable local storage as an empty history.
     }
-    // Seed demo items only when there is no valid saved history.
-    return INITIAL_MOCK_HISTORY;
+    return [];
   },
 
   saveItem(item: TryOnHistoryItem): TryOnHistoryItem[] {
@@ -24,10 +45,11 @@ export const historyStorage = {
       const current = this.getHistory();
       // Prepend the new item
       const updated = [item, ...current.filter((h) => h.id !== item.id)];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      window.setTimeout(() => { this.getHistory(); }, HISTORY_RETENTION_MS);
       return updated;
     } catch {
-      return INITIAL_MOCK_HISTORY;
+      return [];
     }
   },
 
@@ -35,7 +57,7 @@ export const historyStorage = {
     try {
       const current = this.getHistory();
       const updated = current.filter((h) => h.id !== id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     } catch {
       return [];
@@ -48,7 +70,7 @@ export const historyStorage = {
       const updated = current.map((h) =>
         h.id === id ? { ...h, inCart: !h.inCart } : h
       );
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     } catch {
       return [];
@@ -57,7 +79,7 @@ export const historyStorage = {
 
   clearAll(): void {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }

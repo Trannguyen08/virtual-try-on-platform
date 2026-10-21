@@ -3,7 +3,7 @@
 Kiểm định:
 1. DomainGuardrail: Chặn 100% câu hỏi ngoài lề (lập trình, thời tiết, giải toán, làm thơ...) và prompt injection.
 2. LRUResponseCache: Bộ đệm phản hồi tốc độ cao, giảm tải gọi LLM cho các câu hỏi trùng lặp.
-3. FitStylistChatbot Zero-Crash Fallback: Hoạt động mượt mà, trả về lời khuyên may đo chuẩn xác khi không có API Key.
+3. FitStylistChatbot: Trả lời câu hỏi chung qua Gemini, fallback size khi có đủ dữ liệu.
 4. Tương thích loại vải: Nhận diện áo thun vs áo sơ mi để tư vấn độ cử động tương ứng.
 """
 
@@ -88,20 +88,36 @@ def test_lru_response_cache_behavior():
 # 3. FIT STYLIST CHATBOT TESTS (TÁC NHÂN TƯ VẤN & ZERO-CRASH FALLBACK)
 # ==============================================================================
 @pytest.mark.fast
-def test_chatbot_refuses_off_topic_directly():
-    """Kiểm tra Chatbot lập tức từ chối câu hỏi ngoài lề mà không gọi API hay tính toán."""
-    bot = FitStylistChatbot(api_key=None)
-    res = bot.ask(user_query="Dự báo thời tiết ngày mai thế nào?")
+def test_chatbot_answers_off_topic_via_gemini(monkeypatch):
+    """TC-AI-CHAT-01: Câu hỏi chung được gửi cho Gemini, không mang số đo mặc định."""
+    bot = FitStylistChatbot(api_key="test-key")
+    prompts = []
+    monkeypatch.setattr(bot, "_call_gemini_rest_api", lambda prompt: prompts.append(prompt) or "Tôi có thể giúp bạn giải toán.")
 
-    assert res["is_refusal"] is True
-    assert res["source"] == "domain_guardrail"
-    assert "Trợ lý Tư vấn Kích cỡ" in res["reply"]
+    res = bot.ask(user_query="Bạn có thể giúp tôi giải toán không?")
+
+    assert res["is_refusal"] is False
+    assert res["source"] == "gemini_llm"
+    assert "giải toán" in res["reply"]
+    assert "170.0" not in prompts[0]
+    assert "TSHIRT" not in prompts[0]
+
+
+@pytest.mark.fast
+def test_chatbot_reports_ai_unavailable_for_general_question():
+    """TC-AI-CHAT-02: Thiếu khóa không tạo lời khuyên size giả cho câu hỏi khác."""
+    bot = FitStylistChatbot(api_key="")
+    res = bot.ask(user_query="Bạn có thể giúp tôi giải toán không?")
+
+    assert res["is_refusal"] is False
+    assert res["source"] == "ai_unavailable"
+    assert "tạm thời" in res["reply"]
 
 
 @pytest.mark.fast
 def test_chatbot_zero_crash_fallback_with_exact_numbers():
     """Kiểm tra Chatbot hoạt động hoàn hảo khi không có API Key (Zero-Crash Fallback)."""
-    bot = FitStylistChatbot(api_key=None)
+    bot = FitStylistChatbot(api_key="")
 
     size_chart = {
         "S": {"bust": 90.0, "length": 68.0, "shoulder": 41.0, "waist": 82.0},

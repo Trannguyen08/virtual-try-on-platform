@@ -3,15 +3,13 @@ import { TryOnHistoryItem } from '../../data/mockHistory';
 
 interface HistoryStatsBarProps {
   items: TryOnHistoryItem[];
+  onClear: () => void;
 }
 
-export const HistoryStatsBar: React.FC<HistoryStatsBarProps> = ({ items }) => {
+export const HistoryStatsBar: React.FC<HistoryStatsBarProps> = ({ items, onClear }) => {
   const totalCount = items.length;
-  const avgFit =
-    totalCount > 0
-      ? (items.reduce((acc, curr) => acc + curr.fitScore, 0) / totalCount).toFixed(1)
-      : '0.0';
-  const cartCount = items.filter((i) => i.inCart).length;
+  const simulatedCount = items.filter((item) => item.simulationRan).length;
+  const previewCount = totalCount - simulatedCount;
 
   return (
     <div className="vfit-history-top">
@@ -20,11 +18,11 @@ export const HistoryStatsBar: React.FC<HistoryStatsBarProps> = ({ items }) => {
           <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
           </svg>
-          BỘ SƯU TẬP CÁ NHÂN & LOOKBOOK ẢO
+          LỊCH SỬ THỬ ĐỒ GẦN ĐÂY · TỰ XÓA SAU 5 PHÚT
         </div>
         <h1>LỊCH SỬ THỬ ĐỒ ẢO</h1>
         <p>
-          Xem lại tất cả kết quả mô phỏng trang phục 3D trên vóc dáng của bạn, so sánh trước sau hoặc thử lại kích cỡ mới.
+          Các lượt thử đồ đã hoàn tất trên thiết bị này. Ảnh cá nhân không được lưu vào lịch sử.
         </p>
       </div>
 
@@ -38,26 +36,27 @@ export const HistoryStatsBar: React.FC<HistoryStatsBarProps> = ({ items }) => {
           </div>
         </div>
 
-        {/* Avg fit rate */}
+        {/* Completed simulations */}
         <div className="vfit-stat-chip">
-          <div className="vfit-stat-dot" style={{ backgroundColor: 'var(--vfit-surface-tint)' }} />
+          <div className="vfit-stat-dot" style={{ backgroundColor: '#26a269' }} />
           <div>
-            <div className="vfit-stat-label">Độ khớp trung bình</div>
+            <div className="vfit-stat-label">Đã mô phỏng</div>
             <div className="vfit-stat-val" style={{ color: 'var(--vfit-primary-container)' }}>
-              {avgFit}% Chuẩn dáng
+              {simulatedCount} lượt
             </div>
           </div>
         </div>
 
-        {/* Cart items */}
+        {/* Preview results */}
         <div className="vfit-stat-chip">
-          <div className="vfit-stat-dot" style={{ backgroundColor: 'var(--vfit-destructive-crimson)' }} />
+          <div className="vfit-stat-dot" style={{ backgroundColor: '#8b5cf6' }} />
           <div>
-            <div className="vfit-stat-label">Giỏ mua sắm</div>
-            <div className="vfit-stat-val">{cartCount} Đã thêm giỏ</div>
+            <div className="vfit-stat-label">Bản xem trước</div>
+            <div className="vfit-stat-val">{previewCount} lượt</div>
           </div>
         </div>
       </div>
+      {totalCount > 0 && <button type="button" className="vfit-history-clear" onClick={onClear}>Xóa lịch sử</button>}
     </div>
   );
 };

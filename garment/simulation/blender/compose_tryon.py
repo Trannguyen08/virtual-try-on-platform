@@ -111,6 +111,120 @@ def ray_surface_depth(trees, point, side, body_depth_bounds):
     return min(hits, key=lambda hit: hit[3])[0].y if hits else None
 
 
+def lift_top_shoulders(garment_objects, center_x, body_height):
+    """Raise low photo-derived shoulders while preserving the neck and hem."""
+    from mathutils import Vector
+
+    front = next((obj for obj in garment_objects
+                  if obj.name.startswith("GarmentFront")), None)
+    if front is None:
+        raise ValueError("GARMENT_MESH_MISSING: front panel required")
+    bin_width = 0.01
+    upper_edge = {}
+    for vertex in front.data.vertices:
+        point = front.matrix_world @ vertex.co
+        column = round((point.x - center_x) / bin_width)
+        upper_edge[column] = max(upper_edge.get(column, point.z), point.z)
+
+    max_lift = min(0.06, body_height * 0.03)
+    applied_max = 0.0
+    for obj in garment_objects:
+        inverse = obj.matrix_world.inverted()
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            column = round((point.x - center_x) / bin_width)
+            envelope = max(upper_edge.get(key, point.z)
+                           for key in (column - 1, column, column + 1))
+            distance_below_edge = max(0.0, envelope - point.z)
+            edge_weight = max(0.0, 1.0 - distance_below_edge / 0.24)
+            lateral_weight = min(1.0, max(
+                0.0, (abs(point.x - center_x) - 0.07) / 0.04,
+            ))
+            sleeve_weight = min(1.0, max(
+                0.0, (abs(point.x - center_x) - 0.14) / 0.15,
+            ))
+            lift = edge_weight * (
+                max_lift * lateral_weight + 0.05 * sleeve_weight
+            )
+            applied_max = max(applied_max, lift)
+            if lift:
+                vertex.co = inverse @ Vector((point.x, point.y, point.z + lift))
+        obj.data.update()
+    return applied_max
+
+
+def conform_sleeve_silhouette(garment_objects, body_points, metadata,
+                              *, center_x, body_bottom, body_height):
+    """Keep photo-derived sleeve edges close to the posed upper arms."""
+    from mathutils import Vector
+
+    landmarks = metadata.get("landmarks") or {}
+    try:
+        armpit_x = abs(float(
+            landmarks["right_armpit"]["front_position_m"][0]
+        ))
+        cuff_x = abs(float(
+            landmarks["right_sleeve_end"]["front_position_m"][0]
+        ))
+    except (KeyError, TypeError, ValueError, IndexError):
+        return 0.0
+    if not 0.10 < armpit_x < cuff_x:
+        return 0.0
+
+    # Past the armpit the mesh is sleeve fabric, not torso fabric. The photo
+    # silhouette can hang below an A-pose arm even after depth projection.
+    start_x = armpit_x + 0.015
+    full_x = min(cuff_x, start_x + 0.05)
+    if full_x <= start_x:
+        return 0.0
+    lower_body_limit = body_bottom + 0.61 * body_height
+    arm_rows = {}
+    for point in body_points:
+        if point.z < lower_body_limit:
+            continue
+        offset_x = point.x - center_x
+        side = 1 if offset_x >= 0 else -1
+        key = (side, round(abs(offset_x) / 0.01))
+        arm_rows.setdefault(key, []).append(point.z)
+
+    envelopes = {}
+    max_shift = 0.0
+    for obj in garment_objects:
+        inverse = obj.matrix_world.inverted()
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            offset_x = point.x - center_x
+            lateral = abs(offset_x)
+            if lateral < start_x or point.z < lower_body_limit:
+                continue
+            side = 1 if offset_x >= 0 else -1
+            key = (side, round(lateral / 0.01))
+            if key not in envelopes:
+                values = sorted(value
+                                for neighbor in (key[1] - 1, key[1], key[1] + 1)
+                                for value in arm_rows.get((side, neighbor), ()))
+                if len(values) < 12:
+                    envelopes[key] = None
+                else:
+                    envelopes[key] = (
+                        values[int(0.03 * (len(values) - 1))] - 0.012,
+                        values[int(0.97 * (len(values) - 1))] + 0.012,
+                    )
+            envelope = envelopes[key]
+            if envelope is None:
+                continue
+            weight = min(1.0, (lateral - start_x) / (full_x - start_x))
+            target_z = min(max(point.z, envelope[0]), envelope[1])
+            shift = weight * (target_z - point.z)
+            if abs(shift) > 0.000001:
+                vertex.co = inverse @ Vector((
+                    point.x, point.y, point.z + shift,
+                ))
+                max_shift = max(max_shift, abs(shift))
+        obj.data.update()
+    return max_shift
+
+
 def fit_parametric_shell(trees, garment_objects, body_depth_bounds,
                          *, category, body_bottom, body_height):
     """Wrap image-derived front/back panels around the body without lateral spikes.
@@ -389,9 +503,8 @@ def fit_to_body(trees, garment_objects):
 def validate_surface_adjustment(large_adjustments, vertex_count, max_fraction=0.05):
     """Reject a garment that would need large-scale warping to cover the body.
 
-    Direct callers use the conservative default. The composition path passes a
-    reconstruction-specific limit; final penetration checks still reject
-    unsafe placements.
+    The image-derived shell uses depth projection instead. This guard protects
+    the fallback normal-displacement path from accepting distorted geometry.
     """
     if vertex_count <= 0 or large_adjustments > vertex_count * max_fraction:
         raise ValueError(
@@ -452,12 +565,15 @@ def main():
         raise ValueError("BODY_SCALE_INVALID")
     body_center_x = (low_body[0] + high_body[0]) / 2
     from mathutils import Vector
+
     surfaces = body_surfaces(body)
+    body_points = body_vertices(body)
     placements = []
     garment_objects = []
     totals = {"moved": 0, "deep": 0, "large": 0, "projected": 0, "missed": 0}
     tested_inside = []
     tested_severe = []
+
     for garment_path, metadata in zip(args.garment, metadata_items, strict=True):
         before = {obj.name for obj in bpy.context.scene.objects}
         bpy.ops.import_scene.gltf(filepath=garment_path)
@@ -470,7 +586,7 @@ def main():
         low_garment, high_garment = bounds(garment)
         anchor_fraction = 0.58 if category in {"pants", "skirt"} else 0.84
         body_center_y = torso_depth_center(
-            body_vertices(body), center_x=body_center_x,
+            body_points, center_x=body_center_x,
             bottom_z=low_body[2], body_height=body_height, category=category,
         )
         garment_center_x = (low_garment[0] + high_garment[0]) / 2
@@ -483,10 +599,21 @@ def main():
         for obj in garment:
             obj.matrix_world.translation += Vector(translation)
         bpy.context.view_layer.update()
+
         parametric = (metadata.get("reconstruction_mode") == "local_parametric"
                       and category in {"tshirt", "shirt", "jacket", "dress", "pants", "skirt"})
+        shoulder_lift = (lift_top_shoulders(garment, body_center_x, body_height)
+                         if parametric and category in {"tshirt", "shirt", "jacket", "dress"}
+                         else 0.0)
+        sleeve_conform = (conform_sleeve_silhouette(
+            garment, body_points, metadata,
+            center_x=body_center_x, body_bottom=low_body[2], body_height=body_height,
+        ) if parametric and category in {"tshirt", "shirt"} else 0.0)
+        bpy.context.view_layer.update()
         fit_profile = (fit_garment_width_profile(garment, metadata, category=category)
                        if parametric else {})
+        bpy.context.view_layer.update()
+
         if parametric:
             moved, deep, large, projected, missed = fit_parametric_shell(
                 surfaces, garment, (low_body[1], high_body[1]),
@@ -517,7 +644,10 @@ def main():
             "translation_m_blender_frame": translation,
             "fit_profile": fit_profile,
             "fit_mode": (metadata.get("fit_settings") or {}).get("mode", "auto"),
+            "shoulder_lift_m": shoulder_lift,
+            "sleeve_conform_m": sleeve_conform,
         })
+
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
@@ -534,6 +664,8 @@ def main():
         "projection_misses": totals["missed"],
         "penetration_fraction": round(max(tested_inside), 6),
         "severe_penetration_fraction": round(max(tested_severe), 6),
+        "shoulder_lift_max_m": round(max((item["shoulder_lift_m"] for item in placements), default=0.0), 6),
+        "sleeve_conform_max_m": round(max((item["sleeve_conform_m"] for item in placements), default=0.0), 6),
         "simulation_ran": False,
     }))
 

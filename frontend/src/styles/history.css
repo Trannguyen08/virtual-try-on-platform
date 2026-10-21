@@ -21,6 +21,54 @@
   border-bottom: 1px solid rgba(8, 10, 97, 0.08);
 }
 
+.vfit-history-clear {
+  align-self: flex-start;
+  padding: 0.65rem 1rem;
+  border: 1px solid #ead6e6;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #7c284f;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.vfit-history-clear:hover { background: #fff4f8; }
+
+.vfit-history-viewer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(20, 19, 38, 0.68);
+  backdrop-filter: blur(6px);
+}
+
+.vfit-history-viewer-dialog {
+  width: min(960px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(12, 10, 38, 0.28);
+}
+
+.vfit-history-viewer-dialog > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.vfit-history-viewer-dialog > header span { color: #6554c7; font-size: 0.75rem; font-weight: 750; letter-spacing: 0.08em; }
+.vfit-history-viewer-dialog > header h2 { margin: 0.25rem 0 0; font-size: 1.35rem; }
+.vfit-history-viewer-dialog > header button { width: 2.5rem; height: 2.5rem; border: 0; border-radius: 50%; background: #f2eff8; font-size: 1.5rem; cursor: pointer; }
+.vfit-history-viewer-dialog > p { color: #666277; font-size: 0.9rem; line-height: 1.5; }
+
 @media (min-width: 1024px) {
   .vfit-history-top {
     flex-direction: row;
@@ -244,6 +292,43 @@
   transition: transform 0.5s ease;
 }
 
+.vfit-history-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  color: #51458f;
+  background: radial-gradient(circle at 50% 35%, #fff 0, #f0eafd 68%, #e7e2f4 100%);
+}
+
+.vfit-history-placeholder span { font-size: 3.5rem; font-weight: 800; letter-spacing: -0.08em; }
+.vfit-history-placeholder small { color: #6d6780; font-size: 0.85rem; }
+
+.vfit-history-media-caption {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #514b61;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.vfit-badge-result {
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #604b98;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.vfit-badge-result.is-simulated { color: #176747; }
+
 .vfit-history-card:hover .vfit-history-card-media img {
   transform: scale(1.04);
 }
@@ -376,6 +461,16 @@
   margin: 0.25rem 0 0.5rem 0;
 }
 
+.vfit-history-note,
+.vfit-history-honesty {
+  margin: 0.45rem 0 0;
+  color: var(--vfit-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.vfit-history-honesty { color: #776b8f; font-size: 0.8rem; }
+
 .vfit-card-status-pill {
   display: inline-flex;
   align-items: center;
@@ -429,8 +524,9 @@
   transform: translateY(-1px);
 }
 
-.vfit-btn-icon-action {
-  width: 2.5rem;
+.vfit-btn-action {
+  min-width: 3rem;
+  padding-inline: 0.75rem;
   height: 2.5rem;
   border-radius: var(--vfit-radius-md);
   background-color: var(--vfit-surface-container-low);
@@ -443,12 +539,12 @@
   transition: all 0.2s ease;
 }
 
-.vfit-btn-icon-action:hover {
+.vfit-btn-action:hover {
   background-color: var(--vfit-secondary-container);
   color: var(--vfit-primary-container);
 }
 
-.vfit-btn-icon-action.delete:hover {
+.vfit-btn-action.delete:hover {
   background-color: #fee2e2;
   color: var(--vfit-destructive-crimson);
   border-color: #fca5a5;

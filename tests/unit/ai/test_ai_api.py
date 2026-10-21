@@ -3,7 +3,7 @@
 Kiểm thử:
 1. GET /api/v1/ai/health: Trả về trạng thái healthy.
 2. POST /api/v1/ai/recommend-size: Nhận diện size chuẩn (S/M/L/XL) và size Local Brand (1/2/3).
-3. POST /api/v1/ai/chat: Phản hồi tư vấn hợp lệ vs Từ chối câu hỏi ngoài lề (Guardrail).
+3. POST /api/v1/ai/chat: Phản hồi tư vấn và câu hỏi chung qua Gemini.
 4. POST /api/v1/ai/evaluate-fit: Tính điểm Fit Score giải tích và phân lớp từng vùng.
 5. Validation Error: Bắt lỗi 422 khi input không hợp lệ.
 """
@@ -12,6 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import app
+from ai.api.router import _chatbot
 
 client = TestClient(app)
 
@@ -27,7 +28,7 @@ def test_ai_health_endpoint():
     data = response.json()
     assert data["status"] == "healthy"
     assert "M4" in data["module"]
-    assert data["guardrail_active"] is True
+    assert data["guardrail_active"] is False
     assert data["advisor_ready"] is True
 
 
@@ -84,8 +85,10 @@ def test_recommend_size_endpoint_local_brand():
 # 3. TEST AI STYLIST CHAT & GUARDRAILS
 # ==============================================================================
 @pytest.mark.fast
-def test_chat_endpoint_valid_fashion_query():
+def test_chat_endpoint_valid_fashion_query(monkeypatch):
     """Kiểm tra API Chatbot trả lời câu hỏi thời trang hợp lệ."""
+    monkeypatch.setattr(_chatbot, "api_key", "test-key")
+    monkeypatch.setattr(_chatbot, "_call_gemini_rest_api", lambda prompt: "Áo size M có thể phù hợp; hãy đối chiếu bảng size thực tế.")
     payload = {
         "query": "Anh cao 1m70 nặng 65kg, mặc áo thun này lấy size nào vừa đẹp?",
         "height_cm": 170.0,
@@ -105,8 +108,10 @@ def test_chat_endpoint_valid_fashion_query():
 
 
 @pytest.mark.fast
-def test_chat_endpoint_blocks_off_topic_query():
-    """Kiểm tra Guardrail chặn câu hỏi ngoài lề thông qua API."""
+def test_chat_endpoint_answers_off_topic_query(monkeypatch):
+    """TC-AI-CHAT-03: API chuyển câu hỏi ngoài thời trang đến Gemini."""
+    monkeypatch.setattr(_chatbot, "api_key", "test-key")
+    monkeypatch.setattr(_chatbot, "_call_gemini_rest_api", lambda prompt: "Tôi chưa có dữ liệu thời tiết trực tiếp.")
     payload = {
         "query": "Dự báo thời tiết ngày mai ở Đà Nẵng thế nào có mưa không?",
     }
@@ -114,9 +119,9 @@ def test_chat_endpoint_blocks_off_topic_query():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
-    assert data["is_refusal"] is True
-    assert data["source"] == "domain_guardrail"
-    assert "Trợ lý Tư vấn Kích cỡ" in data["reply"]
+    assert data["is_refusal"] is False
+    assert data["source"] == "gemini_llm"
+    assert "thời tiết" in data["reply"]
 
 
 # ==============================================================================

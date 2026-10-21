@@ -3,7 +3,7 @@
  * 
  * Cung cấp:
  * 1. recommendSize(): Gợi ý size tối ưu từ vóc dáng người dùng và bảng size shop.
- * 2. askStylistChat(): Trợ lý ảo Stylist tư vấn may đo (có Guardrail chống spam).
+ * 2. askStylistChat(): Trợ lý AI trả lời câu hỏi chung và tư vấn trang phục.
  * 3. evaluateFit(): Đánh giá chi tiết điểm Fit Score và phân lớp chật/vừa/rộng từng vùng.
  * 4. checkAiHealth(): Kiểm tra trạng thái sẵn sàng của AI services.
  */

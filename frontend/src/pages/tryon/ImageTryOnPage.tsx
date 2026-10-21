@@ -30,19 +30,19 @@ type GarmentFitMeasurements = NonNullable<OutfitGarmentUpload['garment_measureme
 /** Rút gọn UUID — hiện 8 ký tự đầu */
 function shortId(id: string) { return id.length > 12 ? `${id.slice(0, 8)}…` : id; }
 
-/** Ánh xạ mã lỗi → thông báo thân thiện */
+/** Ánh xạ mã lỗi sang thông báo thân thiện */
 const ERROR_MESSAGES: Record<string, { title: string; detail: string; hint: string }> = {
   SEVERE_MESH_PENETRATION: {
-    title: '⚠️ Không thể căn chỉnh trang phục an toàn',
-    detail: 'Mesh cần hiệu chỉnh quá nhiều hoặc vẫn xuyên sâu vào body sau khi căn chỉnh.',
-    hint: 'Kiểm tra lại loại trang phục và tải ảnh chụp thẳng, đủ sáng, nền đơn giản để cải thiện mesh.',
+    title: 'Không thể căn chỉnh trang phục an toàn',
+    detail: 'Trang phục chưa thể căn chỉnh an toàn lên mẫu cơ thể.',
+    hint: 'Kiểm tra loại trang phục và thử ảnh chụp thẳng, đủ sáng, trên nền đơn giản.',
   },
-  GARMENT_FRAME_INVALID: { title: '⚠️ Trang phục không đúng định dạng', detail: 'File trang phục bị sai hệ trục tọa độ (cần Y-up, mét).', hint: 'Hãy xuất lại file trang phục từ pipeline chuẩn hoặc liên hệ quản trị viên.' },
-  BODY_MESH_MISSING: { title: '⚠️ Không tìm thấy body 3D', detail: 'File GLB body không chứa mesh nào hợp lệ.', hint: 'Vui lòng tạo lại body MPFB bằng nút "Tạo body mới" bên trên.' },
-  GARMENT_MESH_MISSING: { title: '⚠️ Không tìm thấy mesh trang phục', detail: 'Không dựng được lưới 3D từ ảnh trang phục đã tải lên.', hint: 'Hãy tải ảnh rõ hơn, nền sáng và trang phục chiếm ≥ 60% khung hình.' },
-  BODY_SCALE_INVALID: { title: '⚠️ Kích thước body không hợp lệ', detail: 'Chiều cao body GLB nằm ngoài khoảng 1.2–2.3 m.', hint: 'Tạo lại body MPFB với chiều cao người thật của bạn.' },
-  BLENDER_TIMEOUT: { title: '⏱ Quá thời gian xử lý', detail: 'Blender mất quá 4 phút để dựng cảnh thử đồ.', hint: 'Thử lại sau vài phút hoặc sử dụng ảnh trang phục nhỏ hơn.' },
-  COMPOSITION_FAILED: { title: '❌ Không thể ghép áo và body', detail: 'Quá trình hợp nhất mesh áo và body gặp lỗi không xác định.', hint: 'Thử tải lại ảnh trang phục khác hoặc tạo body mới rồi thử lại.' },
+  GARMENT_FRAME_INVALID: { title: 'Trang phục không đúng định dạng', detail: 'File trang phục bị sai hệ trục tọa độ (cần Y-up, mét).', hint: 'Hãy xuất lại file trang phục từ pipeline chuẩn hoặc liên hệ quản trị viên.' },
+  BODY_MESH_MISSING: { title: 'Không tải được mẫu cơ thể 3D', detail: 'Mẫu cơ thể hiện không khả dụng.', hint: 'Vui lòng tạo mẫu cơ thể mới rồi thử lại.' },
+  GARMENT_MESH_MISSING: { title: 'Chưa tạo được mẫu trang phục', detail: 'Không thể tạo mô hình 3D từ ảnh trang phục đã tải lên.', hint: 'Hãy tải ảnh rõ hơn, nền sáng và trang phục chiếm phần lớn khung hình.' },
+  BODY_SCALE_INVALID: { title: 'Chiều cao chưa phù hợp', detail: 'Chiều cao mẫu cơ thể nằm ngoài phạm vi hỗ trợ.', hint: 'Tạo lại mẫu cơ thể với chiều cao phù hợp.' },
+  BLENDER_TIMEOUT: { title: '⏱ Xử lý mất nhiều thời gian', detail: 'Quá trình tạo bản thử đồ chưa hoàn tất đúng hạn.', hint: 'Thử lại sau ít phút hoặc dùng ảnh trang phục có kích thước nhỏ hơn.' },
+  COMPOSITION_FAILED: { title: '❌ Chưa thể ghép trang phục', detail: 'Không thể kết hợp trang phục với mẫu cơ thể lần này.', hint: 'Thử ảnh trang phục khác hoặc tạo mẫu cơ thể mới rồi thử lại.' },
   BODY_MEASUREMENTS_MISSING: { title: 'Thiếu số đo body', detail: 'Body hiện tại chưa lưu đủ số đo để tự căn trang phục.', hint: 'Cập nhật số đo body hoặc chọn chế độ nhập số đo trang phục.' },
   GARMENT_MEASUREMENT_MISMATCH: { title: 'Số đo trang phục chưa khớp', detail: 'Kích thước trang phục yêu cầu biến dạng quá lớn để căn an toàn.', hint: 'Kiểm tra lại số đo cm hoặc chọn Tự căn theo body.' },
 };
@@ -229,7 +229,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
       window.localStorage.setItem(BODY_KEY, bodyId);
       window.localStorage.removeItem(JOB_KEY);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Không thể tạo body MPFB');
+      setError(reason instanceof Error ? reason.message : 'Không thể tạo mẫu cơ thể');
     } finally {
       setCreatingBody(false);
     }
@@ -304,7 +304,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
         {/* ── Hero ── */}
         <div style={S.hero}>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={S.heroPill}>✨ AI Try-On 3D</div>
+            <div style={S.heroPill}>AI Try-On 3D</div>
             <h1 style={S.heroTitle}>Thử trang phục từ ảnh</h1>
             <p style={S.heroSub}>Tạo body 3D, tải ảnh trang phục và xem kết quả trực quan ngay lập tức.</p>
           </div>
@@ -314,17 +314,17 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
         {/* ── Step indicator ── */}
         <div style={S.stepRow}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={S.stepCircle(!step1Done, step1Done)}>{step1Done ? '✓' : '1'}</div>
+            <div style={S.stepCircle(!step1Done, step1Done)}>{step1Done ? 'Xong' : '1'}</div>
             <span style={S.stepLabel(!step1Done, step1Done)}>Body 3D</span>
           </div>
           <div style={S.stepConn(step1Done)} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={S.stepCircle(step2Active && !step2Done, step2Done)}>{step2Done ? '✓' : '2'}</div>
+            <div style={S.stepCircle(step2Active && !step2Done, step2Done)}>{step2Done ? 'Xong' : '2'}</div>
             <span style={S.stepLabel(step2Active && !step2Done, step2Done)}>Trang phục</span>
           </div>
           <div style={S.stepConn(step2Done)} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={S.stepCircle(!!result, false)}>{result ? '✓' : '3'}</div>
+            <div style={S.stepCircle(!!result, false)}>{result ? 'Xong' : '3'}</div>
             <span style={S.stepLabel(!!result, false)}>Kết quả</span>
           </div>
         </div>
@@ -388,7 +388,12 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
                     {UPPER_GARMENT_TYPES.map((type) => <option key={type} value={type}>{GARMENT_LABELS[type]}</option>)}
                   </select>
                 </label>
-                <GarmentImageInputs idPrefix="upper-garment" files={upperFiles} onChange={setUpperFiles}
+                <GarmentImageInputs idPrefix="upper-garment" files={upperFiles} onChange={(next) => {
+                  setUpperFiles(next);
+                  setJob(null);
+                  setError('');
+                  window.localStorage.removeItem(JOB_KEY);
+                }}
                   disabled={active} tryOnImagesOnly />
                 <GarmentFitControls slot="upper" mode={upperFitMode} onModeChange={setUpperFitMode}
                   easeCm={upperEaseCm} onEaseChange={setUpperEaseCm}
@@ -406,7 +411,12 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
                       {LOWER_GARMENT_TYPES.map((type) => <option key={type} value={type}>{GARMENT_LABELS[type]}</option>)}
                     </select>
                   </label>
-                  <GarmentImageInputs idPrefix="lower-garment" files={lowerFiles} onChange={setLowerFiles}
+                  <GarmentImageInputs idPrefix="lower-garment" files={lowerFiles} onChange={(next) => {
+                    setLowerFiles(next);
+                    setJob(null);
+                    setError('');
+                    window.localStorage.removeItem(JOB_KEY);
+                  }}
                     disabled={active} tryOnImagesOnly />
                   <GarmentFitControls slot="lower" mode={lowerFitMode} onModeChange={setLowerFitMode}
                     easeCm={lowerEaseCm} onEaseChange={setLowerEaseCm}
@@ -431,7 +441,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
               <button type="submit"
                 style={{ ...S.btnSubmit, opacity: active ? .5 : 1, cursor: active ? 'not-allowed' : 'pointer' }}
                 disabled={active}>
-                {active ? '⏳ Đang xử lý…' : '✨ Tạo cảnh thử đồ 3D'}
+                {active ? 'Đang xử lý…' : 'Tạo cảnh thử đồ 3D'}
               </button>
             </div>
           </form>
@@ -459,7 +469,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
             <div style={S.errBanner} role="alert">
               <strong style={{ fontSize: '.92rem', color: '#c2410c' }}>{friendly.title}</strong>
               <p style={{ margin: 0, color: '#431407', fontSize: '.86rem' }}>{friendly.detail}</p>
-              <p style={S.errHint}>💡 <strong>Gợi ý:</strong> {friendly.hint}</p>
+              <p style={S.errHint}><strong>Gợi ý:</strong> {friendly.hint}</p>
               <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                 <button type="button" style={S.btnPrimary} onClick={() => { setError(''); setJob(null); }}>Thử lại</button>
                 <button type="button" style={S.btnSecondary} onClick={() => { setError(''); setJob(null); setEditingBody(true); }}>Tạo body mới</button>
@@ -473,11 +483,11 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
           <div style={S.card}>
             <div style={S.cardHead}>
               <h2 style={S.cardTitle}>
-                <span style={S.numBadge(true)}>✓</span>
+                <span style={S.numBadge(true)}>Đã xong</span>
                 Cảnh thử đồ 3D
               </h2>
               <a style={{ ...S.btnSecondary, textDecoration: 'none', fontSize: '.82rem', padding: '5px 14px' }}
-                href={imageTryOnApi.assetUrl(result.tryon_mesh.url)} download>↓ Tải GLB</a>
+                href={imageTryOnApi.assetUrl(result.tryon_mesh.url)} download>Tải tệp 3D</a>
             </div>
             <p style={{ margin: '0 0 1rem', color: '#667085', fontSize: '.88rem' }}>
               Cảnh 3D là bản xem trước tĩnh. {result.warnings.some((warning) => warning.includes('BACK_INFERRED_FROM_FRONT'))

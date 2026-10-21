@@ -97,7 +97,7 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
       orbit.update();
       scene.add(object);
       setLoadError('');
-    }, undefined, () => { if (!cancelled) setLoadError('Không tải được GLB. Vui lòng tạo lại mô hình.'); });
+    }, undefined, () => { if (!cancelled) setLoadError('Không tải được mẫu 3D. Vui lòng tạo lại mô hình.'); });
     let frame = 0;
     const animate = () => {
       frame = requestAnimationFrame(animate);
@@ -152,8 +152,8 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
   return (
     <div className="vfit-builder-result">
       <div className="vfit-builder-result-header">
-        <button className="vfit-btn-secondary" type="button" onClick={onRestart}>← Tạo body khác</button>
-        <div><h2>Body 3D từ Blender</h2><span>MPFB2 • GLB</span></div>
+        <button className="vfit-btn-secondary" type="button" onClick={onRestart}>Tạo mẫu cơ thể khác</button>
+        <div><h2>Mẫu cơ thể 3D</h2><span>Mô hình thử đồ</span></div>
       </div>
       <div className="vfit-builder-layout">
         <section className="vfit-builder-viewport">
@@ -181,8 +181,8 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
           <span className="vfit-builder-eyebrow">Mô hình thử đồ</span>
           <h3>{garment.name}</h3>
           <p>Size đã chọn: <strong>{selectedSize}</strong></p>
-          <p>Mô hình cơ thể được tạo từ thông số đã chọn. {isMpfbRefit ? 'Trang phục MHCLO được refit theo body MPFB và giữ chất liệu gốc.' : clothingJob?.method === 'blender_asset_clothing' ? 'Trang phục dùng asset GLB/OBJ đã cung cấp.' : clothingJob ? 'Trang phục là hình minh họa theo loại sản phẩm.' : 'Chưa tạo được trang phục.'} Ảnh tải lên chưa được dùng để dựng body. Chưa có mô phỏng vải hoặc đánh giá độ vừa vặn.</p>
-          {isMpfbRefit && <p>M là nhãn thử nghiệm cho chế độ refit; áo/quần biến dạng theo body, chưa phải kiểm tra size thực tế.</p>}
+          <p>Mẫu cơ thể được tạo từ thông số đã chọn. {isMpfbRefit ? 'Trang phục được căn theo mẫu cơ thể và giữ chất liệu gốc.' : clothingJob?.method === 'blender_asset_clothing' ? 'Trang phục dùng mô hình 3D đã cung cấp.' : clothingJob ? 'Trang phục là bản xem trước theo loại sản phẩm.' : 'Chưa tạo được trang phục.'} Ảnh tải lên chưa được dùng để dựng mẫu cơ thể. Bản xem trước này chưa mô phỏng chuyển động vải hoặc xác nhận độ vừa vặn.</p>
+          {isMpfbRefit && <p>Áo và quần được căn theo dáng mẫu; kết quả chưa thay thế việc kiểm tra size thực tế.</p>}
           <div className="vfit-builder-presets">
             <span>Màu trang phục</span>
             {garment.colors.map((item) => (
@@ -193,9 +193,9 @@ export const GeneratedBodyViewer: React.FC<Props> = ({
                 onClick={() => applyColor(item.hex)} />
             ))}
           </div>
-          {busy && <p role="status">Blender đang cập nhật màu trang phục...</p>}
+          {busy && <p role="status">Đang cập nhật màu trang phục...</p>}
           {error && <p role="alert" className="vfit-builder-error">{error}</p>}
-          <p className="vfit-builder-note">Nguồn body: MPFB2. Nguồn trang phục: {isMpfbRefit ? 'asset MHCLO, refit theo body' : clothingJob?.method === 'blender_asset_clothing' ? 'asset do người dùng cung cấp' : clothingJob ? 'hình minh họa' : 'chưa có'}. Không có số đo ảnh, điểm fit hay gợi ý size được tính từ mô hình này.</p>
+          <p className="vfit-builder-note">Mẫu cơ thể được dựng từ thông số đã chọn, không lấy số đo từ ảnh. Bản xem trước chưa tính điểm vừa vặn hoặc gợi ý size.</p>
           <button className="vfit-btn-secondary" type="button" onClick={onTryAnotherSize}>Chọn trang phục hoặc size khác</button>
         </section>
       </div>

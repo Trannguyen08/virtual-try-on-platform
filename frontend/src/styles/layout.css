@@ -14,9 +14,66 @@ body,
   margin: 0;
 }
 
+html {
+  font-size: 106.25%;
+}
+
 body {
   overflow-x: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: #25243a;
 }
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Keep the interface text-led and remove inline decorative UI glyphs. */
+svg {
+  display: none !important;
+}
+
+.vfit-icon-btn,
+.vfit-input-icon,
+.vfit-security-badge-outer {
+  display: none !important;
+}
+
+main {
+  width: 100%;
+  max-width: none;
+}
+
+/* Keep route shells viewport-wide while using responsive inner gutters. */
+.outfit-page,
+.outfit-body-setup,
+.vfit-stepper-track,
+.vfit-legacy-tryon-page,
+.vfit-garment-page {
+  width: 100%;
+  max-width: none !important;
+}
+
+.outfit-page {
+  padding-inline: clamp(1rem, 3vw, 3.5rem);
+}
+
+.outfit-body-setup {
+  margin-inline: 0;
+}
+
+.outfit-eyebrow { font-size: 0.85rem; }
+.outfit-page button, .outfit-file-button { font-size: 1rem; }
+.outfit-steps li { font-size: 0.98rem; }
+.outfit-note, .outfit-progress, .outfit-error { font-size: 0.98rem; }
+.outfit-section-heading button, .outfit-viewer-status { font-size: 0.98rem; }
+.outfit-viewer-controls button { font-size: 0.96rem; }
+.outfit-viewer-controls span, .outfit-wearing strong { font-size: 0.92rem; }
 
 .vfit-hero,
 .vfit-products-section,
@@ -121,6 +178,21 @@ body {
 .vfit-footer-inner small {
   flex: none;
   color: #9ca6b8;
+}
+
+/* Raise the smallest labels while keeping headings and body copy proportional. */
+.vfit-catalog-status,
+.vfit-showcase-caption,
+.vfit-footer-inner small {
+  font-size: 0.9rem;
+}
+
+small,
+.vfit-eyebrow,
+[class*="caption"],
+[class*="status"],
+[class*="filter-title"] {
+  font-size: max(0.9rem, 1em);
 }
 
 @media (max-width: 640px) {

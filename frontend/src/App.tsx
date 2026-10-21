@@ -82,12 +82,12 @@ const MainContent: React.FC = () => {
       category: item.category,
       categoryLabel: item.categoryLabel,
       tagline: 'Bộ sưu tập cá nhân',
-      price: item.price,
+      price: item.price ?? 0,
       material: 'Vải cao cấp',
-      imageUrl: item.resultPhotoUrl,
+      imageUrl: item.resultPhotoUrl || '/images/mpfb-tshirt.svg',
       gender: 'unisex' as const,
       sizes: ['S' as const, 'M' as const, 'L' as const, 'XL' as const],
-      colors: [{ name: item.colorName, hex: item.colorHex }],
+      colors: [{ name: item.colorName || 'Mặc định', hex: item.colorHex || '#080a61' }],
     };
     setSelectedProduct(found);
     setSelectedSize(undefined);
@@ -119,7 +119,7 @@ const MainContent: React.FC = () => {
               boxShadow: '0 4px 12px rgba(8, 10, 97, 0.08)',
             }}
           >
-            ← Quay lại trang chủ
+            Quay lại trang chủ
           </button>
         </div>
 

@@ -47,7 +47,7 @@ async def ai_health_check() -> AiHealthResponse:
     return AiHealthResponse(
         status="healthy",
         module="M4: Fit & AI Intelligence",
-        guardrail_active=True,
+        guardrail_active=False,
         cache_capacity=256,
         advisor_ready=True,
         version="1.0.0",
@@ -117,13 +117,7 @@ async def recommend_size(payload: SizeRecommendationRequest) -> SizeRecommendati
     summary="Trợ lý ảo Stylist tư vấn trang phục & kích cỡ (Bất đồng bộ & An toàn)",
 )
 async def chat_stylist(payload: ChatStylistRequest) -> ChatStylistResponse:
-    """Tư vấn phong cách và trả lời thắc mắc của khách hàng.
-    
-    Đặc điểm nổi bật:
-    - DomainGuardrail: Chặn 100% câu hỏi ngoài lề (lập trình, thời tiết, giải toán, prompt injection).
-    - LRU Cache 256: Phản hồi siêu tốc trong < 0.05 ms cho các câu hỏi trùng lặp.
-    - Zero-Crash Fallback: Luôn trả về lời khuyên may đo tiếng Việt ngay cả khi không có API Key.
-    """
+    """Trả lời câu hỏi chung qua Gemini; tư vấn size khi có dữ liệu thử đồ."""
     try:
         response = await _chatbot.ask_async(
             user_query=payload.query,

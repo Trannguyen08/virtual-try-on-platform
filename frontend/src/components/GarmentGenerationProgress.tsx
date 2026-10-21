@@ -8,7 +8,7 @@ const LABELS: Record<string, string> = {
   generating: 'Đang tạo hình học và texture 3D',
   downloading: 'Đang tải mô hình',
   postprocessing: 'Đang tối ưu mô hình',
-  validating_mesh: 'Đang kiểm tra mesh',
+  validating_mesh: 'Đang kiểm tra mô hình trang phục',
   completed: 'Mô hình đã sẵn sàng',
   failed: 'Tạo mô hình thất bại',
   cancelled: 'Đã hủy',
@@ -30,8 +30,8 @@ export const GarmentGenerationProgress: React.FC<{ job: Garment3DJob }> = ({ job
               : job.progress < 65
                 ? 'Đang xác định điểm đo'
                 : job.progress < 90
-                  ? 'Đang dựng mesh 3D'
-                  : 'Đang đóng gói texture và GLB'
+                  ? 'Đang tạo mô hình 3D'
+                  : 'Đang hoàn thiện hình ảnh và mô hình'
             : LABELS[job.status] ?? 'Đang xử lý'}
         </h2>
       </div>

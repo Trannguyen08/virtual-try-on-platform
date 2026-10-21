@@ -373,7 +373,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
               cursor: 'pointer',
             }}
           >
-            ← Bắt đầu lượt mới
+            Bắt đầu lượt mới
           </button>
           <span style={{ color: 'var(--vfit-outline)' }}>|</span>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-primary-container)', margin: 0 }}>
@@ -410,7 +410,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
             onClick={() => setDisplayMode('3d-canvas')}
             style={{ padding: '0.45rem 1.15rem', fontSize: '0.825rem', borderRadius: '9999px', fontWeight: 700 }}
           >
-            🎮 Mô hình 3D tương tác (Three.js WebGL)
+            Mô hình 3D tương tác
           </button>
           <button
             type="button"
@@ -418,7 +418,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
             onClick={() => setDisplayMode('photorealistic')}
             style={{ padding: '0.45rem 1.15rem', fontSize: '0.825rem', borderRadius: '9999px', fontWeight: 700 }}
           >
-            📸 Ảnh AI Render 4K (So sánh Before / After)
+            Ảnh kết quả (So sánh trước và sau)
           </button>
         </div>
 
@@ -439,7 +439,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                 cursor: 'pointer',
               }}
             >
-              ☀️ Studio
+              Studio
             </button>
             <button
               type="button"
@@ -471,7 +471,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                 cursor: 'pointer',
               }}
             >
-              🌙 Dạ tiệc / Warm
+              Dạ tiệc / Ánh sáng ấm
             </button>
           </div>
         )}
@@ -524,7 +524,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                   zIndex: 10,
                 }}
               >
-                🖱️ Giữ chuột kéo để xoay 360°
+                Giữ chuột và kéo để xoay 360°
               </div>
 
               {/* 3D Engine Status Badge */}
@@ -548,7 +548,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                 }}
               >
                 <span className="vfit-pulse-dot" style={{ width: '6px', height: '6px' }} />
-                <span>{modelMeshType === 'glb' ? '⚡ Blender MPFB 3D Mesh' : '👤 Mannequin Procedural'}</span>
+                <span>{modelMeshType === 'glb' ? 'Mẫu cơ thể 3D' : 'Hình nộm 3D'}</span>
               </div>
 
               {/* Canvas Mount Container */}
@@ -581,7 +581,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                   onClick={handleResetCamera}
                   style={{ width: '2rem', height: '2rem' }}
                 >
-                  🔄
+                  Thử lại
                 </button>
                 <button
                   type="button"
@@ -856,7 +856,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
                 onClick={() => setAddedToCart(true)}
               >
                 {addedToCart ? (
-                  <span>✓ ĐÃ THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
+                  <span>ĐÃ THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
                 ) : (
                   <span>THÊM VÀO GIỎ HÀNG (SIZE {selectedSize})</span>
                 )}
@@ -916,7 +916,7 @@ export const InteractiveViewer3DStep: React.FC<InteractiveViewer3DStepProps> = (
               >
                 {savedToHistory ? (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    ✓ ĐÃ LƯU KẾT QUẢ • XEM LỊCH SỬ THỬ ĐỒ →
+                    ĐÃ LƯU KẾT QUẢ • XEM LỊCH SỬ THỬ ĐỒ
                   </span>
                 ) : (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

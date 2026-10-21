@@ -77,9 +77,9 @@ class SizeRecommendationResponse(BaseModel):
 # ==============================================================================
 class ChatStylistRequest(BaseModel):
     """Payload gửi tin nhắn của người dùng tới AI Stylist."""
-    query: str = Field(..., min_length=1, description="Câu hỏi hoặc yêu cầu tư vấn từ khách hàng", examples=["Anh có bụng bia mặc áo thun này size M có bị lộ bụng không?"])
-    height_cm: float = Field(default=170.0, ge=120.0, le=230.0, description="Chiều cao (cm)")
-    weight_kg: float = Field(default=65.0, ge=30.0, le=200.0, description="Cân nặng (kg)")
+    query: str = Field(..., min_length=1, description="Câu hỏi của người dùng", examples=["Anh có bụng bia mặc áo thun này size M có bị lộ bụng không?"])
+    height_cm: Optional[float] = Field(default=None, ge=120.0, le=230.0, description="Chiều cao (cm), nếu người dùng đã cung cấp")
+    weight_kg: Optional[float] = Field(default=None, ge=30.0, le=200.0, description="Cân nặng (kg), nếu người dùng đã cung cấp")
     gender: str = Field(default="male", description="Giới tính")
     garment_category: str = Field(default="tshirt", description="Loại trang phục")
     fit_preference: str = Field(default="regular", description="Gu mặc")
@@ -93,8 +93,8 @@ class ChatStylistResponse(BaseModel):
     """Phản hồi tư vấn từ AI Stylist."""
     status: str = Field(default="success", examples=["success"])
     reply: str = Field(..., description="Câu trả lời may đo chuyên nghiệp từ AI")
-    source: str = Field(..., description="Nguồn sinh câu trả lời ('gemini_llm', 'rule_based_fallback', 'domain_guardrail', 'lru_cache')")
-    is_refusal: bool = Field(..., description="True nếu câu hỏi ngoài lề bị chặn bởi Guardrail")
+    source: str = Field(..., description="Nguồn câu trả lời: gemini_llm, lru_cache, rule_based_fallback hoặc ai_unavailable")
+    is_refusal: bool = Field(..., description="Trường tương thích cũ; câu hỏi ngoài thời trang không còn bị chặn")
 
 
 # ==============================================================================
@@ -122,7 +122,7 @@ class FitEvaluationResponse(BaseModel):
 class AiHealthResponse(BaseModel):
     status: str = Field(default="healthy")
     module: str = Field(default="M4: Fit & AI Intelligence")
-    guardrail_active: bool = Field(default=True)
+    guardrail_active: bool = Field(default=False)
     cache_capacity: int = Field(default=256)
     advisor_ready: bool = Field(default=True)
     version: str = Field(default="1.0.0")

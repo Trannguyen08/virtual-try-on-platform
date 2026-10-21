@@ -1,28 +1,32 @@
 """AI Fit Stylist Chatbot Agent for Virtual Try-On Platform (Module M4).
 
 Cung cấp:
-1. FitStylistChatbot: Tác nhân tư vấn kích cỡ & form dáng hội thoại thời gian thực.
-2. Tích hợp đa tầng:
-   - Tầng Guardrails: Chặn 100% câu hỏi ngoài lề (lập trình, thời tiết, chính trị) mà không tốn API.
-   - Tầng Cache & Concurrency: Cache phản hồi tương tự, chịu tải cao khi nhiều người truy cập cùng lúc.
-   - Tầng LLM: Kết nối Google Gemini API (gemini-1.5-flash) bất đồng bộ.
-   - Tầng Zero-Crash Fallback: Tự động chuyển sang Rule-based Stylist khi không có API Key hoặc mất mạng.
+Trả lời câu hỏi tổng quát qua Gemini và hỗ trợ tư vấn size khi có dữ liệu thử đồ.
 """
 
 import asyncio
 import hashlib
 import json
+import logging
 import os
-from typing import Any, Dict, List, Optional
+import re
+from pathlib import Path
+from typing import Any, Dict, Optional
 import urllib.error
 import urllib.request
+from dotenv import load_dotenv
 
-from ai.chatbot.guardrails import ConcurrencyGovernor, DomainGuardrail, LRUResponseCache
+from ai.chatbot.guardrails import ConcurrencyGovernor, LRUResponseCache
 from ai.chatbot.prompt_templates import (
     SYSTEM_INSTRUCTION_STYLIST,
     build_stylist_context_prompt,
 )
 from ai.models.dynamic_size_advisor import DynamicSizeAdvisor
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
+logger = logging.getLogger(__name__)
 
 
 class FitStylistChatbot:
@@ -31,23 +35,15 @@ class FitStylistChatbot:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model_name: str = "gemini-1.5-flash",
+        model_name: Optional[str] = None,
         max_concurrent: int = 10,
         cache_capacity: int = 256,
     ) -> None:
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-        self.model_name = model_name
-        self.guardrail = DomainGuardrail()
+        self.api_key = api_key if api_key is not None else (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
+        self.model_name = model_name or os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
         self.cache = LRUResponseCache(capacity=cache_capacity)
         self.governor = ConcurrencyGovernor(max_concurrent_requests=max_concurrent)
         self.advisor = DynamicSizeAdvisor()
-
-    def _make_context_hash(self, user_profile: Dict[str, Any], size_chart: Optional[Dict[str, Any]], garment_category: str) -> str:
-        """Tạo chuỗi băm đại diện cho ngữ cảnh đo đạc."""
-        summary = f"{user_profile.get('height')}_{user_profile.get('weight')}_{user_profile.get('bust')}_{garment_category}"
-        if size_chart:
-            summary += f"_{len(size_chart)}"
-        return hashlib.md5(summary.encode("utf-8")).hexdigest()
 
     def _generate_rule_based_advice(
         self,
@@ -115,8 +111,8 @@ class FitStylistChatbot:
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY chưa được thiết lập.")
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
-        headers = {"Content-Type": "application/json"}
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent"
+        headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
 
         payload = {
             "contents": [
@@ -128,10 +124,11 @@ class FitStylistChatbot:
                 "parts": [{"text": SYSTEM_INSTRUCTION_STYLIST}]
             },
             "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 500,
+                "maxOutputTokens": 1024,
             },
         }
+        if self.model_name == "gemini-3.8-flash":
+            payload["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "low"}
 
         req = urllib.request.Request(
             url,
@@ -140,21 +137,24 @@ class FitStylistChatbot:
             method="POST",
         )
 
-        with urllib.request.urlopen(req, timeout=10.0) as response:
+        with urllib.request.urlopen(req, timeout=30.0) as response:
             result_data = json.loads(response.read().decode("utf-8"))
             candidates = result_data.get("candidates", [])
             if candidates:
                 parts = candidates[0].get("content", {}).get("parts", [])
-                if parts:
-                    return str(parts[0].get("text", "")).strip()
+                reply = "\n".join(
+                    str(part.get("text", "")) for part in parts if not part.get("thought")
+                ).strip()
+                if reply:
+                    return reply
 
         raise RuntimeError("Không nhận được phản hồi hợp lệ từ Gemini API.")
 
     async def ask_async(
         self,
         user_query: str,
-        height_cm: float = 170.0,
-        weight_kg: float = 65.0,
+        height_cm: Optional[float] = None,
+        weight_kg: Optional[float] = None,
         body_measurements: Optional[Dict[str, float]] = None,
         size_chart: Optional[Dict[str, Dict[str, float]]] = None,
         current_trial_specs: Optional[Dict[str, Any]] = None,
@@ -162,7 +162,7 @@ class FitStylistChatbot:
         garment_category: str = "tshirt",
         fit_preference: str = "regular",
     ) -> Dict[str, Any]:
-        """Tư vấn kích cỡ và form dáng bất đồng bộ (Non-blocking Async).
+        """Trả lời câu hỏi bằng Gemini và tư vấn size khi có dữ liệu phù hợp.
 
         Args:
             user_query: Câu hỏi của người dùng.
@@ -176,79 +176,72 @@ class FitStylistChatbot:
             fit_preference: 'regular', 'slim', 'oversized'.
 
         Returns:
-            Dictionary chứa 'reply', 'is_refusal', 'source' ('gemini_llm', 'rule_fallback', 'cache').
+            Dictionary chứa 'reply', 'is_refusal' và 'source'.
         """
-        # Bước 1: Kiểm tra Domain Guardrails (Chặn 100% câu hỏi ngoài lề / injection)
-        is_allowed, refusal_msg = self.guardrail.is_query_allowed(user_query)
-        if not is_allowed:
-            return {
-                "reply": refusal_msg,
-                "is_refusal": True,
-                "source": "domain_guardrail",
-            }
+        if not user_query.strip():
+            return {"reply": "Vui lòng nhập câu hỏi.", "is_refusal": False, "source": "validation"}
 
-        # Bước 2: Chuẩn bị thông tin người dùng
-        profile = self.advisor.estimator.estimate_measurements(
-            height_cm=height_cm,
-            weight_kg=weight_kg,
-            exact_measurements=body_measurements,
+        # Only construct body measurements when the caller supplied them.
+        if body_measurements:
+            height_cm = height_cm or body_measurements.get("height")
+            weight_kg = weight_kg or body_measurements.get("weight")
+        profile = None
+        if height_cm is not None and weight_kg is not None:
+            profile = self.advisor.estimator.estimate_measurements(
+                height_cm=height_cm,
+                weight_kg=weight_kg,
+                exact_measurements=body_measurements,
+            )
+
+        prompt = build_stylist_context_prompt(
+            user_query=user_query,
+            user_profile=profile or body_measurements,
+            size_chart=size_chart,
+            current_trial_specs=current_trial_specs,
+            fit_diagnostics=fit_diagnostics,
+            garment_category=garment_category,
+            fit_preference=fit_preference,
         )
-
-        context_hash = self._make_context_hash(profile, size_chart, garment_category)
-
-        # Bước 3: Kiểm tra Cache (LRU Response Cache)
+        context_hash = hashlib.sha256(f"{self.model_name}:{prompt}".encode("utf-8")).hexdigest()
         cached_reply = self.cache.get(user_query, context_hash=context_hash)
         if cached_reply:
-            return {
-                "reply": cached_reply,
-                "is_refusal": False,
-                "source": "lru_cache",
-            }
+            return {"reply": cached_reply, "is_refusal": False, "source": "lru_cache"}
 
-        # Bước 4: Điều tiết tần suất truy cập (Concurrency Governor)
         await self.governor.acquire()
         try:
-            # Thử gọi Gemini LLM nếu có API Key
             if self.api_key:
-                prompt = build_stylist_context_prompt(
-                    user_query=user_query,
-                    user_profile=profile,
-                    size_chart=size_chart,
-                    current_trial_specs=current_trial_specs,
-                    fit_diagnostics=fit_diagnostics,
-                    garment_category=garment_category,
-                    fit_preference=fit_preference,
-                )
                 loop = asyncio.get_event_loop()
                 reply = await loop.run_in_executor(None, self._call_gemini_rest_api, prompt)
                 source = "gemini_llm"
             else:
-                # Tự động Fallback sang Rule-based Stylist
-                reply = self._generate_rule_based_advice(
-                    user_query=user_query,
-                    user_profile=profile,
-                    size_chart=size_chart,
-                    fit_diagnostics=fit_diagnostics,
-                    garment_category=garment_category,
-                    fit_preference=fit_preference,
-                )
-                source = "rule_based_fallback"
-        except Exception:
-            # Zero-Crash: Bất kỳ lỗi mạng / timeout / quota nào cũng fallback an toàn
-            reply = self._generate_rule_based_advice(
-                user_query=user_query,
-                user_profile=profile,
-                size_chart=size_chart,
-                fit_diagnostics=fit_diagnostics,
-                garment_category=garment_category,
-                fit_preference=fit_preference,
-            )
-            source = "exception_fallback"
+                raise RuntimeError("Gemini API key is unavailable")
+        except Exception as exc:
+            if self.api_key:
+                logger.warning("Gemini chat request failed (%s)", getattr(exc, "code", type(exc).__name__))
+            # Keep an analytical size fallback only when sufficient real context exists.
+            is_size_question = bool(re.search(r"\b(size|áo|quần|váy|đầm|form|fit|vải|mặc)\b", user_query.lower()))
+            if profile is not None and size_chart and is_size_question and garment_category in {"tshirt", "shirt", "jacket"}:
+                try:
+                    reply = self._generate_rule_based_advice(
+                        user_query=user_query,
+                        user_profile=profile,
+                        size_chart=size_chart,
+                        fit_diagnostics=fit_diagnostics,
+                        garment_category=garment_category,
+                        fit_preference=fit_preference,
+                    )
+                    source = "rule_based_fallback"
+                except Exception:
+                    reply = "Trợ lý AI đang tạm thời không kết nối được. Vui lòng thử lại sau."
+                    source = "ai_unavailable"
+            else:
+                reply = "Trợ lý AI đang tạm thời không kết nối được. Vui lòng thử lại sau."
+                source = "ai_unavailable"
         finally:
             self.governor.release()
 
-        # Lưu câu trả lời vào Cache để phục vụ cho các request tiếp theo
-        self.cache.set(user_query, reply, context_hash=context_hash)
+        if source == "gemini_llm":
+            self.cache.set(user_query, reply, context_hash=context_hash)
 
         return {
             "reply": reply,
@@ -259,8 +252,8 @@ class FitStylistChatbot:
     def ask(
         self,
         user_query: str,
-        height_cm: float = 170.0,
-        weight_kg: float = 65.0,
+        height_cm: Optional[float] = None,
+        weight_kg: Optional[float] = None,
         body_measurements: Optional[Dict[str, float]] = None,
         size_chart: Optional[Dict[str, Dict[str, float]]] = None,
         current_trial_specs: Optional[Dict[str, Any]] = None,

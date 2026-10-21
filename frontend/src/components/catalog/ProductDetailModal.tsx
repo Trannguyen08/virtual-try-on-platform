@@ -24,7 +24,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   if (product.fittingMode) return (
     <div className="vfit-product-modal-backdrop" onClick={onClose}>
       <div className="vfit-product-modal-box" role="dialog" aria-modal="true" aria-labelledby="asset-product-title" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="vfit-product-modal-close" onClick={onClose} aria-label="Đóng">✕</button>
+        <button type="button" className="vfit-product-modal-close" onClick={onClose} aria-label="Đóng">Đóng</button>
         <div className="vfit-product-detail-layout">
           <div className="vfit-product-gallery">
             <div className="vfit-main-image-viewport" style={{ background: '#f3f4f6' }}>
@@ -40,7 +40,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <h2 id="asset-product-title" className="vfit-product-modal-title">{product.name}</h2>
               <p className="vfit-price-main">Có sẵn để thử</p>
               <p style={{ lineHeight: 1.8, color: 'var(--vfit-secondary)' }}>
-                {product.fittingMode === 'body_refit' ? 'Trang phục được refit theo model MPFB của bạn.' : 'Trang phục được căn theo chiều cao, giữ tư thế gốc.'}
+                {product.fittingMode === 'body_refit' ? 'Trang phục được căn theo dáng mẫu cơ thể của bạn.' : 'Trang phục được căn theo chiều cao, giữ tư thế gốc.'}
                 {' '}Bạn có thể phối cùng một món khác trong phòng thử đồ. Chưa mô phỏng tương tác vải hoặc kiểm chứng độ vừa theo size.
               </p>
               <div className="vfit-size-pills">
@@ -49,7 +49,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <p style={{ fontSize: '.8rem', color: 'var(--vfit-secondary)' }}>M là nhãn thử nghiệm cho refit, chưa phải size bán lẻ đã kiểm chứng.</p>
               {product.author && <p>Tác giả: <strong>{product.author}</strong></p>}
               {product.license && <p>Giấy phép: <strong>{product.license}</strong></p>}
-              {product.sourceUrl && <a href={product.sourceUrl} target="_blank" rel="noreferrer">Xem asset và nguồn MakeHuman ↗</a>}
+              {product.sourceUrl && <a href={product.sourceUrl} target="_blank" rel="noreferrer">Xem asset và nguồn MakeHuman</a>}
             </div>
             <div className="vfit-action-stack">
               <button type="button" className="vfit-btn-try-now" onClick={() => { onClose(); onSelectProductForTryOn(product, selectedSize); }}>THỬ VÀ PHỐI ĐỒ TRÊN MODEL</button>
@@ -92,7 +92,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           onClick={onClose}
           aria-label="Đóng"
         >
-          ✕
+          Đóng
         </button>
 
         <div className="vfit-product-detail-layout">
@@ -147,7 +147,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
               {/* Rating */}
               <div className="vfit-product-rating-row">
-                <div className="vfit-stars">★★★★★</div>
+                <div className="vfit-stars">Đánh giá tốt</div>
                 <strong style={{ color: 'var(--vfit-on-surface)' }}>4.9</strong>
                 <span>• 120 đánh giá thực tế từ khách hàng</span>
               </div>
@@ -235,7 +235,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     Kích cỡ: <strong>{selectedSize}</strong>
                     {aiRecommendedSize === selectedSize && (
                       <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
-                        ✨ AI Khuyên dùng
+                        AI khuyên dùng
                       </span>
                     )}
                   </span>
@@ -244,7 +244,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     className="vfit-ai-size-btn"
                     onClick={() => setIsAiSizeModalOpen(true)}
                   >
-                    <span>✨ AI Gợi ý Size</span>
+                    <span>AI gợi ý size</span>
                   </button>
                 </div>
                 <div className="vfit-size-pills">
@@ -284,7 +284,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 style={{ width: '100%', height: '2.85rem' }}
                 onClick={() => setAddedToCart(true)}
               >
-                {addedToCart ? '✓ ĐÃ THÊM VÀO GIỎ HÀNG' : 'THÊM VÀO GIỎ HÀNG'}
+                {addedToCart ? 'ĐÃ THÊM VÀO GIỎ HÀNG' : 'THÊM VÀO GIỎ HÀNG'}
               </button>
             </div>
           </div>

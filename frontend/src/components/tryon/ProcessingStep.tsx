@@ -19,7 +19,7 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({ statusMessage })
     >
       {/* Radar Scanner Animation */}
       <div className="vfit-radar-scanner">
-        <div className="vfit-radar-pulse">🪄</div>
+        <div className="vfit-radar-pulse" aria-hidden="true" />
       </div>
 
       <span
@@ -64,11 +64,11 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({ statusMessage })
 
       {/* Subtext info */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', color: 'var(--vfit-outline)', fontSize: '0.8rem' }}>
-        <span>⚡ Đang xử lý</span>
+        <span>Đang xử lý</span>
         <span>•</span>
-        <span>🌐 Three.js WebGL</span>
+        <span>Đồ họa 3D</span>
         <span>•</span>
-        <span>📐 Bản xem thử 3D</span>
+        <span>Bản xem thử 3D</span>
       </div>
     </div>
   );

@@ -182,7 +182,7 @@ export const Garment360Viewer: React.FC<{
         {annotationMode && (
           <p className="g3d-viewer__annotation-note">
             Chỉ hiển thị các điểm có thể suy ra từ ảnh trang phục. Những bộ phận không thấy rõ trong ảnh sẽ được ẩn;
-            vị trí này chưa xác nhận độ vừa với body mesh.
+            vị trí này chưa xác nhận độ vừa với mẫu cơ thể.
           </p>
         )}
         {(['front', 'back', 'left', 'right'] as ViewPreset[]).map((view) => (

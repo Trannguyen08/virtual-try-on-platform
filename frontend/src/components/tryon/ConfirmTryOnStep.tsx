@@ -50,7 +50,7 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
             marginBottom: '0.5rem',
           }}
         >
-          <span>✨ NEURAL DRAPING PRE-FLIGHT</span>
+          <span>CHUẨN BỊ THỬ ĐỒ 3D</span>
         </div>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
           XÁC NHẬN CẤU HÌNH THỬ ĐỒ ẢO
@@ -84,7 +84,6 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>👤</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--vfit-on-surface)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   ẢNH NGƯỜI MẪU CỦA BẠN
                 </span>
@@ -188,7 +187,7 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
             {/* Model Metadata Tags */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.85rem' }}>
               <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-primary-container)', fontWeight: 700 }}>
-                🧬 {selectedPreset ? selectedPreset.name : '3D Custom Biometrics'}
+                {selectedPreset ? selectedPreset.name : 'Mẫu cơ thể tùy chỉnh'}
               </span>
               <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-on-surface)' }}>
                 Cao: {heightCm} cm • {customParams?.weight || 50}kg
@@ -199,57 +198,8 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
                 </span>
               )}
               <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-focus-ring)', fontWeight: 600 }}>
-                ⚡ Mesh: {customParams?.glbModelUrl?.split('/').pop() || 'body_default.glb'}
+                Tệp mô hình: {customParams?.glbModelUrl?.split('/').pop() || 'body_default.glb'}
               </span>
-            </div>
-          </div>
-
-          {/* Center AI Neural Connector Node */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              pointerEvents: 'none',
-            }}
-          >
-            <div
-              style={{
-                width: '3.75rem',
-                height: '3.75rem',
-                borderRadius: '50%',
-                backgroundColor: 'var(--vfit-primary-container)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 6px 20px rgba(8, 10, 97, 0.4)',
-                border: '4px solid #fff',
-                fontSize: '1.5rem',
-              }}
-            >
-              ⚡
-            </div>
-            <div
-              style={{
-                marginTop: '0.35rem',
-                padding: '0.2rem 0.65rem',
-                backgroundColor: '#fff',
-                borderRadius: '9999px',
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                color: 'var(--vfit-primary-container)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              AI Neural Fitting
             </div>
           </div>
 
@@ -265,7 +215,6 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>👗</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--vfit-on-surface)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   TRANG PHỤC ĐÃ CHỌN
                 </span>
@@ -325,7 +274,6 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
                   boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
                 }}
               >
-                <span>✓</span>
                 <span>99.4% Chuẩn form vải</span>
               </div>
 
@@ -401,21 +349,6 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div
-            style={{
-              width: '2.5rem',
-              height: '2.5rem',
-              borderRadius: '50%',
-              backgroundColor: 'var(--vfit-secondary-container)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--vfit-primary-container)',
-              fontSize: '1.2rem',
-            }}
-          >
-            ⚙️
-          </div>
           <div>
             <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--vfit-on-surface)' }}>
               Thông số môi trường kết xuất AI
@@ -428,7 +361,7 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           <span style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-secondary-container)', color: 'var(--vfit-primary-container)', fontWeight: 700 }}>
-            3D Engine: <strong>Blender MPFB + WebGL</strong>
+            Mô hình thử đồ 3D
           </span>
           <span style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-surface-container)', color: 'var(--vfit-on-surface)' }}>
             Render: <strong>~3.5 giây</strong>
@@ -463,7 +396,7 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
             onClick={onBack}
             style={{ flex: 1, height: '3.25rem', justifyContent: 'center' }}
           >
-            ← Quay lại chọn đồ
+            Quay lại chọn đồ
           </button>
 
           <button
@@ -473,14 +406,12 @@ export const ConfirmTryOnStep: React.FC<ConfirmTryOnStepProps> = ({
             onClick={onConfirmStart}
             style={{ flex: 2, height: '3.25rem', justifyContent: 'center', opacity: agreedConsent ? 1 : 0.6 }}
           >
-            <span style={{ fontSize: '1.1rem' }}>🪄</span>
             <span style={{ letterSpacing: '0.04em' }}>BẮT ĐẦU TẠO ẢNH THỬ ĐỒ</span>
-            <span>→</span>
           </button>
         </div>
 
         <div style={{ fontSize: '0.75rem', color: 'var(--vfit-outline)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <span>🔒</span> Cam kết bảo mật dữ liệu sinh trắc học chuẩn GDPR & CCPA
+          Cam kết bảo mật dữ liệu sinh trắc học chuẩn GDPR & CCPA
         </div>
       </div>
     </div>

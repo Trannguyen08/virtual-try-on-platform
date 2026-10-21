@@ -4,7 +4,7 @@ import { historyStorage } from '../../services/historyStorage';
 import { HistoryStatsBar } from '../../components/history/HistoryStatsBar';
 import { HistoryToolbar, HistoryFilterState } from '../../components/history/HistoryToolbar';
 import { HistoryCard } from '../../components/history/HistoryCard';
-import { CompareModal } from '../../components/history/CompareModal';
+import { Garment360Viewer } from '../../viewer/Garment360Viewer';
 
 interface HistoryPageProps {
   onStartTryOn: () => void;
@@ -18,19 +18,21 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   onReTryItem,
 }) => {
   const [historyItems, setHistoryItems] = useState<TryOnHistoryItem[]>([]);
-  const [activeCompareItem, setActiveCompareItem] = useState<TryOnHistoryItem | null>(null);
+  const [activeViewerItem, setActiveViewerItem] = useState<TryOnHistoryItem | null>(null);
 
   const [filters, setFilters] = useState<HistoryFilterState>({
     searchQuery: '',
     timeRange: 'all',
     category: 'all',
-    fitLevel: 'all',
+    resultType: 'all',
   });
 
-  // Load from local storage
+  // Refresh while the page is open so entries disappear when their short retention expires.
   useEffect(() => {
-    const loaded = historyStorage.getHistory();
-    setHistoryItems(loaded);
+    const refresh = () => setHistoryItems(historyStorage.getHistory());
+    refresh();
+    const timer = window.setInterval(refresh, 5_000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const handleDelete = (id: string) => {
@@ -40,9 +42,15 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
     }
   };
 
-  const handleToggleCart = (id: string) => {
-    const updated = historyStorage.toggleCart(id);
-    setHistoryItems(updated);
+  const handleClearHistory = () => {
+    if (!window.confirm('Xóa toàn bộ lượt thử đồ đang lưu trong 5 phút gần đây?')) return;
+    historyStorage.clearAll();
+    setHistoryItems([]);
+  };
+
+  const handleViewHistoryItem = (item: TryOnHistoryItem) => {
+    if (item.resultAssetUrl) setActiveViewerItem(item);
+    else onView3DItem(item);
   };
 
   const handleResetFilters = () => {
@@ -50,7 +58,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
       searchQuery: '',
       timeRange: 'all',
       category: 'all',
-      fitLevel: 'all',
+      resultType: 'all',
     });
   };
 
@@ -59,11 +67,11 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
     return historyItems.filter((item) => {
       // 1. Search query
       if (filters.searchQuery.trim()) {
-        const q = filters.searchQuery.toLowerCase();
-        const matchesName = item.productName.toLowerCase().includes(q);
-        const matchesCategory = item.categoryLabel.toLowerCase().includes(q);
-        const matchesColor = item.colorName.toLowerCase().includes(q);
-        if (!matchesName && !matchesCategory && !matchesColor) return false;
+        const q = filters.searchQuery.toLocaleLowerCase('vi');
+        const matchesName = item.productName.toLocaleLowerCase('vi').includes(q);
+        const matchesCategory = item.categoryLabel.toLocaleLowerCase('vi').includes(q);
+        const matchesNotes = item.notes?.toLocaleLowerCase('vi').includes(q) || false;
+        if (!matchesName && !matchesCategory && !matchesNotes) return false;
       }
 
       // 2. Category
@@ -71,16 +79,19 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
         return false;
       }
 
-      // 3. Fit Level
-      if (filters.fitLevel === '98' && item.fitScore < 98) {
-        return false;
-      }
-      if (filters.fitLevel === '95-98' && (item.fitScore < 95 || item.fitScore >= 98)) {
-        return false;
-      }
-      if (filters.fitLevel === 'under95' && item.fitScore >= 95) {
-        return false;
-      }
+      // Time ranges use the record timestamp, not a hard-coded month label.
+      const itemDate = new Date(item.timestamp);
+      const now = new Date();
+      if (filters.timeRange === 'today'
+          && (itemDate.getFullYear() !== now.getFullYear()
+            || itemDate.getMonth() !== now.getMonth()
+            || itemDate.getDate() !== now.getDate())) return false;
+      if (filters.timeRange === '7days' && Date.now() - item.timestamp > 7 * 24 * 60 * 60 * 1000) return false;
+      if (filters.timeRange === 'this-month'
+          && (itemDate.getFullYear() !== now.getFullYear() || itemDate.getMonth() !== now.getMonth())) return false;
+
+      if (filters.resultType === 'simulated' && !item.simulationRan) return false;
+      if (filters.resultType === 'preview' && item.simulationRan) return false;
 
       return true;
     });
@@ -89,7 +100,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   return (
     <div className="vfit-history-page">
       {/* 1. Header & Quick Stat Metric Strip */}
-      <HistoryStatsBar items={historyItems} />
+      <HistoryStatsBar items={historyItems} onClear={handleClearHistory} />
 
       {/* 2. Search & Multi-criteria Filtering Toolbar */}
       <HistoryToolbar
@@ -105,10 +116,8 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
             <HistoryCard
               key={item.id}
               item={item}
-              onCompare={(selected) => setActiveCompareItem(selected)}
-              onView3D={(selected) => onView3DItem(selected)}
+              onView3D={handleViewHistoryItem}
               onDelete={handleDelete}
-              onToggleCart={handleToggleCart}
               onReTry={(selected) => onReTryItem(selected)}
             />
           ))}
@@ -123,12 +132,14 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
             border: '1px dashed var(--vfit-border-subtle)',
           }}
         >
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+          <div style={{ fontSize: '1rem', marginBottom: '1rem', fontWeight: 700 }}>Lịch sử thử đồ</div>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-on-surface)' }}>
-            Không tìm thấy kết quả thử đồ phù hợp
+            {historyItems.length === 0 ? 'Chưa có lượt thử đồ gần đây' : 'Không tìm thấy lượt thử đồ phù hợp'}
           </h3>
           <p style={{ color: 'var(--vfit-secondary)', maxWidth: '420px', margin: '0.5rem auto 1.5rem auto', fontSize: '0.9rem' }}>
-            Không có lần thử nào khớp với bộ lọc hiện tại của bạn. Hãy thử thay đổi từ khóa hoặc đặt lại bộ lọc.
+            {historyItems.length === 0
+              ? 'Kết quả thử đồ hoàn tất sẽ xuất hiện tại đây và tự xóa sau 5 phút.'
+              : 'Thử đổi từ khóa hoặc bộ lọc để xem các lượt thử gần đây.'}
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button
@@ -151,17 +162,25 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
         </div>
       )}
 
-      {/* 4. Compare Modal Popup (Before / After interactive slider) */}
-      {activeCompareItem && (
-        <CompareModal
-          item={activeCompareItem}
-          onClose={() => setActiveCompareItem(null)}
-          onReTry={(selected) => {
-            setActiveCompareItem(null);
-            onReTryItem(selected);
-          }}
-        />
+      {activeViewerItem?.resultAssetUrl && (
+        <div className="vfit-history-viewer-backdrop" role="presentation" onClick={() => setActiveViewerItem(null)}>
+          <section
+            className="vfit-history-viewer-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Kết quả 3D: ${activeViewerItem.productName}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header>
+              <div><span>KẾT QUẢ THỬ ĐỒ</span><h2>{activeViewerItem.productName}</h2></div>
+              <button type="button" onClick={() => setActiveViewerItem(null)} aria-label="Đóng">Đóng</button>
+            </header>
+            <Garment360Viewer modelUrl={activeViewerItem.resultAssetUrl} subject="garment" />
+            <p>{activeViewerItem.simulationRan ? 'Mô phỏng đã hoàn tất.' : 'Bản xem trước; chưa mô phỏng vải.'} Chưa có đánh giá độ vừa vặn cho kết quả này.</p>
+          </section>
+        </div>
       )}
+
     </div>
   );
 };

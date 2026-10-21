@@ -10,18 +10,21 @@ export interface TryOnHistoryItem {
   productName: string;
   category: 't_shirt' | 'shirt' | 'dress' | 'jacket' | 'pants';
   categoryLabel: string;
-  price: number;
-  formattedPrice: string;
-  size: string;
-  colorName: string;
-  colorHex: string;
+  price?: number;
+  formattedPrice?: string;
+  size?: string;
+  colorName?: string;
+  colorHex?: string;
   date: string;
   timestamp: number;
-  originalPhotoUrl: string;
-  resultPhotoUrl: string;
-  fitScore: number;
-  inCart: boolean;
-  regions: {
+  originalPhotoUrl?: string;
+  resultPhotoUrl?: string;
+  resultAssetUrl?: string;
+  fitScore?: number;
+  inCart?: boolean;
+  source?: 'catalog' | 'upload' | 'legacy';
+  simulationRan?: boolean;
+  regions?: {
     chest: TryOnHistoryRegion;
     waist: TryOnHistoryRegion;
     hip: TryOnHistoryRegion;

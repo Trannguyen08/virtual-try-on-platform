@@ -132,7 +132,6 @@ export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled,
       Mặt trước là bắt buộc. Các góc còn lại giúp tái tạo mặt sau và độ dày chính xác hơn.
     </p>
     <div className="g3d-notice">
-      <span aria-hidden="true">✓</span>
       <p>{tryOnImagesOnly
         ? 'Mỗi ảnh tối đa 10 MiB và 16 triệu pixel. Hệ thống kiểm tra nội dung ảnh trước khi tạo job.'
         : 'Hệ thống giữ nguyên tỉ lệ, căn giữa và chuẩn hóa ảnh thành 1024×1024 trước khi phân tích.'}

@@ -38,7 +38,7 @@ export const HowItWorksSection: React.FC = () => {
           {/* Step 1 */}
           <div className="vfit-bento-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="vfit-step-icon">📸</div>
+              <div className="vfit-step-icon">01</div>
               <span className="vfit-step-num">01</span>
             </div>
             <div>
@@ -50,14 +50,14 @@ export const HowItWorksSection: React.FC = () => {
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>↗️ Số đo nhập theo centimet</span>
+              <span>Số đo nhập theo centimet</span>
             </div>
           </div>
 
           {/* Step 2 */}
           <div className="vfit-bento-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="vfit-step-icon">👗</div>
+              <div className="vfit-step-icon">02</div>
               <span className="vfit-step-num">02</span>
             </div>
             <div>
@@ -69,14 +69,14 @@ export const HowItWorksSection: React.FC = () => {
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>↗️ Hỗ trợ ảnh JPG, PNG và WebP</span>
+              <span>Hỗ trợ ảnh JPG, PNG và WebP</span>
             </div>
           </div>
 
           {/* Step 3 */}
           <div className="vfit-bento-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="vfit-step-icon">🪄</div>
+              <div className="vfit-step-icon">03</div>
               <span className="vfit-step-num">03</span>
             </div>
             <div>
@@ -88,7 +88,7 @@ export const HowItWorksSection: React.FC = () => {
               </p>
             </div>
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--vfit-primary-container)', fontSize: '0.8rem', fontWeight: 600 }}>
-              <span>🌐 Có thể xoay và phóng to viewer</span>
+              <span>Có thể xoay và phóng to bản xem trước</span>
             </div>
           </div>
         </div>

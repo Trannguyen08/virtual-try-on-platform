@@ -20,6 +20,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ item, onClose, onReT
   };
 
   const handleDownload = () => {
+    if (!item.resultPhotoUrl) return;
     const link = document.createElement('a');
     link.href = item.resultPhotoUrl;
     link.download = `VFit-AI-TryOn-${item.productName.replace(/\s+/g, '-')}.jpg`;
@@ -41,7 +42,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ item, onClose, onReT
                 SO SÁNH KẾT QUẢ AI VÀ ẢNH GỐC
               </span>
               <span className="vfit-badge-fit">
-                ✓ {item.fitScore}% Fit
+                {item.fitScore}% Fit
               </span>
             </div>
             <h2 style={{ margin: '0.25rem 0 0 0', fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
@@ -49,7 +50,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ item, onClose, onReT
             </h2>
           </div>
           <button type="button" className="vfit-modal-close" onClick={onClose}>
-            ✕
+            Đóng
           </button>
         </div>
 
@@ -165,10 +166,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({ item, onClose, onReT
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
                   {[
-                    { key: 'Vai (Shoulder)', data: item.regions.shoulder },
-                    { key: 'Ngực (Chest)', data: item.regions.chest },
-                    { key: 'Eo (Waist)', data: item.regions.waist },
-                    { key: 'Hông (Hip)', data: item.regions.hip },
+                    ...(item.regions ? [
+                      { key: 'Vai (Shoulder)', data: item.regions.shoulder },
+                      { key: 'Ngực (Chest)', data: item.regions.chest },
+                      { key: 'Eo (Waist)', data: item.regions.waist },
+                      { key: 'Hông (Hip)', data: item.regions.hip },
+                    ] : []),
                   ].map((z) => (
                     <div
                       key={z.key}
@@ -201,7 +204,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ item, onClose, onReT
                     lineHeight: 1.4,
                   }}
                 >
-                  💡 <strong>Ghi chú AI:</strong> {item.notes}
+                  <strong>Ghi chú:</strong> {item.notes}
                 </div>
               )}
             </div>

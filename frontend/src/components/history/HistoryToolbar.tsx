@@ -4,7 +4,7 @@ export interface HistoryFilterState {
   searchQuery: string;
   timeRange: string;
   category: string;
-  fitLevel: string;
+  resultType: string;
 }
 
 interface HistoryToolbarProps {
@@ -57,7 +57,7 @@ export const HistoryToolbar: React.FC<HistoryToolbarProps> = ({
             <option value="all">Thời gian: Tất cả</option>
             <option value="today">Hôm nay</option>
             <option value="7days">7 ngày qua</option>
-            <option value="this-month">Tháng 9/2026</option>
+            <option value="this-month">Tháng này</option>
           </select>
           <svg
             className="vfit-select-arrow"
@@ -103,15 +103,14 @@ export const HistoryToolbar: React.FC<HistoryToolbarProps> = ({
         {/* Fit Score Filter */}
         <div className="vfit-select-wrap">
           <select
-            value={filters.fitLevel}
+            value={filters.resultType}
             onChange={(e) =>
-              onFilterChange({ ...filters, fitLevel: e.target.value })
+              onFilterChange({ ...filters, resultType: e.target.value })
             }
           >
-            <option value="all">Độ khớp: Tất cả</option>
-            <option value="98">&gt;98% Chuẩn dáng cao</option>
-            <option value="95-98">95% - 98% Tiêu chuẩn</option>
-            <option value="under95">&lt;95% Khuyên thử lại</option>
+            <option value="all">Kết quả: Tất cả</option>
+            <option value="simulated">Đã mô phỏng</option>
+            <option value="preview">Xem trước</option>
           </select>
           <svg
             className="vfit-select-arrow"
@@ -130,7 +129,7 @@ export const HistoryToolbar: React.FC<HistoryToolbarProps> = ({
         {(filters.searchQuery ||
           filters.timeRange !== 'all' ||
           filters.category !== 'all' ||
-          filters.fitLevel !== 'all') && (
+          filters.resultType !== 'all') && (
           <button
             type="button"
             onClick={onReset}
@@ -149,7 +148,7 @@ export const HistoryToolbar: React.FC<HistoryToolbarProps> = ({
               gap: '0.35rem',
             }}
           >
-            ✕ Xóa lọc
+            Xóa bộ lọc
           </button>
         )}
       </div>

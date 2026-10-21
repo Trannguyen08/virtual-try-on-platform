@@ -117,3 +117,20 @@ def test_catalog_route_reports_readiness_without_disk_paths_tc_api_03(native_job
     assert response.data[0]["available"] is True
     assert response.data[0]["mode"] == "body_refit"
     assert str(native_jobs[1]) not in json.dumps(response.data)
+
+
+def test_completed_asset_survives_job_memory_restart_tc_api_03(native_jobs):
+    """Test Case ID: TC-API-03. Keep completed GLBs available after backend reload."""
+    jobs, output = native_jobs
+    job_id = "d50e29a6b0ee4983be73facaed0a7cf9"
+    artifact = output / f"{job_id}.glb"
+    artifact.write_bytes(b"glTF" + b"\x00" * 128)
+
+    # A fresh job manager represents a backend process restart: jobs are RAM-only,
+    # while completed GLB outputs remain on disk for URLs already saved by clients.
+    restarted_jobs = blender_body.BlenderBodyJobs()
+    assert restarted_jobs.asset(job_id) == artifact
+
+    with pytest.raises(AppException) as error:
+        restarted_jobs.asset("not-a-job-id")
+    assert error.value.error.code == "ASSET_NOT_FOUND"

@@ -318,12 +318,6 @@ class GarmentMeshBuilder:
                 (p1[1] + p2[1]) / 2.0,
             )
             edge_vec = (p2[0] - p1[0], p2[1] - p1[1])
-            norm_x = -(p2[1] - p1[1])
-            norm_y = (p2[0] - p1[0])
-            n_len = math.hypot(norm_x, norm_y)
-            if n_len > 1e-6:
-                norm_x /= n_len
-                norm_y /= n_len
 
             opening = self._opening_name(
                 midpoint,
@@ -335,7 +329,6 @@ class GarmentMeshBuilder:
                 landmarks=landmarks,
                 neck_opening=neck_opening,
                 edge_vec=edge_vec,
-                normal=(norm_x, norm_y),
             )
             if opening:
                 opening_vertices.setdefault(opening, set()).update((first, second))
@@ -546,18 +539,16 @@ class GarmentMeshBuilder:
         # 2. Sleeve Cuff Openings (left/right distal ends)
         left_armpit = landmarks.get("left_armpit")
         right_armpit = landmarks.get("right_armpit")
-        norm_x, norm_y = normal
-
         if left_armpit is not None:
             sleeve_len_x = left_armpit[0] - x0
-            if point[0] <= x0 + sleeve_len_x * 0.40:
-                if norm_x < -0.20 or (abs(edge_vec[1]) >= abs(edge_vec[0])):
+            if point[0] <= x0 + sleeve_len_x * 0.12:
+                if abs(edge_vec[1]) >= abs(edge_vec[0]) * 0.65:
                     return "left_cuff"
 
         if right_armpit is not None:
             sleeve_len_x = x1 - right_armpit[0]
-            if point[0] >= x1 - sleeve_len_x * 0.40:
-                if norm_x > 0.20 or (abs(edge_vec[1]) >= abs(edge_vec[0])):
+            if point[0] >= x1 - sleeve_len_x * 0.12:
+                if abs(edge_vec[1]) >= abs(edge_vec[0]) * 0.65:
                     return "right_cuff"
 
         # 3. Bottom Hem Opening (Hollow See-Through Opening)

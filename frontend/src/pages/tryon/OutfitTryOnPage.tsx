@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { bodyBuilderApi, BodyBuilderJob, BodyParameters } from '../../api/bodyBuilderApi';
 import { GarmentType } from '../../api/garment3d';
-import { imageTryOnApi } from '../../api/imageTryOnApi';
+import { imageTryOnApi, type TryOnGarmentType } from '../../api/imageTryOnApi';
 import { GarmentFiles, GarmentImageInputs } from '../../components/GarmentImageInputs';
 import { BodyBuilderStep } from '../../components/tryon/BodyBuilderStep';
 import { BodyPhotoCapture } from '../../components/tryon/BodyPhotoCapture';
 import { OutfitLayer, OutfitViewer } from '../../components/tryon/OutfitViewer';
 import { Product } from '../../data/mockProducts';
+import { TryOnHistoryItem } from '../../data/mockHistory';
 import { useGarmentProducts } from '../../hooks/useGarmentProducts';
+import { historyStorage } from '../../services/historyStorage';
 import '../../styles/outfit.css';
 
 type Slot = 'top' | 'bottom' | 'dress';
@@ -19,7 +21,7 @@ interface Choice {
   length: number;
   size: string;
 }
-interface Applied { key: string; layer: OutfitLayer; note: string }
+interface Applied { key: string; layer: OutfitLayer; note: string; simulationRan?: boolean }
 interface Pending { key: string; jobId: string; bodyId: string }
 type Choices = Partial<Record<Slot, Choice>>;
 type Results = Partial<Record<Slot, Applied>>;
@@ -33,6 +35,11 @@ const TYPES: Record<Slot, { value: GarmentType; label: string; length: number }[
 const BODY_KEY = 'tryon.mpfb.body_id';
 const OUTFIT_KEY = 'tryon.outfit.v1';
 const slotOf = (product: Product): Slot => product.category === 'pants' ? 'bottom' : product.category === 'dress' ? 'dress' : 'top';
+const historyCategory = (type: GarmentType): Product['category'] => {
+  if (type === 'tshirt') return 't_shirt';
+  if (type === 'skirt' || type === 'auto') return 'pants';
+  return type;
+};
 const newUpload = (slot: Slot): Choice => ({ key: crypto.randomUUID(), files: {}, type: TYPES[slot][0].value, length: TYPES[slot][0].length, size: 'M' });
 const fromProduct = (product: Product, size?: string): Choice => {
   const type = product.category === 't_shirt' ? 'tshirt' : product.category;
@@ -83,7 +90,7 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
         const saved = readSaved();
         if (saved.bodyId === savedId) setResults(saved.results || {});
       }).catch(() => {
-        if (mounted.current) setError('Không tải được model đã lưu. Kiểm tra backend hoặc tạo model mới.');
+        if (mounted.current) setError('Không tải được mẫu cơ thể đã lưu. Hãy tạo mẫu mới rồi thử lại.');
       }).finally(() => { if (mounted.current) setRestoring(false); });
     } else setRestoring(false);
     return () => { mounted.current = false; controllerRef.current?.abort(); };
@@ -173,7 +180,8 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
             choice.product.category, choice.product.colors[0]?.hex || '#ffffff', choice.size, controller.signal);
           if (controller.signal.aborted) return;
           applied = { key: choice.key, layer: { url: bodyBuilderApi.assetUrl(clothing), label, kind: 'catalog' },
-            note: choice.product.fittingMode === 'body_refit' ? 'Refit theo model; chưa kiểm chứng size thực tế.' : 'Căn theo chiều cao; giữ tư thế gốc của trang phục.' };
+            note: choice.product.fittingMode === 'body_refit' ? 'Căn theo mẫu cơ thể; chưa kiểm chứng size thực tế.' : 'Căn theo chiều cao; giữ tư thế gốc của trang phục.',
+            simulationRan: false };
         } else {
           const pendingJob = imageJobs[slot];
           const bodyId = body.body_id || body.job_id;
@@ -194,14 +202,21 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
           if (!canResume && !front) throw new Error(`Hãy tải ảnh mặt trước cho ${LABELS[slot].toLowerCase()}.`);
           let job = canResume
             ? await imageTryOnApi.get(pendingJob.jobId, controller.signal)
-            : await imageTryOnApi.create(bodyId,
-              { ...choice.files, front: front! }, choice.type, choice.length, controller.signal);
+            : await imageTryOnApi.create(bodyId, [{
+              slot: slot === 'dress' ? 'onepiece' : slot === 'top' ? 'upper' : 'lower',
+              garment_type: choice.type as TryOnGarmentType,
+              reference_value_cm: choice.length,
+              fit_mode: 'auto',
+              ease_cm: 0,
+              front: front!,
+              back: choice.files.back,
+            }], controller.signal);
           if (!mounted.current || controller.signal.aborted) return;
           setImageJobs((previous) => ({ ...previous, [slot]: { key: choice.key, jobId: job.job_id, bodyId } }));
           const deadline = Date.now() + 20 * 60 * 1000;
           while (job.status === 'pending' || job.status === 'running') {
             if (Date.now() > deadline) throw new Error(`Hết thời gian chờ ${label}. Kiểm tra worker rồi thử lại.`);
-            setStatus(`${LABELS[slot]} đang ${job.status === 'pending' ? 'chờ worker' : 'được dựng và căn theo model'}…`);
+            setStatus(`${LABELS[slot]} đang ${job.status === 'pending' ? 'được chuẩn bị' : 'được tạo và căn theo mẫu cơ thể'}…`);
             await new Promise((resolve) => window.setTimeout(resolve, 2500));
             controller.signal.throwIfAborted();
             job = await imageTryOnApi.get(job.job_id, controller.signal);
@@ -211,11 +226,32 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
             throw new Error(`${label}: ${job.error?.message || 'Không thể xử lý trang phục.'}`);
           }
           applied = { key: choice.key, layer: { url: imageTryOnApi.assetUrl(job.result.tryon_mesh.url), label, kind: 'image' },
-            note: `${job.result.source === 'mock' ? 'Kết quả minh họa. ' : ''}${job.result.simulation_ran ? 'Đã mô phỏng riêng món này.' : 'Xem trước tĩnh, chưa mô phỏng vải.'}${job.result.warnings.length ? ` ${job.result.warnings.join(', ')}` : ''}` };
+            note: `${job.result.source === 'mock' ? 'Kết quả minh họa. ' : ''}${job.result.simulation_ran ? 'Đã mô phỏng riêng món này.' : 'Xem trước tĩnh, chưa mô phỏng vải.'}${job.result.warnings.length ? ` ${job.result.warnings.join(', ')}` : ''}`,
+            simulationRan: job.result.simulation_ran };
           setImageJobs((previous) => { const next = { ...previous }; delete next[slot]; return next; });
         }
         if (!mounted.current || controller.signal.aborted) return;
         setResults((previous) => ({ ...previous, [slot]: applied }));
+        const timestamp = Date.now();
+        const historyItem: TryOnHistoryItem = {
+          id: `tryon-${crypto.randomUUID()}`,
+          productId: choice.product?.id || choice.key,
+          productName: choice.product?.name || `${LABELS[slot]} từ ảnh tải lên`,
+          category: historyCategory(choice.type),
+          categoryLabel: TYPES[slot].find((item) => item.value === choice.type)?.label || LABELS[slot],
+          date: new Date(timestamp).toLocaleString('vi-VN'),
+          timestamp,
+          resultPhotoUrl: choice.product?.imageUrl,
+          resultAssetUrl: applied.layer.url,
+          size: choice.product?.fittingMode ? choice.size : undefined,
+          colorName: choice.product?.colors[0]?.name,
+          colorHex: choice.product?.colors[0]?.hex,
+          inCart: false,
+          source: choice.product ? 'catalog' : 'upload',
+          simulationRan: applied.simulationRan ?? false,
+          notes: applied.simulationRan ? 'Mô phỏng đã hoàn tất.' : 'Bản xem trước; chưa mô phỏng vải.',
+        };
+        historyStorage.saveItem(historyItem);
       }
       setNotice('Đã cập nhật bộ đồ. Bạn có thể đổi riêng áo hoặc quần và tiếp tục phối.');
     } catch (reason) {
@@ -239,10 +275,10 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
     <header className="outfit-hero">
       <div><span className="outfit-eyebrow">PHÒNG THỬ ĐỒ CỦA BẠN</span><h1>Một model. Nhiều cách phối.</h1>
         <p>Chọn áo, đổi quần, tìm bộ đồ hợp với bạn — từ bộ sưu tập hoặc ảnh sản phẩm bên ngoài.</p></div>
-      <button type="button" onClick={onNavigateCatalog}>Khám phá sản phẩm ↗</button>
+      <button type="button" onClick={onNavigateCatalog}>Khám phá sản phẩm</button>
     </header>
     <ol className="outfit-steps" aria-label="Các bước thử đồ">
-      <li className={!body ? 'active' : ''}><b>{body ? '✓' : '1'}</b> Model của bạn</li>
+      <li className={!body ? 'active' : ''}><b>{body ? 'Xong' : '1'}</b> Model của bạn</li>
       <li className={body && !visibleResults.length ? 'active' : ''}><b>2</b> Phối áo & quần</li>
       <li className={visibleResults.length ? 'active' : ''}><b>3</b> Xem & đổi từng món</li>
     </ol>
@@ -251,7 +287,7 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
       <BodyPhotoCapture active={!body || editingBody} />
       <div className="outfit-panel"><BodyBuilderStep disabled={creating} onBack={() => body ? setEditingBody(false) : onNavigateCatalog?.()} onNext={(parameters) => void createBody(parameters)} /></div>
     </section>}
-    {creating && <p className="outfit-progress" role="status">Đang tạo model 3D bằng Blender. Bạn có thể giữ nguyên trang này…</p>}
+    {creating && <p className="outfit-progress" role="status">Đang tạo mẫu cơ thể 3D. Bạn có thể giữ nguyên trang này…</p>}
     {error && <p className="outfit-error" role="alert">{error}</p>}
     {body && !editingBody && <div className="outfit-workspace">
       <section className="outfit-stage outfit-panel">
@@ -316,7 +352,7 @@ export function OutfitTryOnPage({ initialGarment, initialSize, onNavigateCatalog
             {busy ? 'Đang cập nhật bộ đồ…' : pending.some(canResumeSlot) ? 'Tiếp tục xử lý bộ đồ' : pending.length ? `Thử ${pending.length} món đã chọn` : visibleResults.length ? 'Bộ đồ đã được cập nhật' : 'Chọn trang phục để bắt đầu'}
           </button>
           {status && <p role="status" className="outfit-progress">{status}</p>}
-          {!busy && pending.some(canResumeSlot) && <p className="outfit-note">Job đã gửi vẫn có thể chạy trên server. Bấm tiếp tục để theo dõi, hoặc bỏ món và chọn lại nếu muốn tạo yêu cầu mới.</p>}
+          {!busy && pending.some(canResumeSlot) && <p className="outfit-note">Yêu cầu trước đó vẫn đang được xử lý. Bấm tiếp tục để xem tiến độ, hoặc chọn lại món đồ để bắt đầu yêu cầu mới.</p>}
           {invalid && <p className="outfit-note">Ảnh tải lên chưa được lưu khi rời trang. Chọn lại mặt trước của món chưa áp dụng để tiếp tục.</p>}
           {notice && !busy && <p role="status" className="outfit-note">{notice}</p>}
         </div>

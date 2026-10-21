@@ -51,14 +51,14 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
     setProcessingStatus('Đang xử lý mô hình...');
 
     try {
-      setProcessingStatus('Blender đang dựng body MPFB 3D...');
+      setProcessingStatus('Đang tạo mẫu cơ thể 3D...');
       const bodyJob = manualBodyJob?.method === 'blender_mpfb'
         ? manualBodyJob
         : await bodyBuilderApi.generate(manualParams || defaultBodyParameters(heightCm));
       setManualBodyJob(bodyJob);
       setProcessingStatus(garment.fittingMode === 'body_refit'
-        ? 'Blender đang refit quần áo theo body MPFB...'
-        : 'Blender đang tạo hình minh họa trang phục...');
+        ? 'Đang căn trang phục theo mẫu cơ thể...'
+        : 'Đang tạo bản xem trước trang phục...');
       try {
         const clothingJob = await bodyBuilderApi.clothing(bodyJob.job_id, garment.id, garment.category,
           garment.colors[0]?.hex || '#ffffff', size);
@@ -103,9 +103,9 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
                   stepIndex === 1 ? 'active' : stepIndex > 1 ? 'completed' : ''
                 }`}
               >
-                {stepIndex > 1 ? '✓' : '1'}
+                {stepIndex > 1 ? 'Xong' : '1'}
               </div>
-              <span className="vfit-step-label">Body Blender</span>
+              <span className="vfit-step-label">Mẫu cơ thể</span>
               <span className="vfit-step-sublabel">
                 {stepIndex === 1 ? 'Đang thực hiện' : 'Hoàn tất'}
               </span>
@@ -129,7 +129,7 @@ export const TryOnPage: React.FC<TryOnPageProps> = ({ initialGarment }) => {
                   stepIndex === 2 ? 'active' : stepIndex > 2 ? 'completed' : ''
                 }`}
               >
-                {stepIndex > 2 ? '✓' : '2'}
+                {stepIndex > 2 ? 'Xong' : '2'}
               </div>
               <span className="vfit-step-label">Chọn trang phục & Size</span>
               <span className="vfit-step-sublabel">

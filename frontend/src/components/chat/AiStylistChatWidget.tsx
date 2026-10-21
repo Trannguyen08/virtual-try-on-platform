@@ -6,22 +6,20 @@ interface Message {
   id: string;
   sender: 'user' | 'bot';
   text: string;
-  isRefusal?: boolean;
-  source?: string;
   time: string;
 }
 
 const DEFAULT_WELCOME: Message = {
   id: 'welcome-msg',
   sender: 'bot',
-  text: 'Xin chào! Em là Stylist AI của V-Fit. Em có thể giúp anh/chị tư vấn size chuẩn xác theo vóc dáng, giải đáp phom dáng trang phục hoặc gợi ý cách phối đồ thời thượng hôm nay ạ! ✨',
+  text: 'Xin chào! Mình có thể tư vấn trang phục hoặc trả lời những câu hỏi khác của bạn.',
   time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
 };
 
 const QUICK_CHIPS = [
-  '👕 Cao 1m70 nặng 65kg lấy size gì?',
-  '✨ Áo này phối với quần gì đẹp nhất?',
-  '📏 Form dáng áo này ôm hay rộng rãi?',
+  'Cao 1m70 nặng 65kg lấy size gì?',
+  'Áo này phối với quần gì đẹp nhất?',
+  'Form dáng áo này ôm hay rộng rãi?',
 ];
 
 export const AiStylistChatWidget: React.FC = () => {
@@ -57,20 +55,12 @@ export const AiStylistChatWidget: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await askStylistChat({
-        query: textToSend,
-        height_cm: 170,
-        weight_kg: 65,
-        garment_category: 'tshirt',
-        fit_preference: 'regular',
-      });
+      const response = await askStylistChat({ query: textToSend });
 
       const botReply: Message = {
         id: `bot_${Date.now()}`,
         sender: 'bot',
         text: response.reply,
-        isRefusal: response.is_refusal,
-        source: response.source,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
@@ -102,28 +92,22 @@ export const AiStylistChatWidget: React.FC = () => {
         type="button"
         className="vfit-chat-fab"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label="Mở Trợ lý Stylist AI"
-        title="Trò chuyện với AI Stylist tư vấn may đo & phối đồ"
+        aria-label="Mở trợ lý AI"
+        title="Trò chuyện với trợ lý AI"
       >
-        <div className="vfit-chat-fab-avatar">
-          👗
-          <div className="vfit-chat-fab-status" />
-        </div>
-        <span className="vfit-chat-fab-text">Stylist AI</span>
+        <span className="vfit-chat-fab-text">Trợ lý AI</span>
       </button>
 
       {/* 2. Expandable Chat Window */}
       {isOpen && (
-        <aside className="vfit-chat-window" aria-label="Khung trò chuyện cùng Stylist AI">
+        <aside className="vfit-chat-window" aria-label="Khung trò chuyện với trợ lý AI">
           {/* Header */}
           <div className="vfit-chat-header">
             <div className="vfit-chat-header-info">
-              <div className="vfit-chat-header-avatar">✨</div>
-              <div>
-                <h4 className="vfit-chat-header-title">AI Fashion Stylist</h4>
+              <div className="vfit-chat-header-copy">
+                <h4 className="vfit-chat-header-title">Trợ lý AI</h4>
                 <p className="vfit-chat-header-sub">
-                  <span className="vfit-chat-header-dot" />
-                  Trực tuyến 24/7 • Deep Learning M4
+                  Hỏi về trang phục và các chủ đề khác
                 </p>
               </div>
             </div>
@@ -133,7 +117,7 @@ export const AiStylistChatWidget: React.FC = () => {
               onClick={() => setIsOpen(false)}
               aria-label="Đóng khung chat"
             >
-              ✕
+              Đóng
             </button>
           </div>
 
@@ -144,15 +128,10 @@ export const AiStylistChatWidget: React.FC = () => {
                 key={msg.id}
                 className={`vfit-chat-bubble ${msg.sender === 'user' ? 'user' : 'bot'}`}
               >
-                {msg.isRefusal && (
-                  <div className="vfit-chat-refusal-tag">
-                    🛡️ AI Guardrail: Câu hỏi ngoài phạm vi thời trang
-                  </div>
-                )}
-                <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
+                <div className="vfit-chat-message-text">{msg.text}</div>
                 <div
                   style={{
-                    fontSize: '0.65rem',
+                    fontSize: '0.75rem',
                     color: msg.sender === 'user' ? '#cbd5e1' : '#94a3b8',
                     textAlign: msg.sender === 'user' ? 'right' : 'left',
                     marginTop: '0.35rem',
@@ -194,7 +173,7 @@ export const AiStylistChatWidget: React.FC = () => {
             <input
               type="text"
               className="vfit-chat-input"
-              placeholder="Nhập câu hỏi cho Stylist..."
+              placeholder="Nhập câu hỏi..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -207,9 +186,7 @@ export const AiStylistChatWidget: React.FC = () => {
               disabled={isLoading || !inputText.trim()}
               aria-label="Gửi tin nhắn"
             >
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              Gửi
             </button>
           </div>
         </aside>

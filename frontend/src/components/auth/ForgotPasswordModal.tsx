@@ -41,7 +41,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
     <div className="vfit-modal-overlay" onClick={handleClose}>
       <div className="vfit-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="vfit-modal-close" onClick={handleClose} aria-label="Đóng">
-          ✕
+          Đóng
         </button>
 
         <h2 className="vfit-auth-title" style={{ fontSize: '1.45rem', marginBottom: '0.5rem' }}>
@@ -53,13 +53,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
 
         {errorMessage && (
           <div className="vfit-alert-banner" style={{ marginBottom: '1rem' }}>
-            <span>⚠️ {errorMessage}</span>
+            <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage ? (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✉️</div>
+            <div style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: 700 }}>Đặt lại mật khẩu</div>
             <p style={{ color: 'var(--vfit-success-emerald)', fontWeight: 600, fontSize: '0.95rem' }}>
               {successMessage}
             </p>

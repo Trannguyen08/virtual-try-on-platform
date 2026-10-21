@@ -9,7 +9,7 @@ const labels: Record<Product['category'], string> = {
 export function useGarmentProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogLoaded, setCatalogLoaded] = useState(false);
-  const [refitStatus, setRefitStatus] = useState('Đang kiểm tra kho quần áo MPFB…');
+  const [refitStatus, setRefitStatus] = useState('Đang tải danh sách trang phục…');
 
   useEffect(() => {
     let cancelled = false;
@@ -33,10 +33,10 @@ export function useGarmentProducts() {
       setCatalogLoaded(true);
       const missing = entries.filter((item) => !item.available).length;
       setRefitStatus(missing > 0
-        ? `Kho MPFB: ${ready.length} mẫu sẵn sàng, ${missing} mẫu chưa đủ asset.`
-        : `Kho MPFB: ${ready.length} mẫu sẵn sàng. Refit chưa đánh giá độ vừa theo size.`);
+        ? `Có ${ready.length} mẫu sẵn sàng; ${missing} mẫu chưa đủ dữ liệu.`
+        : `Có ${ready.length} mẫu sẵn sàng. Độ vừa theo size chưa được đánh giá.`);
     }).catch(() => {
-      if (!cancelled) setRefitStatus('Không tải được kho MPFB. Kiểm tra backend để xem các sản phẩm đã cài.');
+      if (!cancelled) setRefitStatus('Không tải được danh sách trang phục. Vui lòng thử lại sau.');
     });
     return () => { cancelled = true; };
   }, []);

@@ -120,7 +120,7 @@ export const AiSizeAdvisorModal: React.FC<AiSizeAdvisorModalProps> = ({
             color: '#64748b',
           }}
         >
-          ✕
+          Đóng
         </button>
 
         {/* Title */}
@@ -138,7 +138,6 @@ export const AiSizeAdvisorModal: React.FC<AiSizeAdvisorModalProps> = ({
               fontSize: '1.25rem',
             }}
           >
-            ✨
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
@@ -265,7 +264,7 @@ export const AiSizeAdvisorModal: React.FC<AiSizeAdvisorModalProps> = ({
             boxShadow: '0 4px 12px rgba(8, 10, 97, 0.2)',
           }}
         >
-          {loading ? 'Đang phân tích số đo...' : '🔍 Phân tích số đo & Tìm size lý tưởng'}
+          {loading ? 'Đang phân tích số đo...' : 'Phân tích số đo và tìm size phù hợp'}
         </button>
 
         {error && (
@@ -304,7 +303,7 @@ export const AiSizeAdvisorModal: React.FC<AiSizeAdvisorModalProps> = ({
             </div>
 
             <p style={{ margin: '0 0 0.85rem', fontSize: '0.85rem', color: '#334155', lineHeight: 1.5 }}>
-              💡 {result.recommendation.reason}
+              {result.recommendation.reason}
             </p>
 
             {/* Estimated Body Profile Chips */}
@@ -338,7 +337,7 @@ export const AiSizeAdvisorModal: React.FC<AiSizeAdvisorModalProps> = ({
                 cursor: 'pointer',
               }}
             >
-              ✓ Áp dụng Size {result.recommendation.recommended_size} cho đơn hàng
+              Áp dụng size {result.recommendation.recommended_size} cho đơn hàng
             </button>
           </div>
         )}

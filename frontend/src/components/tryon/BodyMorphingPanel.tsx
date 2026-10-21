@@ -47,7 +47,7 @@ export const BodyMorphingPanel: React.FC<BodyMorphingPanelProps> = ({
               gap: '0.25rem',
             }}
           >
-            {showAdvanced ? '▲ Ẩn bớt số đo' : '⚙️ Tùy chỉnh số đo chi tiết (Blender MPFB)'}
+            {showAdvanced ? 'Ẩn bớt số đo' : 'Tùy chỉnh số đo chi tiết'}
           </button>
         </div>
 
@@ -91,10 +91,10 @@ export const BodyMorphingPanel: React.FC<BodyMorphingPanelProps> = ({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--vfit-primary-container)', letterSpacing: '0.05em' }}>
-              🧬 Tham số giải phẫu cơ thể học 3D (MPFB2 Sliders)
+              Tùy chỉnh dáng cơ thể 3D
             </span>
             <span style={{ fontSize: '0.7rem', color: 'var(--vfit-secondary)' }}>
-              Đồng bộ trực tiếp với Blender 3D Engine
+              Các thay đổi được áp dụng vào mẫu cơ thể 3D
             </span>
           </div>
 
