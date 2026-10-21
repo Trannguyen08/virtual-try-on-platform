@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { Footer } from './components/common/Footer';
 import { AppTab, Navbar } from './components/common/Navbar';
 import { ProductDetailModal } from './components/catalog/ProductDetailModal';
+import { AiStylistChatWidget } from './components/chat/AiStylistChatWidget';
 import { AuthProvider } from './context/AuthContext';
 import { MOCK_PRODUCTS, Product } from './data/mockProducts';
 import { TryOnHistoryItem } from './data/mockHistory';
@@ -203,6 +204,9 @@ const MainContent: React.FC = () => {
 
       {/* Global Footer */}
       <Footer />
+
+      {/* Floating AI Stylist Chat Widget */}
+      <AiStylistChatWidget />
     </div>
   );
 };

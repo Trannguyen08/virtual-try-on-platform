@@ -5,7 +5,7 @@ from time import perf_counter
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import assets, body_builder, garments, health, image_tryon, jobs, tryon
+from backend.api import ai, assets, body_builder, garments, health, image_tryon, jobs, tryon
 from backend.core.config import Settings
 from backend.core.errors import register_error_handlers
 from backend.db.repository import AssetRepository, BodyRepository, ImageTryOnRepository, JobRepository
@@ -84,9 +84,10 @@ def create_app(
     )
     register_error_handlers(app)
     app.include_router(health.router)
-    for router in (garments.router, tryon.router, image_tryon.router,
+    for router in (ai.router, garments.router, tryon.router, image_tryon.router,
                    jobs.router, assets.router, body_builder.router):
         app.include_router(router, prefix="/api")
+    app.include_router(ai.router, prefix="/api/v1")
     app.mount("/garment3d", garment_app)
     return app
 
