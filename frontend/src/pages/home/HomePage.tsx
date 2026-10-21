@@ -36,7 +36,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       />
 
       {/* 4. Bottom CTA Showcase Banner */}
-      <section style={{ maxWidth: '1280px', margin: '2rem auto 5rem auto', padding: '0 2rem' }}>
+      <section className="vfit-home-cta-section" style={{ maxWidth: '1280px', margin: '2rem auto 5rem auto', padding: '0 2rem' }}>
         <div
           style={{
             background: 'linear-gradient(135deg, var(--vfit-primary-container) 0%, var(--vfit-dark-primary) 100%)',
@@ -85,10 +85,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               Phòng Thử Đồ Cá Nhân 3D
             </span>
             <h2 style={{ fontSize: '2.4rem', fontWeight: 800, margin: '0 0 1rem 0', letterSpacing: '-0.025em', lineHeight: '1.2' }}>
-              Sẵn sàng định hình phong cách cùng AI Try-On?
+              Sẵn sàng tạo body và thử trang phục?
             </h2>
             <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.6', margin: 0 }}>
-              Không còn nỗi lo mua sắm sai size hoặc quần áo không hợp dáng. Thử nghiệm tức thì ngay trên thiết bị của bạn hoàn toàn miễn phí.
+              Tạo hoặc cập nhật body 3D, tải ảnh trang phục và xem kết quả trong không gian 3D.
             </p>
           </div>
 

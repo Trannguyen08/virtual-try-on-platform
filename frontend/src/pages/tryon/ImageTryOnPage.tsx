@@ -1,17 +1,16 @@
 import React, { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { bodyBuilderApi, BodyBuilderJob, BodyParameters } from '../../api/bodyBuilderApi';
-import { GarmentType as ApiGarmentType } from '../../api/garment3d';
-import { imageTryOnApi, ImageTryOnJob } from '../../api/imageTryOnApi';
+import { imageTryOnApi, ImageTryOnJob, OutfitGarmentUpload, TryOnGarmentType } from '../../api/imageTryOnApi';
 import { GarmentFiles, GarmentImageInputs } from '../../components/GarmentImageInputs';
 import { BodyBuilderStep } from '../../components/tryon/BodyBuilderStep';
 import { Product } from '../../data/mockProducts';
 import { Garment360Viewer } from '../../viewer/Garment360Viewer';
 
 const BODY_KEY = 'tryon.mpfb.body_id';
-type GarmentType = Exclude<ApiGarmentType, 'auto'>;
 const JOB_KEY = 'tryon.image.job_id';
-const GARMENT_TYPES: GarmentType[] = ['tshirt', 'shirt', 'jacket', 'pants', 'skirt', 'dress'];
-const ESTIMATED_GARMENT_LENGTH_CM: Record<GarmentType, number> = {
+const UPPER_GARMENT_TYPES: TryOnGarmentType[] = ['tshirt', 'shirt', 'jacket'];
+const LOWER_GARMENT_TYPES: TryOnGarmentType[] = ['pants', 'skirt'];
+const ESTIMATED_GARMENT_LENGTH_CM: Record<TryOnGarmentType, number> = {
   tshirt: 70,
   shirt: 75,
   jacket: 68,
@@ -20,10 +19,13 @@ const ESTIMATED_GARMENT_LENGTH_CM: Record<GarmentType, number> = {
   dress: 115,
 };
 
-const GARMENT_LABELS: Record<GarmentType, string> = {
+const GARMENT_LABELS: Record<TryOnGarmentType, string> = {
   tshirt: 'Áo thun', shirt: 'Áo sơ mi', jacket: 'Áo khoác',
   pants: 'Quần', skirt: 'Chân váy', dress: 'Váy liền',
 };
+
+type GarmentFitMode = OutfitGarmentUpload['fit_mode'];
+type GarmentFitMeasurements = NonNullable<OutfitGarmentUpload['garment_measurements_cm']>;
 
 /** Rút gọn UUID — hiện 8 ký tự đầu */
 function shortId(id: string) { return id.length > 12 ? `${id.slice(0, 8)}…` : id; }
@@ -41,6 +43,8 @@ const ERROR_MESSAGES: Record<string, { title: string; detail: string; hint: stri
   BODY_SCALE_INVALID: { title: '⚠️ Kích thước body không hợp lệ', detail: 'Chiều cao body GLB nằm ngoài khoảng 1.2–2.3 m.', hint: 'Tạo lại body MPFB với chiều cao người thật của bạn.' },
   BLENDER_TIMEOUT: { title: '⏱ Quá thời gian xử lý', detail: 'Blender mất quá 4 phút để dựng cảnh thử đồ.', hint: 'Thử lại sau vài phút hoặc sử dụng ảnh trang phục nhỏ hơn.' },
   COMPOSITION_FAILED: { title: '❌ Không thể ghép áo và body', detail: 'Quá trình hợp nhất mesh áo và body gặp lỗi không xác định.', hint: 'Thử tải lại ảnh trang phục khác hoặc tạo body mới rồi thử lại.' },
+  BODY_MEASUREMENTS_MISSING: { title: 'Thiếu số đo body', detail: 'Body hiện tại chưa lưu đủ số đo để tự căn trang phục.', hint: 'Cập nhật số đo body hoặc chọn chế độ nhập số đo trang phục.' },
+  GARMENT_MEASUREMENT_MISMATCH: { title: 'Số đo trang phục chưa khớp', detail: 'Kích thước trang phục yêu cầu biến dạng quá lớn để căn an toàn.', hint: 'Kiểm tra lại số đo cm hoặc chọn Tự căn theo body.' },
 };
 function parseFriendlyError(raw: string) {
   for (const [code, msg] of Object.entries(ERROR_MESSAGES)) { if (raw.includes(code)) return msg; }
@@ -73,12 +77,11 @@ const S = {
   spinner: { width: 26, height: 26, borderRadius: '50%', border: '3px solid #c7d9f8', borderTopColor: '#4a39c7', animation: 'vfit-spin .7s linear infinite', flexShrink: 0 } as React.CSSProperties,
   errBanner: { background: 'linear-gradient(135deg,#fff8f0,#fff1e6)', border: '1.5px solid #f97316', borderRadius: 16, padding: '1.1rem 1.5rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column' as const, gap: '0.45rem' } as React.CSSProperties,
   errHint: { margin: 0, background: '#ffedd5', borderRadius: 10, padding: '0.45rem 0.7rem', fontSize: '.82rem', color: '#7c2d12' } as React.CSSProperties,
-  metaChip: { padding: '4px 12px', borderRadius: 999, fontSize: '.78rem', fontWeight: 700, background: '#eef0f5', color: '#4f586d' } as React.CSSProperties,
 };
 
-function initialType(product?: Product | null): GarmentType {
+function initialType(product?: Product | null): TryOnGarmentType {
   const category = product?.category === 't_shirt' ? 'tshirt' : product?.category;
-  return GARMENT_TYPES.find((c) => c === category) ?? 'tshirt';
+  return UPPER_GARMENT_TYPES.find((c) => c === category) ?? 'tshirt';
 }
 
 interface Props {
@@ -86,12 +89,91 @@ interface Props {
   onNavigateCatalog?: () => void;
 }
 
+interface GarmentFitControlsProps {
+  slot: 'upper' | 'lower';
+  mode: GarmentFitMode;
+  onModeChange: (mode: GarmentFitMode) => void;
+  easeCm: number;
+  onEaseChange: (value: number) => void;
+  measurements: GarmentFitMeasurements;
+  onMeasurementsChange: (value: GarmentFitMeasurements) => void;
+  disabled: boolean;
+}
+
+const GarmentFitControls: React.FC<GarmentFitControlsProps> = ({
+  slot, mode, onModeChange, easeCm, onEaseChange,
+  measurements, onMeasurementsChange, disabled,
+}) => {
+  const upper = slot === 'upper';
+  const fields: Array<{ key: keyof GarmentFitMeasurements; label: string; required: boolean }> = upper
+    ? [
+      { key: 'chest_circumference_cm', label: 'Vòng ngực áo', required: true },
+      { key: 'waist_circumference_cm', label: 'Vòng eo áo', required: false },
+      { key: 'hem_circumference_cm', label: 'Vòng gấu áo', required: false },
+    ]
+    : [
+      { key: 'waist_circumference_cm', label: 'Vòng eo quần/váy', required: true },
+      { key: 'hip_circumference_cm', label: 'Vòng mông quần/váy', required: true },
+    ];
+
+  return (
+    <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: 14, background: '#f7f8fc', border: '1px solid #e6e9f2' }}>
+      <label style={S.fieldLabel}>Cách căn trang phục
+        <select value={mode} disabled={disabled}
+          onChange={(event) => onModeChange(event.target.value as GarmentFitMode)} style={S.fieldCtrl}>
+          <option value="auto">Tự căn theo body</option>
+          <option value="measurements">Nhập số đo trang phục</option>
+        </select>
+      </label>
+      {mode === 'auto' ? (
+        <label style={{ ...S.fieldLabel, marginTop: '.8rem' }}>Độ dư vải
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input type="number" min={0} max={20} step={0.5} value={easeCm} disabled={disabled}
+              onChange={(event) => onEaseChange(Number(event.target.value))} style={{ ...S.fieldCtrl, width: 120 }} />
+            <span>cm</span>
+          </div>
+        </label>
+      ) : (
+        <>
+          <p style={{ margin: '.75rem 0', color: '#667085', fontSize: '.8rem', lineHeight: 1.5 }}>
+            Nhập số đo vòng quanh trang phục bằng cm, không phải chiều ngang khi trải phẳng.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '.75rem' }}>
+            {fields.map(({ key, label, required }) => (
+              <label key={key} style={S.fieldLabel}>{label}{required ? ' *' : ' (tùy chọn)'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input type="number" min={35} max={240} step={0.5}
+                    value={measurements[key] ?? ''} disabled={disabled}
+                    onChange={(event) => onMeasurementsChange({
+                      ...measurements,
+                      [key]: event.target.value === '' ? undefined : Number(event.target.value),
+                    })} style={{ ...S.fieldCtrl, width: 140 }} />
+                  <span>cm</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
   const [body, setBody] = useState<BodyBuilderJob | null>(null);
   const [editingBody, setEditingBody] = useState(false);
   const [creatingBody, setCreatingBody] = useState(false);
-  const [files, setFiles] = useState<GarmentFiles>({});
-  const [garmentType, setGarmentType] = useState<GarmentType>(() => initialType(initialGarment));
+  const [upperFiles, setUpperFiles] = useState<GarmentFiles>({});
+  const [lowerFiles, setLowerFiles] = useState<GarmentFiles>({});
+  const [includeLower, setIncludeLower] = useState(false);
+  const [upperType, setUpperType] = useState<TryOnGarmentType>(() => initialType(initialGarment));
+  const [lowerType, setLowerType] = useState<TryOnGarmentType>('pants');
+  const [upperFitMode, setUpperFitMode] = useState<GarmentFitMode>('auto');
+  const [lowerFitMode, setLowerFitMode] = useState<GarmentFitMode>('auto');
+  const [upperEaseCm, setUpperEaseCm] = useState(4);
+  const [lowerEaseCm, setLowerEaseCm] = useState(4);
+  const [upperMeasurements, setUpperMeasurements] = useState<GarmentFitMeasurements>({});
+  const [lowerMeasurements, setLowerMeasurements] = useState<GarmentFitMeasurements>({});
   const [job, setJob] = useState<ImageTryOnJob | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -137,7 +219,9 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
     setCreatingBody(true);
     setError('');
     try {
-      const created = await bodyBuilderApi.generate(parameters);
+      const created = body
+        ? await bodyBuilderApi.updateBody(body.body_id || body.job_id, parameters)
+        : await bodyBuilderApi.generate(parameters);
       const bodyId = created.body_id || created.job_id;
       setBody(created);
       setEditingBody(false);
@@ -153,7 +237,36 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!body || !files.front) return;
+    if (!body) return;
+    const upperHasInput = Object.values(upperFiles).some(Boolean);
+    const garments: OutfitGarmentUpload[] = [];
+    if (upperHasInput && upperFitMode === 'measurements' && !upperMeasurements.chest_circumference_cm) {
+      setError('Nhập vòng ngực thực tế của áo hoặc chọn Tự căn theo body.');
+      return;
+    }
+    if (includeLower && lowerFitMode === 'measurements'
+        && (!lowerMeasurements.waist_circumference_cm || !lowerMeasurements.hip_circumference_cm)) {
+      setError('Nhập vòng eo và vòng mông của quần/váy hoặc chọn Tự căn theo body.');
+      return;
+    }
+    if (upperHasInput && upperFiles.front) {
+      garments.push({ slot: 'upper', garment_type: upperType,
+        reference_value_cm: ESTIMATED_GARMENT_LENGTH_CM[upperType],
+          fit_mode: upperFitMode, ease_cm: upperFitMode === 'auto' ? upperEaseCm : 0,
+        garment_measurements_cm: upperFitMode === 'measurements' ? upperMeasurements : undefined,
+        front: upperFiles.front, back: upperFiles.back });
+    }
+    if (includeLower && lowerFiles.front) {
+      garments.push({ slot: 'lower', garment_type: lowerType,
+        reference_value_cm: ESTIMATED_GARMENT_LENGTH_CM[lowerType],
+          fit_mode: lowerFitMode, ease_cm: lowerFitMode === 'auto' ? lowerEaseCm : 0,
+        garment_measurements_cm: lowerFitMode === 'measurements' ? lowerMeasurements : undefined,
+        front: lowerFiles.front, back: lowerFiles.back });
+    }
+    if (!garments.length || (upperHasInput && !upperFiles.front) || (includeLower && !lowerFiles.front)) {
+      setError('Mỗi món đã chọn cần có ảnh mặt trước.');
+      return;
+    }
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -161,11 +274,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
     setError('');
     setJob(null);
     try {
-      const created = await imageTryOnApi.create(
-        body.body_id || body.job_id,
-        { ...files, front: files.front }, garmentType,
-        ESTIMATED_GARMENT_LENGTH_CM[garmentType], controller.signal,
-      );
+      const created = await imageTryOnApi.create(body.body_id || body.job_id, garments, controller.signal);
       setJob(created);
       window.localStorage.setItem(JOB_KEY, created.job_id);
       setSubmitting(false);
@@ -239,7 +348,7 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
           )}
           <div style={S.inputRow}>
             <button type="button" style={S.btnPrimary} disabled={active || creatingBody}
-              onClick={() => setEditingBody(true)}>{bodyId ? '+ Tạo body mới' : '+ Tạo body'}</button>
+              onClick={() => setEditingBody(true)}>{bodyId ? 'Chỉnh thông số body' : '+ Tạo body'}</button>
             {bodyId && bodyAssetUrl && (
               <a href={bodyAssetUrl} download="body-3d.glb" style={{ ...S.btnSecondary, textDecoration: 'none' }}>
                 Tải body GLB
@@ -261,6 +370,8 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
         {editingBody && (
           <div style={{ ...S.card, border: '1.5px solid #c7cef8' }}>
             <BodyBuilderStep onBack={() => setEditingBody(false)} disabled={creatingBody}
+              initialParams={body?.parameters || null}
+              submitLabel={body ? 'Lưu thông số và cập nhật body hiện tại' : undefined}
               onNext={(p) => void createBody(p)} />
           </div>
         )}
@@ -269,7 +380,43 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
         {body && (
           <form onSubmit={(e) => void submit(e)}>
             <div style={{ marginBottom: '1.25rem' }}>
-              <GarmentImageInputs files={files} onChange={setFiles} disabled={active} tryOnImagesOnly />
+              <div style={S.card}>
+                <h3 style={{ marginTop: 0 }}>Áo (có thể bỏ qua nếu chỉ thử quần)</h3>
+                <label style={S.fieldLabel}>Loại áo
+                  <select value={upperType} disabled={active}
+                    onChange={(e) => setUpperType(e.target.value as TryOnGarmentType)} style={S.fieldCtrl}>
+                    {UPPER_GARMENT_TYPES.map((type) => <option key={type} value={type}>{GARMENT_LABELS[type]}</option>)}
+                  </select>
+                </label>
+                <GarmentImageInputs idPrefix="upper-garment" files={upperFiles} onChange={setUpperFiles}
+                  disabled={active} tryOnImagesOnly />
+                <GarmentFitControls slot="upper" mode={upperFitMode} onModeChange={setUpperFitMode}
+                  easeCm={upperEaseCm} onEaseChange={setUpperEaseCm}
+                  measurements={upperMeasurements} onMeasurementsChange={setUpperMeasurements}
+                  disabled={active} />
+                <label style={{ ...S.fieldLabel, flexDirection: 'row', alignItems: 'center', marginTop: '1rem' }}>
+                  <input type="checkbox" checked={includeLower} disabled={active}
+                    onChange={(e) => setIncludeLower(e.target.checked)} />
+                  Thử thêm quần hoặc chân váy
+                </label>
+                {includeLower && <>
+                  <label style={S.fieldLabel}>Loại trang phục thân dưới
+                    <select value={lowerType} disabled={active}
+                      onChange={(e) => setLowerType(e.target.value as TryOnGarmentType)} style={S.fieldCtrl}>
+                      {LOWER_GARMENT_TYPES.map((type) => <option key={type} value={type}>{GARMENT_LABELS[type]}</option>)}
+                    </select>
+                  </label>
+                  <GarmentImageInputs idPrefix="lower-garment" files={lowerFiles} onChange={setLowerFiles}
+                    disabled={active} tryOnImagesOnly />
+                  <GarmentFitControls slot="lower" mode={lowerFitMode} onModeChange={setLowerFitMode}
+                    easeCm={lowerEaseCm} onEaseChange={setLowerEaseCm}
+                    measurements={lowerMeasurements} onMeasurementsChange={setLowerMeasurements}
+                    disabled={active} />
+                </>}
+                <p style={{ color: '#8991aa', fontSize: '.8rem' }}>
+                  Mỗi món cần ảnh mặt trước; ảnh mặt sau tùy chọn. Có thể tạo outfit áo và quần trong cùng một lượt.
+                </p>
+              </div>
             </div>
             <div style={S.card}>
               <div style={S.cardHead}>
@@ -278,22 +425,12 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
                   Thông tin trang phục
                 </h2>
               </div>
-              <div style={S.fieldGrid}>
-                <label style={S.fieldLabel}>
-                  Loại trang phục
-                  <select value={garmentType} disabled={active}
-                    onChange={(e) => setGarmentType(e.target.value as GarmentType)}
-                    style={S.fieldCtrl}>
-                    {GARMENT_TYPES.map((t) => <option key={t} value={t}>{GARMENT_LABELS[t]}</option>)}
-                  </select>
-                </label>
-              </div>
               <p style={{ margin: '0.6rem 0 0', color: '#8c94a7', fontSize: '.8rem' }}>
-                💡 Tỉ lệ được ước lượng theo loại trang phục; mặt sau không có ảnh sẽ được suy từ mặt trước.
+                Độ ôm được căn theo số đo body hoặc số đo vòng quanh trang phục bạn nhập; ảnh là nguồn hình dáng ước lượng.
               </p>
               <button type="submit"
-                style={{ ...S.btnSubmit, opacity: active || !files.front ? .5 : 1, cursor: active || !files.front ? 'not-allowed' : 'pointer' }}
-                disabled={active || !files.front}>
+                style={{ ...S.btnSubmit, opacity: active ? .5 : 1, cursor: active ? 'not-allowed' : 'pointer' }}
+                disabled={active}>
                 {active ? '⏳ Đang xử lý…' : '✨ Tạo cảnh thử đồ 3D'}
               </button>
             </div>
@@ -342,15 +479,10 @@ export const ImageTryOnPage: React.FC<Props> = ({ initialGarment }) => {
               <a style={{ ...S.btnSecondary, textDecoration: 'none', fontSize: '.82rem', padding: '5px 14px' }}
                 href={imageTryOnApi.assetUrl(result.tryon_mesh.url)} download>↓ Tải GLB</a>
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <span style={S.metaChip}>Xuyên mesh: {(result.penetration_fraction * 100).toFixed(1)}%</span>
-              <span style={{ ...S.metaChip, background: result.simulation_ran ? '#dcfce7' : '#f0f4ff', color: result.simulation_ran ? '#166534' : '#4a39c7' }}>
-                {result.simulation_ran ? '✅ Mô phỏng vải đã chạy' : 'Mô phỏng vải: chưa chạy'}
-              </span>
-              {result.warnings.length > 0 && (
-                <span style={{ ...S.metaChip, background: '#fef9c3', color: '#854d0e' }}>⚠️ {result.warnings.join(', ')}</span>
-              )}
-            </div>
+            <p style={{ margin: '0 0 1rem', color: '#667085', fontSize: '.88rem' }}>
+              Cảnh 3D là bản xem trước tĩnh. {result.warnings.some((warning) => warning.includes('BACK_INFERRED_FROM_FRONT'))
+                ? 'Mặt sau được ước lượng từ ảnh mặt trước.' : ''}
+            </p>
             <Garment360Viewer modelUrl={imageTryOnApi.assetUrl(result.tryon_mesh.url)} />
           </div>
         )}

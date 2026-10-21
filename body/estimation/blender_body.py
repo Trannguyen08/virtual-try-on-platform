@@ -105,6 +105,24 @@ def mpfb_body(params, skin, preserve=False):
     human = HumanService.create_human(mask_helpers=True, detailed_helpers=True,
                                       extra_vertex_groups=True, feet_on_ground=True,
                                       scale=0.1, macro_detail_dict=macro)
+    proportions = dict(params["proportions"])
+    measurements = params.get("measurements_cm") or {}
+    height_cm = params["height_cm"]
+    physical_targets = {
+        "shoulder_width": ("shoulder_width_cm", 0.247, 24.0),
+        "chest": ("chest_cm", 0.53, 34.0),
+        "waist": ("waist_cm", 0.45, 34.0),
+        "hips": ("hip_cm", 0.55, 34.0),
+        "leg_length": ("inseam_cm", 0.47, 26.0),
+    }
+    for proportion, (measurement, height_ratio, span_cm) in physical_targets.items():
+        value_cm = measurements.get(measurement)
+        if value_cm is not None:
+            baseline_cm = height_cm * height_ratio
+            proportions[proportion] = max(
+                0.0, min(1.0, 0.5 + (value_cm - baseline_cm) / span_cm)
+            )
+
     targets = {
         "shoulder_width": "measure-shoulder-dist",
         "waist": "measure-waist-circ",
@@ -117,7 +135,7 @@ def mpfb_body(params, skin, preserve=False):
     }
     morphs = []
     for key, target in targets.items():
-        value = params["proportions"][key]
+        value = proportions[key]
         if value != 0.5:
             for name in (target,) if isinstance(target, str) else target:
                 morphs.append({"target": f"{name}-{'incr' if value > 0.5 else 'decr'}",

@@ -17,6 +17,7 @@ import './styles/tryon.css';
 import './styles/history.css';
 import './styles/productDetail.css';
 import './styles/garment3d.css';
+import './styles/layout.css';
 
 const Garment3DPage = React.lazy(() => import('./pages/Garment3DPage'));
 

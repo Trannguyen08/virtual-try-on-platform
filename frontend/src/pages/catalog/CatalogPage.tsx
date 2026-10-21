@@ -96,10 +96,10 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
   }, [products, selectedCategory, selectedGender, selectedSize, selectedColor, maxPrice, searchQuery, sortBy]);
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#fdfcfe', paddingTop: '5.5rem' }}>
-      <p role="status" style={{ padding: '0 2rem', color: 'var(--vfit-secondary)' }}>{refitStatus}</p>
+    <div className="vfit-catalog-page" style={{ width: '100%', minHeight: '100vh', backgroundColor: '#fdfcfe', paddingTop: '5.5rem' }}>
+      {refitStatus && <p role="status" className="vfit-catalog-status">{refitStatus}</p>}
       {/* Top Editorial Breadcrumbs & Header */}
-      <section style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 2rem 1rem 2rem' }}>
+      <section className="vfit-catalog-heading" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem 2rem 1rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--vfit-secondary)' }}>
           <span style={{ cursor: 'pointer', color: 'var(--vfit-primary-container)', fontWeight: 600 }} onClick={onNavigateHome}>
             Trang chủ
@@ -117,7 +117,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               BỘ SƯU TẬP TRANG PHỤC
             </h1>
             <p style={{ color: 'var(--vfit-secondary)', fontSize: '1rem', marginTop: '0.25rem', maxWidth: '36rem' }}>
-              Khám phá và chọn lựa trang phục thời trang cao cấp để thử trực tiếp trên cơ thể 3D của bạn với tỷ lệ chuẩn xác.
+              Chọn trang phục và xem bản phối trên mô hình body 3D của bạn.
             </p>
           </div>
 

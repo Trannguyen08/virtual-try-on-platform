@@ -8,6 +8,7 @@ interface Props {
   onChange: (next: GarmentFiles) => void;
   disabled?: boolean;
   tryOnImagesOnly?: boolean;
+  idPrefix?: string;
 }
 
 const SLOTS: Array<{ view: GarmentView; label: string; required?: boolean }> = [
@@ -24,6 +25,7 @@ function ViewSlot({
   file,
   disabled,
   tryOnImagesOnly,
+  idPrefix = 'garment',
   onFile,
 }: {
   view: GarmentView;
@@ -32,10 +34,12 @@ function ViewSlot({
   file?: File;
   disabled?: boolean;
   tryOnImagesOnly?: boolean;
+  idPrefix?: string;
   onFile: (file?: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const inputId = useId();
+  const generatedId = useId();
+  const inputId = idPrefix ? `${idPrefix}-${view}` : `${generatedId}-${view}`;
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(
     () => () => {
@@ -113,15 +117,15 @@ function ViewSlot({
   );
 }
 
-export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled, tryOnImagesOnly }) => (
-  <section className="g3d-panel" aria-labelledby="garment-images-title">
+export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled, tryOnImagesOnly, idPrefix }) => (
+  <section className="g3d-panel" aria-labelledby={`${idPrefix || 'garment'}-images-title`}>
     <div className="g3d-section-heading">
       <div>
         <span className="g3d-eyebrow">Tải ảnh trang phục</span>
-        <h2 id="garment-images-title">Ảnh cùng một trang phục</h2>
+        <h2 id={`${idPrefix || 'garment'}-images-title`}>Ảnh cùng một trang phục</h2>
       </div>
       <span className="g3d-view-count">
-        {Object.values(files).filter(Boolean).length}/4 góc
+        {Object.values(files).filter(Boolean).length}/{tryOnImagesOnly ? 2 : 4} góc
       </span>
     </div>
     <p className="g3d-section-copy">
@@ -135,10 +139,11 @@ export const GarmentImageInputs: React.FC<Props> = ({ files, onChange, disabled,
       </p>
     </div>
     <div className="g3d-upload-grid">
-      {SLOTS.map((slot) => (
+      {(tryOnImagesOnly ? SLOTS.filter(({ view }) => view === 'front' || view === 'back') : SLOTS).map((slot) => (
         <ViewSlot
           key={slot.view}
           {...slot}
+          idPrefix={idPrefix}
           file={files[slot.view]}
           disabled={disabled}
           tryOnImagesOnly={tryOnImagesOnly}

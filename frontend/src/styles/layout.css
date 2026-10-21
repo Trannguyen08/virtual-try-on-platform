@@ -1,0 +1,136 @@
+/* Shared page frame: every route uses the full viewport width with consistent gutters. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.vfit-hero,
+.vfit-products-section,
+.vfit-history-page,
+.g3d-app,
+.vfit-legacy-tryon-page,
+.vfit-legacy-tryon-viewer {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.vfit-hero,
+.vfit-products-section,
+.vfit-history-page {
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-how-it-works-content,
+.vfit-section-bg > div:first-child,
+.vfit-bento-grid,
+.vfit-footer-inner {
+  width: 100%;
+  max-width: none !important;
+}
+
+.vfit-home-cta-section,
+.vfit-catalog-heading {
+  width: 100%;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-catalog-layout {
+  width: 100%;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-catalog-status {
+  margin: 0;
+  padding: 0.65rem clamp(1rem, 3vw, 3.5rem);
+  color: #5d6474;
+  background: #f4f5fa;
+  font-size: 0.875rem;
+}
+
+.g3d-app {
+  padding: 2rem clamp(1rem, 3vw, 3.5rem) 4rem !important;
+}
+
+.g3d-hero,
+.g3d-panel,
+.g3d-submit-row,
+.g3d-result__footer {
+  border-radius: 18px;
+}
+
+.vfit-showcase-caption {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--vfit-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.vfit-showcase-container {
+  width: 100%;
+  max-width: min(100%, 620px);
+}
+
+.vfit-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.vfit-footer-brand-name {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.vfit-footer-brand p {
+  max-width: 42rem;
+  margin: 0.8rem 0 0;
+  color: #c3cada;
+  line-height: 1.6;
+}
+
+.vfit-footer-inner small {
+  flex: none;
+  color: #9ca6b8;
+}
+
+@media (max-width: 640px) {
+  .vfit-footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .vfit-home-cta-section > div {
+    padding: 2rem 1.25rem !important;
+  }
+}

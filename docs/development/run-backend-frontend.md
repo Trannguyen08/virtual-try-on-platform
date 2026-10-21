@@ -76,7 +76,7 @@ Mở địa chỉ Vite in ra terminal, thông thường là [http://localhost:51
 
 Mở [http://localhost:5173/garment-3d](http://localhost:5173/garment-3d) hoặc chọn mục **Tạo trang phục 3D** trong menu. Frontend gọi các route `/garment3d/...` trên backend chính tại `http://localhost:8000`; không cần tiến trình backend thứ hai. Nếu API chạy ở origin khác, đặt `VITE_API_URL` cho frontend trước khi chạy Vite. Đường dẫn cũ `/garment3d.html` chuyển tiếp đến trang mới. Xem thêm [hướng dẫn Garment 3D](../../frontend/GARMENT3D.md).
 
-Frontend hiện gọi API tại `http://localhost:8000`; backend mặc định cho phép CORS từ `http://localhost:5173`. Nếu cổng 5173 đã bị chiếm và Vite tự chọn cổng khác, cần giải phóng cổng 5173 hoặc cấu hình lại `CORS_ORIGINS` cho backend trước khi chạy. Trong giao diện, cả nút tạo body từ thông số và nút tiếp tục với body mẫu đều gọi Blender MPFB2; ảnh chọn ở bước đầu chỉ là ảnh xem trước.
+Frontend hiện gọi API tại `http://localhost:8000`; backend mặc định cho phép CORS từ `http://localhost:5173` với các method `GET`, `POST` và `PUT`. Nếu cổng 5173 đã bị chiếm và Vite tự chọn cổng khác, cần giải phóng cổng 5173 hoặc cấu hình lại `CORS_ORIGINS` cho backend trước khi chạy. Trong giao diện, cả nút tạo body từ thông số và nút tiếp tục với body mẫu đều gọi Blender MPFB2; ảnh chọn ở bước đầu chỉ là ảnh xem trước.
 
 Xem [kế hoạch ghép body với trang phục 3D đã tạo](body-garment-tryon-integration-plan.md) để biết các đầu việc, thứ tự triển khai và tiêu chí nghiệm thu cho luồng thử đồ thật.
 

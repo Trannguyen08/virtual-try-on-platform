@@ -17,8 +17,8 @@ def arguments():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser()
     parser.add_argument("--body", required=True)
-    parser.add_argument("--garment", required=True)
-    parser.add_argument("--metadata", required=True)
+    parser.add_argument("--garment", action="append", required=True)
+    parser.add_argument("--metadata", action="append", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--simulate-cloth", action="store_true")
     return parser.parse_args(argv)
@@ -267,6 +267,96 @@ def fit_parametric_shell(trees, garment_objects, body_depth_bounds,
     return moved, deep, large, projected, missed
 
 
+def fit_garment_width_profile(garment_objects, metadata, *, category):
+    """Scale the reconstructed shell by body/garment circumferences in cm."""
+    fit = metadata.get("fit_settings") or {}
+    mode = fit.get("mode", "auto")
+    body = metadata.get("body_measurements_cm") or {}
+    garment = fit.get("garment_measurements_cm") or {}
+    ease_cm = float(fit.get("ease_cm", 4.0)) if mode == "auto" else 0.0
+    measured = metadata.get("measurements") or {}
+
+    def reconstructed_value(key):
+        item = measured.get(key) or {}
+        value = item.get("value_cm")
+        return float(value) if value is not None else None
+
+    def width_factor(target_circumference, current_flat_width):
+        if not target_circumference or not current_flat_width:
+            return None
+        # Approximate a front-view chord from circumference using an oval torso.
+        return (float(target_circumference) * 0.40) / float(current_flat_width)
+
+    sections = []
+    if category in {"tshirt", "shirt", "jacket", "dress"}:
+        target_chest = (garment.get("chest_circumference_cm") if mode == "measurements"
+                        else float(body.get("chest_cm") or 0) + ease_cm)
+        target_waist = (garment.get("waist_circumference_cm") if mode == "measurements"
+                        else float(body.get("waist_cm") or 0) + ease_cm)
+        target_hem = (garment.get("hem_circumference_cm") if mode == "measurements"
+                      else float(body.get("waist_cm") or 0) + ease_cm)
+        if mode == "auto" and (not body.get("chest_cm") or not body.get("waist_cm")):
+            raise ValueError("BODY_MEASUREMENTS_MISSING: save body measurements before auto fit")
+        factors = (
+            (0.68, width_factor(target_chest, reconstructed_value("chest_flat_width")), "chest"),
+            (0.32, width_factor(target_waist, reconstructed_value("waist_flat_width")), "waist"),
+            (0.04, width_factor(target_hem, reconstructed_value("hem_flat_width")), "hem"),
+        )
+        sections.extend((position, factor, section)
+                        for position, factor, section in factors if factor is not None)
+    elif category in {"pants", "skirt"}:
+        target_waist = (garment.get("waist_circumference_cm") if mode == "measurements"
+                        else float(body.get("waist_cm") or 0) + ease_cm)
+        target_hip = (garment.get("hip_circumference_cm") if mode == "measurements"
+                      else float(body.get("hip_cm") or 0) + ease_cm)
+        if mode == "auto" and (not body.get("waist_cm") or not body.get("hip_cm")):
+            raise ValueError("BODY_MEASUREMENTS_MISSING: save body measurements before auto fit")
+        factors = (
+            (0.98, width_factor(target_waist, reconstructed_value("waist_flat_width")), "waist"),
+            (0.70, width_factor(target_hip, reconstructed_value("hip_flat_width")), "hip"),
+        )
+        sections.extend((position, factor, section)
+                        for position, factor, section in factors if factor is not None)
+
+    if not sections:
+        raise ValueError("BODY_MEASUREMENTS_MISSING: no usable body/garment dimensions")
+    for _position, factor, section in sections:
+        if not 0.65 <= factor <= 1.5:
+            raise ValueError(
+                f"GARMENT_MEASUREMENT_MISMATCH: {section} width needs an unsafe scale"
+            )
+
+    low, high = bounds(garment_objects)
+    center_x = (low[0] + high[0]) / 2
+    bottom_z, top_z = low[2], high[2]
+    height = top_z - bottom_z
+    if height <= 0:
+        raise ValueError("GARMENT_MESH_MISSING: garment has no vertical extent")
+    sections.sort(key=lambda item: item[0])
+    from mathutils import Vector
+
+    for obj in garment_objects:
+        inverse = obj.matrix_world.inverted()
+        for vertex in obj.data.vertices:
+            point = obj.matrix_world @ vertex.co
+            position = min(1.0, max(0.0, (point.z - bottom_z) / height))
+            if position <= sections[0][0]:
+                factor = sections[0][1]
+            elif position >= sections[-1][0]:
+                factor = sections[-1][1]
+            else:
+                for first, second in zip(sections, sections[1:]):
+                    if first[0] <= position <= second[0]:
+                        blend = (position - first[0]) / (second[0] - first[0])
+                        factor = first[1] + blend * (second[1] - first[1])
+                        break
+            fitted = Vector((center_x + (point.x - center_x) * factor,
+                             point.y, point.z))
+            vertex.co = inverse @ fitted
+        obj.data.update()
+    return {section: round(factor, 3) for _position, factor, section in sections}
+
+
 def fit_to_body(trees, garment_objects):
     """Move penetrating garment vertices to 1 cm outside the body surface."""
     max_displacement = 0.12
@@ -339,73 +429,95 @@ def main():
     args = arguments()
     if args.simulate_cloth:
         raise ValueError("SIMULATION_UNAVAILABLE: cloth solver has not been calibrated for this mesh")
-    metadata = json.loads(Path(args.metadata).read_text(encoding="utf-8"))
-    frame = metadata.get("coordinate_system") or {}
-    if not metadata.get("fit_ready") or frame != {
-        "handedness": "right", "up_axis": "Y", "forward_axis": "+Z",
-        "mesh_unit": "m", "measurement_unit": "cm",
-    }:
-        raise ValueError("GARMENT_FRAME_INVALID: calibrated Y-up garment is required")
+    if len(args.garment) != len(args.metadata):
+        raise ValueError("GARMENT_FRAME_INVALID: each garment needs matching metadata")
+    metadata_items = [json.loads(Path(path).read_text(encoding="utf-8"))
+                      for path in args.metadata]
+    for metadata in metadata_items:
+        frame = metadata.get("coordinate_system") or {}
+        if not metadata.get("fit_ready") or frame != {
+            "handedness": "right", "up_axis": "Y", "forward_axis": "+Z",
+            "mesh_unit": "m", "measurement_unit": "cm",
+        }:
+            raise ValueError("GARMENT_FRAME_INVALID: calibrated Y-up garment is required")
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete()
     bpy.ops.import_scene.gltf(filepath=args.body)
     body = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     if not body:
         raise ValueError("BODY_MESH_MISSING")
-    body_names = {obj.name for obj in bpy.context.scene.objects}
-    bpy.ops.import_scene.gltf(filepath=args.garment)
-    garment = [obj for obj in bpy.context.scene.objects
-               if obj.type == "MESH" and obj.name not in body_names]
-    if not garment:
-        raise ValueError("GARMENT_MESH_MISSING")
     low_body, high_body = bounds(body)
-    low_garment, high_garment = bounds(garment)
     body_height = high_body[2] - low_body[2]
     if not 1.2 <= body_height <= 2.3:
         raise ValueError("BODY_SCALE_INVALID")
-    category = metadata.get("garment_type")
-    anchor_fraction = 0.58 if category in {"pants", "skirt"} else 0.84
     body_center_x = (low_body[0] + high_body[0]) / 2
-    # Whole-body depth bounds include the face and buttocks. Centering a thin
-    # garment there places both panels in front of the torso instead of around it.
-    body_center_y = torso_depth_center(
-        body_vertices(body), center_x=body_center_x,
-        bottom_z=low_body[2], body_height=body_height, category=category,
-    )
-    garment_center_x = (low_garment[0] + high_garment[0]) / 2
-    garment_center_y = (low_garment[1] + high_garment[1]) / 2
-    translation = (
-        body_center_x - garment_center_x,
-        body_center_y - garment_center_y,
-        low_body[2] + anchor_fraction * body_height - high_garment[2],
-    )
     from mathutils import Vector
-
-    for obj in garment:
-        obj.matrix_world.translation += Vector(translation)
-    bpy.context.view_layer.update()
     surfaces = body_surfaces(body)
-    parametric = (metadata.get("reconstruction_mode") == "local_parametric"
-                  and category in {"tshirt", "shirt", "jacket", "dress",
-                                   "pants", "skirt"})
-    if parametric:
-        moved, too_deep, large_adjustments, projected, missed = fit_parametric_shell(
-            surfaces, garment, (low_body[1], high_body[1]),
-            category=category, body_bottom=low_body[2], body_height=body_height,
+    placements = []
+    garment_objects = []
+    totals = {"moved": 0, "deep": 0, "large": 0, "projected": 0, "missed": 0}
+    tested_inside = []
+    tested_severe = []
+    for garment_path, metadata in zip(args.garment, metadata_items, strict=True):
+        before = {obj.name for obj in bpy.context.scene.objects}
+        bpy.ops.import_scene.gltf(filepath=garment_path)
+        garment = [obj for obj in bpy.context.scene.objects
+                   if obj.type == "MESH" and obj.name not in before]
+        if not garment:
+            raise ValueError("GARMENT_MESH_MISSING")
+        garment_objects.extend(garment)
+        category = metadata.get("garment_type")
+        low_garment, high_garment = bounds(garment)
+        anchor_fraction = 0.58 if category in {"pants", "skirt"} else 0.84
+        body_center_y = torso_depth_center(
+            body_vertices(body), center_x=body_center_x,
+            bottom_z=low_body[2], body_height=body_height, category=category,
         )
-    else:
-        moved, too_deep, large_adjustments = fit_to_body(surfaces, garment)
-        projected = missed = 0
-    garment_vertex_count = sum(len(obj.data.vertices) for obj in garment)
-    if not parametric:
-        validate_surface_adjustment(large_adjustments, garment_vertex_count)
-    bpy.context.view_layer.update()
-    inside, severe = penetration_fraction(surfaces, garment)
-    if severe > 0.01 or inside > 0.03 or (not parametric and too_deep > garment_vertex_count * 0.05):
-        raise ValueError(
-            "SEVERE_MESH_PENETRATION: "
-            f"inside={inside:.4f}, severe={severe:.4f}, deep={too_deep}"
+        garment_center_x = (low_garment[0] + high_garment[0]) / 2
+        garment_center_y = (low_garment[1] + high_garment[1]) / 2
+        translation = (
+            body_center_x - garment_center_x,
+            body_center_y - garment_center_y,
+            low_body[2] + anchor_fraction * body_height - high_garment[2],
         )
+        for obj in garment:
+            obj.matrix_world.translation += Vector(translation)
+        bpy.context.view_layer.update()
+        parametric = (metadata.get("reconstruction_mode") == "local_parametric"
+                      and category in {"tshirt", "shirt", "jacket", "dress", "pants", "skirt"})
+        fit_profile = (fit_garment_width_profile(garment, metadata, category=category)
+                       if parametric else {})
+        if parametric:
+            moved, deep, large, projected, missed = fit_parametric_shell(
+                surfaces, garment, (low_body[1], high_body[1]),
+                category=category, body_bottom=low_body[2], body_height=body_height,
+            )
+        else:
+            moved, deep, large = fit_to_body(surfaces, garment)
+            projected = missed = 0
+        vertex_count = sum(len(obj.data.vertices) for obj in garment)
+        if not parametric:
+            validate_surface_adjustment(large, vertex_count)
+        bpy.context.view_layer.update()
+        inside, severe = penetration_fraction(surfaces, garment)
+        if severe > 0.01 or inside > 0.03 or (not parametric and deep > vertex_count * 0.05):
+            raise ValueError(
+                "SEVERE_MESH_PENETRATION: "
+                f"inside={inside:.4f}, severe={severe:.4f}, deep={deep}"
+            )
+        for key, value in (("moved", moved), ("deep", deep), ("large", large),
+                           ("projected", projected), ("missed", missed)):
+            totals[key] += value
+        tested_inside.append(inside)
+        tested_severe.append(severe)
+        placements.append({
+            "garment_type": category,
+            "placement": "body_ray_projected_shell" if parametric
+            else "body_height_anchor_and_surface_clearance",
+            "translation_m_blender_frame": translation,
+            "fit_profile": fit_profile,
+            "fit_mode": (metadata.get("fit_settings") or {}).get("mode", "auto"),
+        })
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
@@ -413,15 +525,15 @@ def main():
         export_yup=True, export_materials="EXPORT",
     )
     print("TRYON_REPORT=" + json.dumps({
-        "placement": "body_ray_projected_shell" if parametric else "body_height_anchor_and_surface_clearance",
-        "translation_m_blender_frame": translation,
-        "clearance_adjusted_vertices": moved,
-        "large_adjustment_vertices": large_adjustments,
-        "deep_vertices": too_deep,
-        "projection_hits": projected,
-        "projection_misses": missed,
-        "penetration_fraction": round(inside, 6),
-        "severe_penetration_fraction": round(severe, 6),
+        "placement": "+".join(item["placement"] for item in placements),
+        "garments": placements,
+        "clearance_adjusted_vertices": totals["moved"],
+        "large_adjustment_vertices": totals["large"],
+        "deep_vertices": totals["deep"],
+        "projection_hits": totals["projected"],
+        "projection_misses": totals["missed"],
+        "penetration_fraction": round(max(tested_inside), 6),
+        "severe_penetration_fraction": round(max(tested_severe), 6),
         "simulation_ran": False,
     }))
 

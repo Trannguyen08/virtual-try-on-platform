@@ -301,19 +301,31 @@ route `/api/...` phía trên không áp dụng cho namespace này. Xem
 Luồng này tách khỏi `/api/tryon/fit` mock. `POST /api/body-builder/generate`
 tạo body MPFB; khi job hoàn tất, response có `body_id` và GLB được đăng ký tại
 `/api/assets/body-<body_id>.glb`. `GET /api/body-builder/bodies/{body_id}` lấy lại
-body đã tạo sau khi API khởi động lại. Body này là hình học MPFB từ thông số,
-không phải số đo suy từ ảnh người.
+body đã tạo sau khi API khởi động lại. `PUT /api/body-builder/bodies/{body_id}`
+cập nhật thông số và dựng lại asset dưới cùng `body_id`. `parameters` gồm
+`measurements_cm` (rộng vai, vòng ngực/eo/mông và dài chân trong, cm) cùng các
+thông số hình thể khác. Số đo nhập tay được ánh xạ gần đúng vào morph MPFB;
+chúng không phải số đo được suy ra hoặc xác minh từ ảnh.
 
 `POST /api/tryon/image-jobs` nhận multipart:
 
 | Field | Yêu cầu | Ý nghĩa |
 | --- | --- | --- |
 | `body_id` | bắt buộc | ID của body MPFB đã hoàn tất và còn GLB trong kho quản lý |
-| `front` | bắt buộc | ảnh mặt trước JPG/PNG/WebP |
-| `left`, `back`, `right` | tùy chọn | các góc ảnh khác của cùng trang phục |
-| `garment_type` | mặc định `tshirt` | `tshirt`, `shirt`, `jacket`, `pants`, `skirt`, `dress` |
-| `reference_value_cm` | bắt buộc, 1–300 | mốc chiều dài dùng chuẩn tỉ lệ. Giao diện hiện ước lượng theo loại trang phục; client khác có thể gửi số đo thật |
+| `garments_json` | multipart, tối đa 2 món | Danh sách item `{slot, garment_type, reference_value_cm, fit_mode, ease_cm, garment_measurements_cm}`. Slot: `upper`, `lower`, `onepiece`; outfit ghép áo với quần/váy hoặc dùng một món liền thân |
+| `garment_{index}_front` | bắt buộc mỗi món | ảnh mặt trước JPG/PNG/WebP |
+| `garment_{index}_back` | tùy chọn mỗi món | ảnh mặt sau JPG/PNG/WebP; giao diện không yêu cầu ảnh trái/phải |
 | `simulate_cloth` | mặc định `false` | `true` hiện trả lỗi job `SIMULATION_UNAVAILABLE`; solver chưa hiệu chuẩn |
+
+`fit_mode=auto` (mặc định) dùng số đo body đã lưu và `ease_cm` (0–20, mặc định
+4 cm) để co/giãn profile ngang từng vùng áo hoặc quần. `fit_mode=measurements`
+nhận số đo vòng quanh trang phục bằng cm trong `garment_measurements_cm`:
+áo cần `chest_circumference_cm` (eo/gấu tùy chọn); quần/váy cần
+`waist_circumference_cm` và `hip_circumference_cm`. Các giá trị là chu vi thật,
+không phải chiều ngang áo trải phẳng. Với shell dựng từ ảnh, M2 dùng xấp xỉ
+40% chu vi làm bề rộng dây cung nhìn chính diện rồi chiếu bề mặt ra ngoài body.
+Đây là chỉnh hình học tham khảo, không phải rập may hay mô phỏng vải; sai khác
+quá lớn bị từ chối thay vì tự scale mạnh.
 
 Mỗi ảnh tối đa 10 MiB và 16 triệu pixel. Backend kiểm tra MIME, định dạng thực,
 khả năng giải mã; BMP không được nhận ở endpoint này. Ảnh gốc được lưu dưới
@@ -325,21 +337,25 @@ Response dùng envelope `data/error` chung. `data` là `ImageTryOnJob` với
 `job_id`, `status`, `attempt_count`, `request`, `result`, `error`. `request` không
 chứa đường dẫn file nội bộ. `GET /api/tryon/image-jobs/{job_id}` cho polling:
 `pending → running → completed | failed`. Kết quả completed có `source`,
-`method`, `notes`, `body_id`, `garment_type`, `tryon_mesh`,
+`method`, `notes`, `body_id`, `garment_type`, `garments`, `tryon_mesh`,
 `simulation_ran`, `penetration_fraction`, `placement`, `warnings`,
-`reconstruction`. Trường `reconstruction` ghi chế độ dựng hình, tách nền,
-chuẩn tỉ lệ và mesh; `garment_type` do người dùng chọn, chưa có bộ phân loại tự động. `tryon_mesh`
+`reconstruction`. `garments` mô tả từng món; `reconstruction.garments` chứa
+thông tin dựng hình và chế độ căn của từng món. `auto` dùng số đo body cùng độ
+dư; `measurements` dùng chu vi trang phục người dùng nhập. Tỷ lệ dây cung là
+xấp xỉ trên shell 2D/ảnh. Loại trang phục do người dùng chọn, chưa có
+bộ phân loại tự động. `tryon_mesh`
 là một `Asset` GLB tại `/api/assets/tryon-<job_id>.glb` và là asset duy nhất
-viewer cần tải cho cảnh kết quả. Job failed giữ `result=null`, `error` có
+viewer cần tải cho cảnh kết quả. Phép ghép là tĩnh, chưa chạy solver mô phỏng vải.
+Job failed giữ `result=null`, `error` có
 `code/message/details`; không phát URL GLB khi chưa có file hợp lệ.
 
 Worker riêng dùng bảng PostgreSQL `image_tryon_jobs` như hàng đợi bền vững,
 claim có lease 15 phút và tối đa 2 lần sau khi worker mất giữa chừng. Nó dùng
 pipeline local parametric hiện có của M2, yêu cầu `fit_ready=true` với kích thước
-thật, sau đó Blender ghép body và áo trong hệ mét, Y-up, +Z forward. Phép ghép
-định vị theo tỉ lệ chiều cao body và đẩy đỉnh áo ra khỏi bề mặt body với khoảng
-hở 1 cm, tối đa 12 cm mỗi đỉnh; vùng xuyên mesh nghiêm trọng làm job fail. Đây
-là cảnh thử tĩnh, chưa có rig động, mô phỏng vải, điểm fit hay gợi ý size.
+thật, sau đó Blender căn profile ngang theo chu vi body/trang phục và ghép trong
+hệ mét, Y-up, +Z forward. Mesh được chiếu ra ngoài body với khoảng hở 1 cm; căn
+quá mức hoặc xuyên mesh nghiêm trọng làm job fail. Đây là cảnh thử tĩnh, chưa
+có rập may, rig động, mô phỏng vải, điểm fit hay gợi ý size.
 Texture và material phải có mặt trong GLB cuối; mất chúng làm job fail. File GLB
 và metadata job còn truy xuất được sau khi API khởi động lại nếu PostgreSQL và
 `data/assets/` vẫn được giữ. Người vận hành phải chạy worker riêng:
