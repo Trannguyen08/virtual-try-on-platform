@@ -1,0 +1,437 @@
+{
+  "version": 1,
+  "garments": [
+    {
+      "id": "mpfb-aotest-hoodie",
+      "name": "Áo hoodie nữ MPFB — aotest",
+      "category": "jacket",
+      "gender": "womenswear",
+      "sizes": [
+        "M"
+      ],
+      "engine": "mhclo",
+      "assets": [
+        "ladieshoodiedown1"
+      ],
+      "license": "CC-BY (source header: CC_by; version unspecified); author Elvaerwyn",
+      "source": "User-provided data/external/aotest; ladieshoodiedown1; author Elvaerwyn; basemesh hm08",
+      "author": "Elvaerwyn",
+      "thumbnail_url": "/images/makehuman/ladieshoodiedown1.png",
+      "thumbnail_source": "data/external/aotest/ladieshoodiedown1.thumb"
+    },
+    {
+      "id": "mpfb-tshirt",
+      "name": "Áo thun MPFB",
+      "category": "t_shirt",
+      "gender": "menswear",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_basic_tucked_t-shirt"
+      ],
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_basic_tucked_t-shirt.png",
+      "author": "MargaretToigo",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_basic_tucked_t-shirt.png"
+    },
+    {
+      "id": "mpfb-pants",
+      "name": "Quần cargo MPFB",
+      "category": "pants",
+      "gender": "menswear",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "cortu_cargo_pants"
+      ],
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "thumbnail_url": "/images/makehuman/cortu_cargo_pants.png",
+      "author": "Cortu",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/cortu_cargo_pants.png"
+    },
+    {
+      "id": "mh-crude-tshirt-male",
+      "name": "Áo thun nam Crude",
+      "category": "t_shirt",
+      "gender": "menswear",
+      "author": "Elvaerwyn",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_crude_t-shirt_male"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_crude_t-shirt_male.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_crude_t-shirt_male.png"
+    },
+    {
+      "id": "mh-crude-tshirt-female",
+      "name": "Áo thun nữ Crude",
+      "category": "t_shirt",
+      "gender": "womenswear",
+      "author": "Joel Palmius",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "joepal_crude_t-shirt_female"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/joepal_crude_t-shirt_female.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/joepal_crude_t-shirt_female.png"
+    },
+    {
+      "id": "mh-polo-shirt",
+      "name": "Áo polo nam Basic",
+      "category": "shirt",
+      "gender": "menswear",
+      "author": "Namuhekam",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "namuhekam_male_polo_shirt"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/namuhekam_male_polo_shirt.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/namuhekam_male_polo_shirt.png"
+    },
+    {
+      "id": "mh-tube-top",
+      "name": "Áo ống Funky Colors",
+      "category": "t_shirt",
+      "gender": "womenswear",
+      "author": "skalldyrssuppe",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "skalldyrssuppe_tube_top_funky_colors"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/skalldyrssuppe_tube_top_funky_colors.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/skalldyrssuppe_tube_top_funky_colors.png"
+    },
+    {
+      "id": "mh-boho-top",
+      "name": "Áo nam Boho",
+      "category": "shirt",
+      "gender": "menswear",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_male_boho_top1"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_male_boho_top1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_boho_top1.png"
+    },
+    {
+      "id": "mh-bodice-top",
+      "name": "Áo kiểu Bodice",
+      "category": "shirt",
+      "gender": "womenswear",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_bodice-style_top"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_bodice-style_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_bodice-style_top.png"
+    },
+    {
+      "id": "mh-camisole-top",
+      "name": "Áo hai dây Camisole",
+      "category": "t_shirt",
+      "gender": "womenswear",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_camisole_top"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_camisole_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_camisole_top.png"
+    },
+    {
+      "id": "mh-fisherman-sweater",
+      "name": "Áo len Fisherman",
+      "category": "shirt",
+      "gender": "unisex",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_fisherman_sweater"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_fisherman_sweater.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_fisherman_sweater.png"
+    },
+    {
+      "id": "mh-keyhole-tank",
+      "name": "Áo tank top Keyhole",
+      "category": "t_shirt",
+      "gender": "womenswear",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_keyhole_tank_top"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_keyhole_tank_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_keyhole_tank_top.png"
+    },
+    {
+      "id": "mh-halter-top",
+      "name": "Áo yếm cổ cao Halter",
+      "category": "shirt",
+      "gender": "womenswear",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_turtleneck_halter_top"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_turtleneck_halter_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_turtleneck_halter_top.png"
+    },
+    {
+      "id": "mh-trouser-chain",
+      "name": "Quần nam phối dây xích",
+      "category": "pants",
+      "gender": "menswear",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_male_trouser_with_chain"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_male_trouser_with_chain.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_trouser_with_chain.png"
+    },
+    {
+      "id": "mh-jeans-shorts",
+      "name": "Quần short jeans Cortu",
+      "category": "pants",
+      "gender": "unisex",
+      "author": "Cortu",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "cortu_jeans_shorts"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/cortu_jeans_shorts.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/cortu_jeans_shorts.png"
+    },
+    {
+      "id": "mh-harem-pants",
+      "name": "Quần ống rộng Harem",
+      "category": "pants",
+      "gender": "unisex",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_harem_pants"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_harem_pants.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_harem_pants.png"
+    },
+    {
+      "id": "mh-wool-pants",
+      "name": "Quần tây Wool",
+      "category": "pants",
+      "gender": "unisex",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "toigo_wool_pants"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/toigo_wool_pants.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_wool_pants.png"
+    },
+    {
+      "id": "mh-jeans-bootcut",
+      "name": "Quần jeans ống loe Bootcut",
+      "category": "pants",
+      "gender": "womenswear",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_jeans_bootcut"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_jeans_bootcut.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_jeans_bootcut.png"
+    },
+    {
+      "id": "mh-jeans-straight",
+      "name": "Quần jeans ống đứng Straight",
+      "category": "pants",
+      "gender": "unisex",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_jeans_straight_leg"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_jeans_straight_leg.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_jeans_straight_leg.png"
+    },
+    {
+      "id": "mh-male-trouser",
+      "name": "Quần tây nam Classic",
+      "category": "pants",
+      "gender": "menswear",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "elvs_male_trouser"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/elvs_male_trouser.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_trouser.png"
+    },
+    {
+      "id": "mh-female-trousers",
+      "name": "Quần tây nữ Tailored",
+      "category": "pants",
+      "gender": "womenswear",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "mindfront_female_trousers_1"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/mindfront_female_trousers_1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_female_trousers_1.png"
+    },
+    {
+      "id": "mh-male-trousers-1",
+      "name": "Quần nam Tailored 01",
+      "category": "pants",
+      "gender": "menswear",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "mindfront_male_trousers_1"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/mindfront_male_trousers_1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_male_trousers_1.png"
+    },
+    {
+      "id": "mh-male-trousers-2",
+      "name": "Quần nam Tailored 02",
+      "category": "pants",
+      "gender": "menswear",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "engine": "mhclo",
+      "sizes": [
+        "M"
+      ],
+      "assets": [
+        "mindfront_male_trousers_2"
+      ],
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "collection": "makehuman-20",
+      "thumbnail_url": "/images/makehuman/mindfront_male_trousers_2.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_male_trousers_2.png"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tryon
+      POSTGRES_USER: tryon
+      POSTGRES_PASSWORD: tryon
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tryon -d tryon"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@tryon.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-tryon-local}
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # backend:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/backend/Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     - ./data:/app/data
+  #   environment:
+  #     - APP_ENV=development
+  #     - DATABASE_URL=postgresql+psycopg://tryon:tryon@postgres:5432/tryon
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: ../docker/frontend/Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+
+volumes:
+  postgres_data:
+  pgadmin_data:

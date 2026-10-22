@@ -1,0 +1,230 @@
+import React, { useEffect, useState } from 'react';
+import { Product } from '../../data/mockProducts';
+import { useGarmentProducts } from '../../hooks/useGarmentProducts';
+import { AiSizeAdvisorModal } from '../ai/AiSizeAdvisorModal';
+import '../../styles/aiChatWidget.css';
+
+interface SelectGarmentStepProps {
+  initialGarment: Product | null;
+  onBack: () => void;
+  onConfirm: (garment: Product, selectedSize: string) => void;
+}
+
+export const SelectGarmentStep: React.FC<SelectGarmentStepProps> = ({
+  initialGarment,
+  onBack,
+  onConfirm,
+}) => {
+  const { products, refitStatus } = useGarmentProducts();
+  const [selectedGarment, setSelectedGarment] = useState<Product | null>(
+    initialGarment
+  );
+  const [selectedSize, setSelectedSize] = useState<string>(initialGarment?.sizes.includes('M') ? 'M' : initialGarment?.sizes[0] || 'M');
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+  const [aiRecommendedSize, setAiRecommendedSize] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedGarment && products[0]) {
+      setSelectedGarment(products[0]);
+      setSelectedSize(products[0].sizes[0] || 'M');
+    }
+  }, [products, selectedGarment]);
+
+  if (!selectedGarment) return <div role="status"><p>{refitStatus}</p><button type="button" onClick={onBack}>Quay lại</button></div>;
+
+  const sizes = selectedGarment.sizes;
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: 'var(--vfit-surface-card)', borderRadius: 'var(--vfit-radius-xl)', padding: '2rem', boxShadow: '0 2px 10px rgba(8,10,97,0.03)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '9999px', backgroundColor: 'var(--vfit-secondary-container)', color: 'var(--vfit-primary-container)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+          <span>Bước 2 • Chọn trang phục và size</span>
+        </div>
+
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--vfit-on-surface)', margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+          XÁC NHẬN TRANG PHỤC VÀ SIZE THỬ
+        </h2>
+        <p style={{ color: 'var(--vfit-secondary)', fontSize: '0.9rem', margin: '0 0 1.5rem 0' }}>
+          Chọn món đồ và kích cỡ để xem trên body 3D. Bản mẫu chưa đánh giá độ vừa vặn thực tế.
+        </p>
+        <p role="status">{refitStatus}</p>
+        {selectedGarment.fittingMode === 'body_refit' && (
+          <p>Trang phục sẽ refit theo body, giữ chất liệu gốc. M là nhãn thử nghiệm; chưa đánh giá độ vừa theo size.</p>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+          {/* Garment Showcase Card */}
+          <div style={{ borderRadius: 'var(--vfit-radius-lg)', overflow: 'hidden', border: '1px solid var(--vfit-border-subtle)', backgroundColor: '#ffffff' }}>
+            <div style={{ height: '320px', position: 'relative', overflow: 'hidden' }}>
+              <img
+                src={selectedGarment.imageUrl}
+                alt={selectedGarment.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '1rem',
+                  left: '1rem',
+                  backgroundColor: 'rgba(6, 10, 19, 0.8)',
+                  backdropFilter: 'blur(4px)',
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '9999px',
+                }}
+              >
+                Chất liệu: {selectedGarment.material}
+              </span>
+            </div>
+
+            <div style={{ padding: '1.25rem' }}>
+              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--vfit-secondary)' }}>
+                {selectedGarment.tagline}
+              </span>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--vfit-on-surface)', margin: '0.25rem 0' }}>
+                {selectedGarment.name}
+              </h3>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--vfit-primary-container)' }}>
+                {selectedGarment.price.toLocaleString('vi-VN')}₫
+              </div>
+            </div>
+          </div>
+
+          {/* Configuration Panel */}
+          <div>
+            {/* Quick Switch Garments */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--vfit-on-surface)', marginBottom: '0.5rem' }}>
+                Đổi mẫu khác nhanh:
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                {products.map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedGarment(g);
+                      if (!g.sizes.some((size) => size === selectedSize)) setSelectedSize(g.sizes[0]);
+                    }}
+                    style={{
+                      border: selectedGarment.id === g.id ? '2px solid var(--vfit-focus-ring)' : '1px solid var(--vfit-border-subtle)',
+                      borderRadius: '0.5rem',
+                      padding: '0.25rem',
+                      background: 'none',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={g.imageUrl}
+                      alt={g.name}
+                      style={{ width: '50px', height: '65px', objectFit: 'cover', borderRadius: '4px' }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Size Selector */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--vfit-on-surface)' }}>
+                  Chọn kích cỡ (Size)
+                  {aiRecommendedSize === selectedSize && (
+                    <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
+                      AI khuyên dùng
+                    </span>
+                  )}
+                </label>
+                <button
+                  type="button"
+                  className="vfit-ai-size-btn"
+                  onClick={() => setIsAiModalOpen(true)}
+                >
+                  AI gợi ý size
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.65rem' }}>
+                {sizes.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSelectedSize(s)}
+                    style={{
+                      height: '3rem',
+                      borderRadius: 'var(--vfit-radius-md)',
+                      border: 'none',
+                      backgroundColor: selectedSize === s ? 'var(--vfit-primary-container)' : 'var(--vfit-surface-container)',
+                      color: selectedSize === s ? '#ffffff' : 'var(--vfit-on-surface)',
+                      fontWeight: 800,
+                      fontSize: '1.1rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: selectedSize === s ? '0 4px 12px rgba(8,10,97,0.2)' : 'none',
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dynamic Fit Feedback Badge */}
+              <div
+                style={{
+                  marginTop: '0.85rem',
+                  padding: '0.6rem 0.85rem',
+                  borderRadius: '0.5rem',
+                  backgroundColor: 'var(--vfit-secondary-container)',
+                  color: 'var(--vfit-primary-container)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <span>Size {selectedSize} chỉ thay đổi mẫu 3D; chưa có đánh giá fit cá nhân.</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+              <button
+                type="button"
+                className="vfit-btn-secondary"
+                style={{ flex: 1 }}
+                onClick={onBack}
+              >
+                Quay lại
+              </button>
+              <button
+                type="button"
+                className="vfit-btn-primary"
+                style={{ flex: 2, height: '3.25rem' }}
+                onClick={() => onConfirm(selectedGarment, selectedSize)}
+              >
+                <span>XÁC NHẬN THỬ ĐỒ 3D</span>
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Size Advisor Modal */}
+      <AiSizeAdvisorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        product={selectedGarment}
+        onSelectSize={(size) => {
+          setSelectedSize(size);
+          setAiRecommendedSize(size);
+        }}
+      />
+    </div>
+  );
+};

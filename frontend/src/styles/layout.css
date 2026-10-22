@@ -1,0 +1,208 @@
+/* Shared page frame: every route uses the full viewport width with consistent gutters. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  font-size: 106.25%;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: #25243a;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Keep the interface text-led and remove inline decorative UI glyphs. */
+svg {
+  display: none !important;
+}
+
+.vfit-icon-btn,
+.vfit-input-icon,
+.vfit-security-badge-outer {
+  display: none !important;
+}
+
+main {
+  width: 100%;
+  max-width: none;
+}
+
+/* Keep route shells viewport-wide while using responsive inner gutters. */
+.outfit-page,
+.outfit-body-setup,
+.vfit-stepper-track,
+.vfit-legacy-tryon-page,
+.vfit-garment-page {
+  width: 100%;
+  max-width: none !important;
+}
+
+.outfit-page {
+  padding-inline: clamp(1rem, 3vw, 3.5rem);
+}
+
+.outfit-body-setup {
+  margin-inline: 0;
+}
+
+.outfit-eyebrow { font-size: 0.85rem; }
+.outfit-page button, .outfit-file-button { font-size: 1rem; }
+.outfit-steps li { font-size: 0.98rem; }
+.outfit-note, .outfit-progress, .outfit-error { font-size: 0.98rem; }
+.outfit-section-heading button, .outfit-viewer-status { font-size: 0.98rem; }
+.outfit-viewer-controls button { font-size: 0.96rem; }
+.outfit-viewer-controls span, .outfit-wearing strong { font-size: 0.92rem; }
+
+.vfit-hero,
+.vfit-products-section,
+.vfit-history-page,
+.g3d-app,
+.vfit-legacy-tryon-page,
+.vfit-legacy-tryon-viewer {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.vfit-hero,
+.vfit-products-section,
+.vfit-history-page {
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-how-it-works-content,
+.vfit-section-bg > div:first-child,
+.vfit-bento-grid,
+.vfit-footer-inner {
+  width: 100%;
+  max-width: none !important;
+}
+
+.vfit-home-cta-section,
+.vfit-catalog-heading {
+  width: 100%;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-catalog-layout {
+  width: 100%;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: clamp(1rem, 3vw, 3.5rem) !important;
+  padding-right: clamp(1rem, 3vw, 3.5rem) !important;
+}
+
+.vfit-catalog-status {
+  margin: 0;
+  padding: 0.65rem clamp(1rem, 3vw, 3.5rem);
+  color: #5d6474;
+  background: #f4f5fa;
+  font-size: 0.875rem;
+}
+
+.g3d-app {
+  padding: 2rem clamp(1rem, 3vw, 3.5rem) 4rem !important;
+}
+
+.g3d-hero,
+.g3d-panel,
+.g3d-submit-row,
+.g3d-result__footer {
+  border-radius: 18px;
+}
+
+.vfit-showcase-caption {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--vfit-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.vfit-showcase-container {
+  width: 100%;
+  max-width: min(100%, 620px);
+}
+
+.vfit-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.vfit-footer-brand-name {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.vfit-footer-brand p {
+  max-width: 42rem;
+  margin: 0.8rem 0 0;
+  color: #c3cada;
+  line-height: 1.6;
+}
+
+.vfit-footer-inner small {
+  flex: none;
+  color: #9ca6b8;
+}
+
+/* Raise the smallest labels while keeping headings and body copy proportional. */
+.vfit-catalog-status,
+.vfit-showcase-caption,
+.vfit-footer-inner small {
+  font-size: 0.9rem;
+}
+
+small,
+.vfit-eyebrow,
+[class*="caption"],
+[class*="status"],
+[class*="filter-title"] {
+  font-size: max(0.9rem, 1em);
+}
+
+@media (max-width: 640px) {
+  .vfit-footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .vfit-home-cta-section > div {
+    padding: 2rem 1.25rem !important;
+  }
+}

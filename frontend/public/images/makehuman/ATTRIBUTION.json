@@ -1,0 +1,237 @@
+{
+  "source": "https://static.makehumancommunity.org/assets/assetpacks.html",
+  "collection": "makehuman-20",
+  "note": "Original asset previews. No synthetic product photography or verified retail sizes/prices.",
+  "products": [
+    {
+      "id": "mh-crude-tshirt-male",
+      "name": "Áo thun nam Crude",
+      "author": "Elvaerwyn",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/elvs_crude_t-shirt_male.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_crude_t-shirt_male.png",
+      "thumbnail_sha256": "0507fb8a0c2aea8e5e3ce861334780a94eafe15550478df2df6d557fe494d692"
+    },
+    {
+      "id": "mh-crude-tshirt-female",
+      "name": "Áo thun nữ Crude",
+      "author": "Joel Palmius",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/joepal_crude_t-shirt_female.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/joepal_crude_t-shirt_female.png",
+      "thumbnail_sha256": "5176ce8eccb6539d531d77e2e2088ca1ba26142f63db3750c9b4c0bb7c2c28f1"
+    },
+    {
+      "id": "mh-polo-shirt",
+      "name": "Áo polo nam Basic",
+      "author": "Namuhekam",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/namuhekam_male_polo_shirt.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/namuhekam_male_polo_shirt.png",
+      "thumbnail_sha256": "c5343f1f6282963d05d4f16ed2799b8441d75f676ad3045b5f329c21bf0fa8ed"
+    },
+    {
+      "id": "mh-tube-top",
+      "name": "Áo ống Funky Colors",
+      "author": "skalldyrssuppe",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/skalldyrssuppe_tube_top_funky_colors.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/skalldyrssuppe_tube_top_funky_colors.png",
+      "thumbnail_sha256": "77912fac515bdcf44c9f784699bcf0709b2402607bc0e912e45f6f4f871c2d2c"
+    },
+    {
+      "id": "mh-boho-top",
+      "name": "Áo nam Boho",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts02.html",
+      "thumbnail_url": "/images/makehuman/elvs_male_boho_top1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_boho_top1.png",
+      "thumbnail_sha256": "f9c1d58be68010a4def6cd947ba37466e71ce622d26ca1d2feb20c7975b5c6b8"
+    },
+    {
+      "id": "mh-bodice-top",
+      "name": "Áo kiểu Bodice",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_bodice-style_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_bodice-style_top.png",
+      "thumbnail_sha256": "b402a4d3817bbc81237f30d0775bb6c66f78fdffced990db258b141777b149be"
+    },
+    {
+      "id": "mh-camisole-top",
+      "name": "Áo hai dây Camisole",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_camisole_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_camisole_top.png",
+      "thumbnail_sha256": "b1f9b8b1859023189791d87de44eef4f1c176675a5568d435a5ee479076eaac7"
+    },
+    {
+      "id": "mh-fisherman-sweater",
+      "name": "Áo len Fisherman",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_fisherman_sweater.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_fisherman_sweater.png",
+      "thumbnail_sha256": "a64cdf427b565eb72d69c4e3b93cd6021df66fe4a7e30c14c55fbced8c3df391"
+    },
+    {
+      "id": "mh-keyhole-tank",
+      "name": "Áo tank top Keyhole",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_keyhole_tank_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_keyhole_tank_top.png",
+      "thumbnail_sha256": "f2a8af8612440f583179436e5a1eaab3fbbd5fe7b4d7c26cc369aa605976269b"
+    },
+    {
+      "id": "mh-halter-top",
+      "name": "Áo yếm cổ cao Halter",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_turtleneck_halter_top.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_turtleneck_halter_top.png",
+      "thumbnail_sha256": "ef374556db27bf8afaf22d4aa5f760d4c8cecab81ec9e21f297a93ad0544cf3b"
+    },
+    {
+      "id": "mh-trouser-chain",
+      "name": "Quần nam phối dây xích",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/elvs_male_trouser_with_chain.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_trouser_with_chain.png",
+      "thumbnail_sha256": "56cd399c2b80b724f77d5d1870a8e7e51ba8c9c616be63216bd7bf7df4d61b62"
+    },
+    {
+      "id": "mh-jeans-shorts",
+      "name": "Quần short jeans Cortu",
+      "author": "Cortu",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "thumbnail_url": "/images/makehuman/cortu_jeans_shorts.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/cortu_jeans_shorts.png",
+      "thumbnail_sha256": "8eca7b7319a465fef774dc326e72f0e701149b14733c56521a0ea9dd9effbb06"
+    },
+    {
+      "id": "mh-harem-pants",
+      "name": "Quần ống rộng Harem",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "thumbnail_url": "/images/makehuman/toigo_harem_pants.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_harem_pants.png",
+      "thumbnail_sha256": "db1852811099423cda26143a69fbd6b0864c5b1db6c1e48ecc32377419cd4df9"
+    },
+    {
+      "id": "mh-wool-pants",
+      "name": "Quần tây Wool",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "thumbnail_url": "/images/makehuman/toigo_wool_pants.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_wool_pants.png",
+      "thumbnail_sha256": "23dfe8875ee2fbdaef1e705871d2054868198fc415188ec177bebf96a09b944c"
+    },
+    {
+      "id": "mh-jeans-bootcut",
+      "name": "Quần jeans ống loe Bootcut",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/elvs_jeans_bootcut.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_jeans_bootcut.png",
+      "thumbnail_sha256": "c0ffc15d2c40a287d0d9f1e47208180440351038aecdbd9eda443dcbb4c89efd"
+    },
+    {
+      "id": "mh-jeans-straight",
+      "name": "Quần jeans ống đứng Straight",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/elvs_jeans_straight_leg.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_jeans_straight_leg.png",
+      "thumbnail_sha256": "b64c72cda5b7e36143ad2e14c980f095ea4fe6cfe7d4eea34e8ecb24d37a18f2"
+    },
+    {
+      "id": "mh-male-trouser",
+      "name": "Quần tây nam Classic",
+      "author": "Elvaerwyn",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/elvs_male_trouser.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/elvs_male_trouser.png",
+      "thumbnail_sha256": "ff97837e6a1aa8914f8433eff1a2950cd9e75e3c4eef9c8a8d148826f0be71e0"
+    },
+    {
+      "id": "mh-female-trousers",
+      "name": "Quần tây nữ Tailored",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/mindfront_female_trousers_1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_female_trousers_1.png",
+      "thumbnail_sha256": "308b30430f54d0c7c247d078d1fc4786c126a78654f86b58834dc9cc5e4b8472"
+    },
+    {
+      "id": "mh-male-trousers-1",
+      "name": "Quần nam Tailored 01",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/mindfront_male_trousers_1.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_male_trousers_1.png",
+      "thumbnail_sha256": "0f107c4e55e3554ad46978f2b68fcbad9925d01ab95b91156606b10a8bfc14c0"
+    },
+    {
+      "id": "mh-male-trousers-2",
+      "name": "Quần nam Tailored 02",
+      "author": "Mindfront",
+      "license": "CC-BY",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants02.html",
+      "thumbnail_url": "/images/makehuman/mindfront_male_trousers_2.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/mindfront_male_trousers_2.png",
+      "thumbnail_sha256": "0df38ec7bdf99250c1de3eb26e1afcb9233c6630a2f727f349cae6125a2da7f6"
+    },
+    {
+      "id": "mpfb-aotest-hoodie",
+      "name": "Áo hoodie nữ MPFB — aotest",
+      "author": "Elvaerwyn",
+      "license": "CC-BY (source header: CC_by; version unspecified); author Elvaerwyn",
+      "source": "User-provided data/external/aotest; ladieshoodiedown1; author Elvaerwyn; basemesh hm08",
+      "thumbnail_url": "/images/makehuman/ladieshoodiedown1.png",
+      "thumbnail_source": "data/external/aotest/ladieshoodiedown1.thumb",
+      "thumbnail_sha256": "9978de2278b881909215edf2a053a2e3575a462d2a05675833b4545842e31f63"
+    },
+    {
+      "id": "mpfb-tshirt",
+      "name": "Áo thun MPFB",
+      "author": "MargaretToigo",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/shirts01.html",
+      "thumbnail_url": "/images/makehuman/toigo_basic_tucked_t-shirt.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/toigo_basic_tucked_t-shirt.png",
+      "thumbnail_sha256": "2826621aa9c17847e95506e8615db52ad45675914e5e3798f65cbf92c5b3811d"
+    },
+    {
+      "id": "mpfb-pants",
+      "name": "Quần cargo MPFB",
+      "author": "Cortu",
+      "license": "CC0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/pants01.html",
+      "thumbnail_url": "/images/makehuman/cortu_cargo_pants.png",
+      "thumbnail_source": "https://static.makehumancommunity.org/assets/assetpacks/cortu_cargo_pants.png",
+      "thumbnail_sha256": "8974f0ee1b057c4bb11b44d98816aa0f3b9260c845ee27e79c40caee7ecaddde"
+    }
+  ]
+}

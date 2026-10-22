@@ -1,0 +1,14 @@
+{
+  "garment_id": "demo-tshirt",
+  "name": "Demo T-shirt (synthetic fixture)",
+  "category": "t_shirt",
+  "source": "mock",
+  "method": "fixed_demo_catalog",
+  "notes": ["Synthetic size chart; not a manufacturer's chart. Preview geometry is identical for all sizes."],
+  "sizes": [
+    {"size": "S", "chest_cm": 92, "waist_cm": 88, "hem_cm": 92, "shoulder_width_cm": 42, "length_cm": 66},
+    {"size": "M", "chest_cm": 100, "waist_cm": 96, "hem_cm": 100, "shoulder_width_cm": 44, "length_cm": 69},
+    {"size": "L", "chest_cm": 108, "waist_cm": 104, "hem_cm": 108, "shoulder_width_cm": 46, "length_cm": 72},
+    {"size": "XL", "chest_cm": 116, "waist_cm": 112, "hem_cm": 116, "shoulder_width_cm": 48, "length_cm": 75}
+  ]
+}

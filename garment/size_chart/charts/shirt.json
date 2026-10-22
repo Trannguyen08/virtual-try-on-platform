@@ -1,0 +1,38 @@
+{
+  "category": "shirt",
+  "name": "Standard Button Shirt",
+  "sizes": {
+    "S": {
+      "chest_cm": 96.0,
+      "waist_cm": 90.0,
+      "hem_cm": 94.0,
+      "shoulder_width_cm": 43.0,
+      "length_cm": 70.0,
+      "sleeve_length_cm": 59.0
+    },
+    "M": {
+      "chest_cm": 104.0,
+      "waist_cm": 98.0,
+      "hem_cm": 102.0,
+      "shoulder_width_cm": 45.0,
+      "length_cm": 72.0,
+      "sleeve_length_cm": 61.0
+    },
+    "L": {
+      "chest_cm": 112.0,
+      "waist_cm": 106.0,
+      "hem_cm": 110.0,
+      "shoulder_width_cm": 47.0,
+      "length_cm": 74.0,
+      "sleeve_length_cm": 63.0
+    },
+    "XL": {
+      "chest_cm": 120.0,
+      "waist_cm": 114.0,
+      "hem_cm": 118.0,
+      "shoulder_width_cm": 49.0,
+      "length_cm": 76.0,
+      "sleeve_length_cm": 65.0
+    }
+  }
+}

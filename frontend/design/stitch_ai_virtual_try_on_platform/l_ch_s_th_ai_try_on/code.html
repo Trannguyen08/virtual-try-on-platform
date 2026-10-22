@@ -1,0 +1,690 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-highest": "#ecdeed",
+          "destructive-crimson": "#e11d48",
+          "tertiary-fixed": "#dce1ff",
+          "surface-card": "#ffffff",
+          "on-primary": "#ffffff",
+          "inverse-primary": "#bfc2ff",
+          "secondary-fixed": "#dae3f5",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed": "#00164f",
+          "focus-ring": "#3d7eff",
+          "dark-background": "#020409",
+          "on-tertiary-fixed-variant": "#003ab1",
+          "dark-secondary": "#11172c",
+          "outline": "#777682",
+          "surface": "#fff7fc",
+          "error-container": "#ffdad6",
+          "surface-variant": "#ecdeed",
+          "on-secondary-fixed-variant": "#3e4755",
+          "on-tertiary-container": "#517aff",
+          "accent-lavender": "#e5e8ff",
+          "on-primary-fixed-variant": "#393e8d",
+          "on-error": "#ffffff",
+          "dark-card": "#060a13",
+          "error": "#ba1a1a",
+          "tertiary-container": "#00164f",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#b6c4ff",
+          "secondary-fixed-dim": "#bec7d8",
+          "on-surface-variant": "#464651",
+          "on-secondary-container": "#5c6574",
+          "surface-container": "#f7eaf8",
+          "inverse-on-surface": "#faecfb",
+          "surface-dim": "#e3d6e4",
+          "background-canvas": "#fdfcfe",
+          "surface-container-low": "#fdeffe",
+          "primary-fixed-dim": "#bfc2ff",
+          "surface-container-high": "#f2e4f2",
+          "muted-fg": "#635d69",
+          "on-secondary": "#ffffff",
+          "inverse-surface": "#362e38",
+          "on-tertiary": "#ffffff",
+          "on-primary-fixed": "#080a61",
+          "secondary": "#565f6e",
+          "outline-variant": "#c7c5d3",
+          "primary-container": "#080a61",
+          "border-subtle": "#e6e1e9",
+          "primary": "#000000",
+          "secondary-container": "#dae3f5",
+          "background": "#fff7fc",
+          "surface-tint": "#5156a6",
+          "on-background": "#201923",
+          "on-primary-container": "#777ccf",
+          "on-secondary-fixed": "#131c29",
+          "tertiary": "#000000",
+          "primary-fixed": "#e0e0ff",
+          "dark-border": "#1b1a42",
+          "on-surface": "#201923",
+          "dark-primary": "#0f2ea9",
+          "surface-bright": "#fff7fc"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin-mobile": "1rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem",
+          "space-sm": "0.5rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "margin": "2rem",
+          "gutter": "1.25rem"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-lg": [
+            "Bricolage Grotesque"
+          ],
+          "label-sm": [
+            "Bricolage Grotesque"
+          ],
+          "label-md": [
+            "Bricolage Grotesque"
+          ],
+          "display": [
+            "Bricolage Grotesque"
+          ],
+          "display-mobile": [
+            "Bricolage Grotesque"
+          ],
+          "body-sm": [
+            "Bricolage Grotesque"
+          ],
+          "headline-sm": [
+            "Bricolage Grotesque"
+          ],
+          "body-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-md": [
+            "Bricolage Grotesque"
+          ],
+          "headline-lg-mobile": [
+            "Bricolage Grotesque"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-lg": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "13px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "600"
+            }
+          ],
+          "display": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.035em",
+              "fontWeight": "800"
+            }
+          ],
+          "display-mobile": [
+            "38px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "800"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "15px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      }
+    }
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-fixed"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" data-path="home" href="#"><img alt="AI Try-On Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XbkASecrYBHBw-l6lmmqphlQ2G-M1jBFjboQRdIGEbCEA-8nMSywelLOB39fsSVeJAY5hwRW8TkCOm4S9t_z3aERPE90EFZL0CasjS9gVG7rXhIgjiWnrxGkfqcUdWgsMfvxAPaahAaZo_B-918f-po6biNww0iY-7vKVzXNAnkkk8ZiRhPVnZ1MzexFZ1MBzjwoRrKWgRIwcUm3tLbBBuktkuLKWqUlr2SSIPC9O4b7EbXwZIlXDIac38"><span class="font-headline-sm text-headline-sm tracking-tight text-primary font-bold">AI TRY-ON</span></a><nav class="hidden lg:flex items-center gap-space-lg" data-active-classes="text-primary font-label-lg font-bold after:w-full"><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="home" href="#">Trang chủ</a><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="products" href="#">Sản phẩm</a><a class="relative py-space-xs font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary-container after:transition-all hover:after:w-full" data-path="try-on" href="#">Thử đồ</a><a aria-current="page" class="relative py-space-xs transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-primary-container after:transition-all text-primary font-label-lg font-bold after:w-full" data-path="history" href="#">Lịch sử</a></nav></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><button aria-label="Tìm kiếm" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Danh sách yêu thích" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive-crimson text-on-error font-label-sm text-label-sm flex items-center justify-center leading-none">3</span></button><button aria-label="Thông báo" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-fixed transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="h-6 w-px bg-outline-variant/40 hidden sm:block"></div><a class="hidden sm:inline-flex items-center justify-center h-12 px-space-lg rounded-[1.25rem] bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_4px_10px_0px_rgba(0,0,0,0.10)] hover:shadow-[0_4px_10px_0px_rgba(0,0,0,0.20)] hover:bg-primary transition-all gap-space-xs" data-path="try-on" href="#"><span class="material-symbols-outlined text-[18px]">auto_fix_high</span><span>Bắt đầu thử đồ</span></a><button aria-label="Hồ sơ người dùng" class="relative w-10 h-10 rounded-full bg-secondary-container p-0.5 overflow-hidden ring-2 ring-transparent hover:ring-focus-ring transition-all focus:outline-none focus:ring-focus-ring flex items-center justify-center" type="button"><img alt="User avatar" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2gGXm_jQT-q76uL3uRsAYx5ljWxp5dq9OdMvWA86LPmp3QkteeUW-bRsHbpFRBwecpFlGXQORQFmzqymxZf_xA1SPgBsBqVqFHlXyGJs81nyvQCsKbXrWZiJS5IBW0V21ZhgDDpYHXcCSWGkMX2BJiat9AldPc1UuX9BqB3tsa8aDlY3G78iYsALJkyvkY16xj-0EjcTetXQ9UgQdJ18_n48HBLoYl2sLrtN2zH0KRobmtV9SPNE9CQ"></button></div></div></header><main class="w-full pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<section class="w-full px-margin py-space-lg">
+<div class="max-w-[1400px] mx-auto flex flex-col gap-space-xl">
+<!-- Top Title & Metrics Header -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg pb-space-md border-b border-border-subtle/60">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="inline-flex items-center gap-space-xs text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">BỘ SƯU TẬP CÁ NHÂN &amp; LOOKBOOK</span>
+</div>
+<h1 class="font-display text-display text-primary-container font-extrabold tracking-tight">
+            LỊCH SỬ THỬ ĐỒ ẢO
+          </h1>
+<p class="font-body-md text-body-md text-muted-fg leading-relaxed">
+            Xem lại tất cả kết quả mô phỏng trang phục 3D trên vóc dáng của bạn, tải ảnh độ phân giải cao hoặc thử lại kích cỡ mới.
+          </p>
+</div>
+<!-- Metric summary chips -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-space-xs px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm border border-border-subtle/50">
+<span class="w-2.5 h-2.5 rounded-full bg-focus-ring"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-muted-fg uppercase tracking-wide">Tổng lượt thử</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">18 Lần thử đồ</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm border border-border-subtle/50">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-tint"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-muted-fg uppercase tracking-wide">Độ khớp trung bình</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container">99.2% Chuẩn vóc dáng</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm border border-border-subtle/50">
+<span class="w-2.5 h-2.5 rounded-full bg-destructive-crimson"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-muted-fg uppercase tracking-wide">Giỏ mua sắm</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">6 Đã thêm giỏ hàng</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter & Search Toolbar -->
+<div class="w-full bg-surface-card rounded-[1.25rem] p-space-md shadow-sm border border-border-subtle/70 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-space-md">
+<!-- Search bar -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted-fg pointer-events-none">search</span>
+<input class="w-full h-12 pl-12 pr-4 bg-background-canvas rounded-[1.25rem] border border-border-subtle text-on-surface placeholder:text-muted-fg text-body-md focus:outline-none focus:ring-2 focus:ring-focus-ring transition-all" placeholder="Tìm kiếm theo tên sản phẩm, bộ sưu tập..." type="text">
+</div>
+<!-- Filter Selects -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Time Dropdown -->
+<div class="relative min-w-[170px]">
+<select class="w-full h-12 appearance-none pl-4 pr-10 rounded-[1.25rem] bg-background-canvas border border-border-subtle text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-focus-ring cursor-pointer">
+<option value="recent">Thời gian: Gần đây nhất</option>
+<option value="today">Hôm nay</option>
+<option value="7days">7 ngày qua</option>
+<option value="this-month">Tháng này</option>
+<option value="sep-2026">Tháng 9/2026</option>
+<option value="oldest">Cũ nhất</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-muted-fg pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Category Dropdown -->
+<div class="relative min-w-[150px]">
+<select class="w-full h-12 appearance-none pl-4 pr-10 rounded-[1.25rem] bg-background-canvas border border-border-subtle text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-focus-ring cursor-pointer">
+<option value="all">Danh mục: Tất cả</option>
+<option value="tshirt">Áo thun</option>
+<option value="shirt">Áo sơ mi</option>
+<option value="dress">Váy đầm</option>
+<option value="blazer">Áo khoác</option>
+<option value="pants">Quần &amp; Chân váy</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-muted-fg pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Match Rate Dropdown -->
+<div class="relative min-w-[160px]">
+<select class="w-full h-12 appearance-none pl-4 pr-10 rounded-[1.25rem] bg-background-canvas border border-border-subtle text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-focus-ring cursor-pointer">
+<option value="all">Độ khớp: Tất cả</option>
+<option value="98">&gt;98% Phù hợp cao</option>
+<option value="95-98">95% - 98% Tiêu chuẩn</option>
+<option value="under95">&lt;95% Khuyên thử lại</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-muted-fg pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Secondary Actions -->
+<button class="h-12 px-space-md rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed font-label-md text-label-md flex items-center gap-space-xs hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Bộ lọc</span>
+</button>
+<button class="h-12 px-space-md rounded-[1.25rem] bg-background-canvas border border-border-subtle text-muted-fg font-label-md text-label-md flex items-center gap-space-xs hover:text-on-surface hover:border-outline-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+<span class="hidden sm:inline">Chọn nhiều để xóa</span>
+</button>
+</div>
+</div>
+<!-- Try-On Results Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1: Minimalist Signature T-Shirt -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img alt="Mô phỏng 3D trên người mẫu - Áo thun Minimalist Signature" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" src="https://lh3.googleusercontent.com/aida/AEtjO1Xlfd8wJDBWLlmXJzr2jw9ha5LoRlBVA1ymdeUckYznGydAfxBZ0SunuI3TcmCy-Jn5_qwRG5SDHBQJlfawPdZ5_r5LoruFEnaZSViTrP_qlPUtF9pphC8qgAm6VoYyhmFPpvOnAXBJN5OuujeeP_RSFY83Jv_OzRbwQu0neqh66UE6vM_KwU3NNCG0AL9etZ4U8vNCu7OQDOiUcgPfOlVzxboAA5nB2_mhVVJeEbW8RraH_KzgG-07agrO">
+<!-- Badges Floating Overlay -->
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 99.4% Fit
+              </span>
+</div>
+<!-- Bookmark / Cart indication -->
+<div class="absolute top-3.5 right-3.5 z-10">
+<span class="w-8 h-8 rounded-full bg-surface-card/90 backdrop-blur-md text-destructive-crimson flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+</span>
+</div>
+<!-- Comparison slider button floating over image -->
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<!-- Metadata -->
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Áo thun Minimalist Signature
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  299.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 12/09/2026 • 14:32 | Size: <strong class="text-on-surface">M</strong> | Màu: Đen phối Trắng
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-on-secondary-fixed-variant bg-secondary-container/50 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-focus-ring">check_circle</span> Đã lưu vào giỏ hàng
+              </span>
+</div>
+<!-- Action buttons -->
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2: Silk Blend Classic Shirt -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Editorial studio portrait of a Vietnamese woman wearing an elegant cream champagne silk blend button-down shirt paired with tailored beige trousers. Soft cinematic studio lighting, minimalist beige backdrop, ultra-detailed fabric texture, haute couture presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGb0E-IqTewTgyZTE8xELsA9zT9BgnvOcVGlNK3BBxlv4cPC92mOaijP8Dt0TZLhmsR-eHcgj2Rx7B_JJps9R4BOGb9DOgSrw8WH8JXibcZcu8Xb7nCuCHvFG8vKfvNVgudj2o-8RCiV_2AGXTUFsTmSB_mhKI1K-fPoRKZ66F3ie3iZma4n_0biyhmL2XLoKRAxPBgMgcuQvh7KcQSHvHCKVwCsqOVwk-eyT_Sxk7xrNY1fqNQrZfbw">
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 98.9% Fit
+              </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Áo sơ mi Silk Blend Classic
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  399.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 10/09/2026 • 09:15 | Size: <strong class="text-on-surface">M</strong> | Màu: Be Champagne
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-muted-fg bg-surface-container/60 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Chưa thêm giỏ hàng
+              </span>
+</div>
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Tailored AI Blazer -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Full body studio photography of an Asian model wearing a structured navy blue tailored AI blazer over crisp innerwear. Premium wool texture, sharp peak lapels, balanced natural lighting, architectural minimalist setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQsPccBGI2rzTGDoDBZ0MrRlclj3hQ_NmehiuY6R3dgCYF77EKqghiJR-yPS7D9HQhDwu5VO-MDHL0xN1EbScCgB-gtzOSVx5S6uPbuLrKNJtae0-hL0VE0KtPs5UUpc2GeoSlBBaK7rud9m79M_j-7qsWNJIjNbMWUcWWePgAduOm2aWckbJ4SpGq7zNi4mEFsqTKOpIrL3hQRXlV5L4jzsIDDdj9MdpFiZXQkiXZl0s7eKJ09aNvpw">
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 99.1% Fit
+              </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Áo khoác Blazer Tailored AI
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  899.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 07/09/2026 • 16:40 | Size: <strong class="text-on-surface">M</strong> | Màu: Xanh Navy Haute
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-on-secondary-fixed-variant bg-secondary-container/50 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-focus-ring">check_circle</span> Đã lưu vào giỏ hàng
+              </span>
+</div>
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4: Midi Pleated Haute Skirt -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Fashion lookbook shot of an Asian model wearing a luxurious emerald green accordion pleated midi skirt, paired with a fitted ivory silk top. Elegant movement, clean studio lighting, realistic draping and soft ambient highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAet1Gg2lLubhGJoczY85gmzdovf3YXw3liOy7C0cJFmE0lwGuUVY2fj8Ufg3nENN1IJdb8zD2oE18FT8nxeJ3f7H2Rpf4ZxOt53qlPFkYypS8aVTxgLlt1HDmU18s27dMJyicJunAaCQ_BdvjxqI3IOwg2yDo10-1969GalfXR7YeERAqByl_fZA99rHmxe-nvDMlN3WdzFhJJZq9JdcFUHJg9DDq204KqboeLbRCTOhwAdiOHNO8RLw">
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 97.5% Fit
+              </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Váy Midi Pleated Haute
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  599.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 04/09/2026 • 11:20 | Size: <strong class="text-on-surface">S</strong> | Màu: Xanh Ngọc Lục Bảo
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-muted-fg bg-surface-container/60 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Đang cân nhắc
+              </span>
+</div>
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 5: Polo Pique Knit Casual -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Editorial look of a stylish Vietnamese model wearing a fitted sage green pique knit polo shirt with delicate collar details. Bright natural warm sunlight, light beige background, clean modern casual aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUoxrJggyGXgUUnTNWBy6aG0-DZ_klfY0Feh4ay9_kND8z6M4XnsI1xUncnxdfRlpwKThpA0ZfqtWaxA9mN1pMxD38yvkwqhht4j6T1PggVrGfetHazpjzJ9Ez4uZz-KoMerVXVPmZFx5uhIgDYeK-8-TNYV96Z55jU6ZSDI_nc-CwHBT-d7eP0-N3O58JB7XySy7Da0NWLIyXdfVftydMtoDItaii-ljjEGmAyfN1-70RtS8uYNcY-g">
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 98.4% Fit
+              </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Áo Polo Pique Knit Casual
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  349.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 01/09/2026 • 18:05 | Size: <strong class="text-on-surface">M</strong> | Màu: Xanh Sage
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-on-secondary-fixed-variant bg-secondary-container/50 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-focus-ring">check_circle</span> Đã lưu vào giỏ hàng
+              </span>
+</div>
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 6: Linen Wide-leg Trousers -->
+<div class="group flex flex-col bg-surface-card rounded-[1.25rem] overflow-hidden border border-border-subtle shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Full body fashion shot of a model wearing high-waisted natural beige linen wide-leg trousers, styled with a minimalist leather belt and clean white sneakers. Warm wooden floor, bright architectural studio atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCg-fH7DtOPn1gtUhtc_hXIMMsAPdaz3Us0VGlNvyCCn2qh2vroY0v7nZbR5ijxvwj7Nfp5nUxTpS90hvPv3xBDpwey5nNgzhERaUUDif6WqbK4AgZU721Hbkg-DWRZVwFDmxLS3Q_w7-M5BUij9NJgs56snUZVXoKH3EJ8ftrzIJ_v2Y6KHv2H55AP9KYfhHdY4KSblVzoJcZ-sB01Mk5vjSyyuzBMW-qgNtYtx6gS5QKEVpJwvPRkQ">
+<div class="absolute top-3.5 left-3.5 flex items-center gap-2 z-10">
+<span class="px-2.5 py-1 rounded-full bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                AFTER • AI SIM
+              </span>
+<span class="px-2.5 py-1 rounded-full bg-surface-card/95 backdrop-blur-md text-focus-ring font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 98.0% Fit
+              </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2 rounded-xl bg-surface-card/85 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<span class="text-body-sm font-body-sm text-on-surface font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-focus-ring">compare_arrows</span> So sánh ảnh gốc
+              </span>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full font-bold">3D Mode</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col flex-1 justify-between gap-space-sm bg-surface-card">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface truncate group-hover:text-focus-ring transition-colors">
+                  Quần Tây ống suông Linen Be
+                </h2>
+<span class="font-headline-sm text-headline-sm font-bold text-primary-container shrink-0">
+                  299.000₫
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-muted-fg">
+                Ngày thử: 28/08/2026 • 10:00 | Size: <strong class="text-on-surface">M</strong> | Màu: Be Tự Nhiên
+              </p>
+<span class="inline-flex items-center gap-1 text-[12px] font-label-sm text-muted-fg bg-surface-container/60 px-2 py-0.5 rounded-md w-fit mt-0.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Chưa thêm giỏ hàng
+              </span>
+</div>
+<div class="flex items-center gap-2 pt-space-xs border-t border-border-subtle/50">
+<a class="flex-1 h-10 px-3 rounded-[1.25rem] bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 hover:bg-primary transition-all shadow-sm" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[18px]">view_in_ar</span>
+<span>Xem lại 3D</span>
+</a>
+<button aria-label="Tải ảnh 4K" class="w-10 h-10 rounded-[1.25rem] bg-secondary-container text-on-secondary-fixed flex items-center justify-center hover:bg-secondary-fixed transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button aria-label="Xóa kết quả" class="w-10 h-10 rounded-[1.25rem] bg-surface-card border border-border-subtle text-muted-fg hover:text-destructive-crimson hover:border-destructive-crimson/30 transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination & Page Count -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md py-space-sm">
+<span class="font-body-sm text-body-sm text-muted-fg">
+          Hiển thị <strong>1 - 6</strong> trong số <strong>18</strong> trang phục đã thử nghiệm
+        </span>
+<nav aria-label="Phân trang kết quả" class="flex items-center gap-1.5">
+<button class="h-10 px-3.5 rounded-xl border border-border-subtle bg-surface-card text-on-surface font-label-md text-label-md flex items-center gap-1 hover:bg-surface-container-low transition-colors disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Trước</span>
+</button>
+<button class="w-10 h-10 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-sm" type="button">
+            1
+          </button>
+<button class="w-10 h-10 rounded-xl bg-surface-card border border-border-subtle text-on-surface hover:bg-secondary-container font-label-md text-label-md transition-colors" type="button">
+            2
+          </button>
+<button class="w-10 h-10 rounded-xl bg-surface-card border border-border-subtle text-on-surface hover:bg-secondary-container font-label-md text-label-md transition-colors" type="button">
+            3
+          </button>
+<button class="w-10 h-10 rounded-xl bg-surface-card border border-border-subtle text-on-surface hover:bg-secondary-container font-label-md text-label-md transition-colors" type="button">
+            4
+          </button>
+<button class="h-10 px-3.5 rounded-xl border border-border-subtle bg-surface-card text-on-surface font-label-md text-label-md flex items-center gap-1 hover:bg-surface-container-low transition-colors" type="button">
+<span>Tiếp theo</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</nav>
+</div>
+<!-- Bottom Interactive Callout Banner -->
+<div class="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-primary-container via-dark-primary to-primary text-on-primary p-space-lg lg:p-space-xl shadow-lg">
+<!-- Subtle ambient circle decoration -->
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-focus-ring/20 blur-3xl pointer-events-none"></div>
+<div class="absolute left-1/3 -bottom-20 w-60 h-60 rounded-full bg-accent-lavender/10 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs max-w-xl">
+<div class="inline-flex items-center gap-space-xs text-tertiary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">magic_button</span> AI Virtual Studio 2.4
+            </div>
+<h3 class="font-headline-lg text-headline-lg font-bold tracking-tight text-on-primary">
+              Muốn thử thêm trang phục mới với hình ảnh vóc dáng của bạn?
+            </h3>
+<p class="font-body-md text-body-md text-tertiary-fixed leading-relaxed">
+              Khám phá hàng trăm mẫu thiết kế thời trang haute couture mới nhất trong tuần hoặc cập nhật góc chụp để có độ khớp hoàn hảo nhất.
+            </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<a class="h-12 px-space-lg rounded-[1.25rem] bg-on-primary text-primary-container font-label-lg text-label-lg font-bold hover:bg-accent-lavender transition-all shadow-md flex items-center gap-2" data-path="products" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span>Khám phá bộ sưu tập mới</span>
+</a>
+<a class="h-12 px-space-lg rounded-[1.25rem] bg-on-primary/15 border border-on-primary/30 text-on-primary font-label-lg text-label-lg font-bold hover:bg-on-primary/25 backdrop-blur-md transition-all flex items-center gap-2" data-path="try-on" href="#">
+<span class="material-symbols-outlined text-[20px]">photo_camera</span>
+<span>Tải ảnh dáng mới</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="w-full px-margin py-space-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-xs max-w-xl"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm font-bold text-primary">AI TRY-ON</span><span class="font-label-sm text-label-sm uppercase px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant">Studio</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">Copyright © 2024 AI Virtual Try-On. All rights reserved. Nền tảng thời trang công nghệ Haute Couture &amp; Thị giác máy tính.</p></div><nav class="flex flex-wrap items-center gap-x-space-lg gap-y-space-sm"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="dieu-khoan-dich-vu" href="#">Điều khoản dịch vụ</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="chinh-sach-quyen-rieng-tu" href="#">Chính sách quyền riêng tư</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="lien-he" href="#">Liên hệ</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="ho-tro" href="#">Hỗ trợ</a></nav></div></footer></body></html>

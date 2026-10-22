@@ -1,0 +1,343 @@
+/* ==========================================================================
+   AI STYLIST CHAT WIDGET & SIZE ADVISOR STYLES (STITCH AI LUXURY THEME)
+   ========================================================================== */
+
+/* ── 1. Floating Launcher Button ── */
+.vfit-chat-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  white-space: nowrap;
+  background: linear-gradient(115deg, #10156b 0%, #19358e 52%, #3568c8 100%);
+  color: #ffffff;
+  border: 1px solid rgba(129, 166, 255, 0.68);
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(56, 92, 214, 0.22), 0 0 14px rgba(61, 126, 255, 0.68), 0 6px 18px rgba(8, 10, 97, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.vfit-chat-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(92, 138, 255, 0.4), 0 0 20px rgba(61, 126, 255, 0.82), 0 8px 20px rgba(8, 10, 97, 0.5);
+}
+
+.vfit-chat-fab-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ── 2. Chat Window Box ── */
+.vfit-chat-window {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 2rem;
+  width: 380px;
+  max-width: calc(100vw - 1rem);
+  height: 560px;
+  max-height: calc(100vh - 7rem);
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(230, 225, 233, 0.8);
+  box-shadow: 0 24px 48px -12px rgba(8, 10, 97, 0.25), 0 0 1px 1px rgba(8, 10, 97, 0.06);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: vfitChatSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes vfitChatSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+.vfit-chat-header {
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #080a61 0%, #1e293b 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.vfit-chat-header-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.vfit-chat-header-copy {
+  min-width: 0;
+}
+
+.vfit-chat-header-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.vfit-chat-header-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+
+.vfit-chat-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.6rem;
+  flex: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.vfit-chat-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Body / Messages */
+.vfit-chat-messages {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background-color: #faf7fb;
+}
+
+.vfit-chat-bubble {
+  max-width: 88%;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.vfit-chat-message-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.vfit-chat-bubble.bot {
+  align-self: flex-start;
+  background-color: #ffffff;
+  color: #1e293b;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom-left-radius: 0.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.vfit-chat-bubble.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #080a61 0%, #1e3a8a 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 0.25rem;
+  box-shadow: 0 4px 10px rgba(8, 10, 97, 0.15);
+}
+
+/* Quick prompt chips */
+.vfit-chat-chips {
+  padding: 0.6rem 0.85rem;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.vfit-chat-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.vfit-chat-chip {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.vfit-chat-chip:hover {
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  border-color: #c7d2fe;
+}
+
+/* Typing Indicator */
+.vfit-typing-dots {
+  display: flex;
+  gap: 4px;
+  padding: 0.4rem 0.2rem;
+}
+
+.vfit-typing-dots span {
+  width: 6px;
+  height: 6px;
+  background-color: #94a3b8;
+  border-radius: 50%;
+  animation: vfitBlink 1.4s infinite both;
+}
+
+.vfit-typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.vfit-typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes vfitBlink {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Footer / Input Bar */
+.vfit-chat-footer {
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vfit-chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.vfit-chat-input:focus {
+  border-color: #3d7eff;
+  box-shadow: 0 0 0 3px rgba(61, 126, 255, 0.15);
+}
+
+.vfit-chat-send-btn {
+  flex: none;
+  min-width: 2.75rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #080a61 0%, #3d7eff 100%);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+
+.vfit-chat-send-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.vfit-chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .vfit-chat-fab {
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .vfit-chat-window {
+    right: 0.5rem;
+    bottom: 4.5rem;
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 5rem);
+  }
+
+  .vfit-chat-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .vfit-chat-messages {
+    padding: 0.75rem;
+  }
+}
+
+/* ── 3. AI Size Advisor Button & Badge ── */
+.vfit-ai-size-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, rgba(8, 10, 97, 0.05) 0%, rgba(61, 126, 255, 0.12) 100%);
+  border: 1px solid rgba(61, 126, 255, 0.35);
+  color: #080a61;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vfit-ai-size-btn:hover {
+  background: linear-gradient(135deg, rgba(8, 10, 97, 0.1) 0%, rgba(61, 126, 255, 0.22) 100%);
+  transform: translateY(-1px);
+  border-color: #3d7eff;
+}
+
+.vfit-ai-pill-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background: linear-gradient(135deg, #3d7eff 0%, #8b5cf6 100%);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(61, 126, 255, 0.4);
+}
